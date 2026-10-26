@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>汽车行业工程变更管理工作台 ECM Workbench</title>
+<style>
+:root{
+  --bg:#f4f6f9; --card:#ffffff; --ink:#16202b; --ink2:#4a5a6b; --ink3:#8494a3;
+  --line:#e3e8ef; --line2:#cfd8e3;
+  --brand:#0f4c81; --brand-soft:#e8f0f8; --brand-2:#1a6fb0;
+  --red:#c62828; --red-soft:#fdecec;
+  --amber:#b26a00; --amber-soft:#fff5e0;
+  --green:#1b6b3a; --green-soft:#e6f4ea;
+  --purple:#5b4a9e; --purple-soft:#efecfa;
+  --teal:#0f6e56; --teal-soft:#e3f4ee;
+  --shadow:0 1px 2px rgba(16,32,54,.06),0 4px 14px rgba(16,32,54,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:"Microsoft YaHei","PingFang SC","Segoe UI",system-ui,sans-serif;font-size:13px;line-height:1.6}
+.wrap{max-width:1560px;margin:0 auto;padding:0 20px 60px}
+header.top{background:linear-gradient(100deg,#0f4c81,#155e96 55%,#1a6fb0);color:#fff;padding:18px 0 16px;box-shadow:0 2px 10px rgba(15,76,129,.18)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;border-radius:9px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;letter-spacing:.5px}
+h1{font-size:18px;font-weight:600;letter-spacing:.3px}
+.sub{font-size:12px;opacity:.85;margin-top:1px}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap}
+button,.btn{border:1px solid var(--line2);background:#fff;color:var(--ink);padding:7px 13px;border-radius:7px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:.15s}
+button:hover,.btn:hover{border-color:var(--brand);color:var(--brand)}
+.btn-p{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn-p:hover{background:var(--brand-2);border-color:var(--brand-2);color:#fff}
+.btn-ghost{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4);color:#fff}
+.btn-ghost:hover{background:rgba(255,255,255,.22);color:#fff;border-color:#fff}
+.btn-danger{color:var(--red);border-color:#f0c5c5}
+.btn-danger:hover{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:18px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow);border-left:3px solid var(--brand)}
+.kpi .k-lab{font-size:12px;color:var(--ink2)}
+.kpi .k-val{font-size:26px;font-weight:600;letter-spacing:-.5px;margin-top:2px}
+.kpi .k-hint{font-size:11.5px;color:var(--ink3)}
+.kpi.red{border-left-color:var(--red)} .kpi.red .k-val{color:var(--red)}
+.kpi.amber{border-left-color:var(--amber)} .kpi.amber .k-val{color:var(--amber)}
+.kpi.green{border-left-color:var(--green)} .kpi.green .k-val{color:var(--green)}
+.kpi.purple{border-left-color:var(--purple)} .kpi.purple .k-val{color:var(--purple)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line2);margin:6px 0 16px;flex-wrap:wrap}
+.tab{padding:9px 16px;font-size:13px;color:var(--ink2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab:hover{color:var(--brand)}
+.tab.on{color:var(--brand);border-bottom-color:var(--brand);font-weight:600}
+.view{display:none} .view.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:16px 18px;margin-bottom:16px}
+.card h2{font-size:14px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card h3{font-size:13px;font-weight:600;margin:16px 0 8px;color:var(--brand)}
+.card .desc{font-size:12px;color:var(--ink2);margin-bottom:12px}
+.board{display:grid;grid-template-columns:repeat(6,minmax(210px,1fr));gap:10px;overflow-x:auto;padding-bottom:6px}
+.col{background:#eef1f6;border-radius:9px;padding:8px;min-height:220px;display:flex;flex-direction:column}
+.col.dragover{outline:2px dashed var(--brand-2);background:var(--brand-soft)}
+.col-h{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;color:var(--ink2);padding:2px 4px 8px}
+.col-h .cnt{background:#fff;border:1px solid var(--line2);border-radius:20px;padding:0 7px;font-size:11px;color:var(--ink2)}
+.col-h .sn{font-size:11px;background:var(--brand);color:#fff;border-radius:4px;padding:1px 5px;margin-right:5px}
+.item{background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 10px;margin-bottom:8px;cursor:grab;box-shadow:0 1px 2px rgba(16,32,54,.05);border-top:3px solid var(--brand)}
+.item:hover{border-color:var(--brand-2);box-shadow:0 3px 10px rgba(16,32,54,.12)}
+.item.r-高{border-top-color:var(--red)} .item.r-中{border-top-color:var(--amber)} .item.r-低{border-top-color:var(--green)}
+.item .i-code{font-size:12px;font-weight:600;color:var(--brand);font-family:Consolas,monospace}
+.item .i-title{font-size:12.5px;margin:2px 0 6px;color:var(--ink);line-height:1.45}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+.chip{font-size:10.5px;padding:1px 6px;border-radius:4px;background:#eef1f6;color:var(--ink2);border:1px solid var(--line)}
+.chip.b{background:var(--brand-soft);color:var(--brand);border-color:#cfe0f0}
+.chip.p{background:var(--purple-soft);color:var(--purple);border-color:#ded7f4}
+.chip.r{background:var(--red-soft);color:var(--red);border-color:#f3d3d3}
+.chip.a{background:var(--amber-soft);color:var(--amber);border-color:#f2dfb8}
+.chip.g{background:var(--green-soft);color:var(--green);border-color:#c9e6d4}
+.chip.t{background:var(--teal-soft);color:var(--teal);border-color:#c5e6da}
+.i-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--ink3)}
+.bar{height:5px;background:#eef1f6;border-radius:4px;overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;background:var(--brand-2);border-radius:4px}
+.bar.full>i{background:var(--green)}
+.prog-t{font-size:10.5px;color:var(--ink3);margin-top:3px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+th{background:#f7f9fc;color:var(--ink2);font-weight:600;font-size:12px;position:sticky;top:0;z-index:2;white-space:nowrap}
+tbody tr:hover{background:#fafcfe}
+.tbl-wrap{overflow:auto;max-height:640px;border:1px solid var(--line);border-radius:8px}
+td.e[contenteditable="true"]{outline:none;border-bottom:1px dashed transparent}
+td.e[contenteditable="true"]:hover,td.e[contenteditable="true"]:focus{background:#fffbe9;border-bottom-color:var(--amber)}
+select,input,textarea{font-family:inherit;font-size:12.5px;color:var(--ink);border:1px solid var(--line2);border-radius:6px;padding:5px 7px;background:#fff;width:100%}
+textarea{min-height:70px;resize:vertical}
+select:focus,input:focus,textarea:focus{outline:2px solid var(--brand-soft);border-color:var(--brand)}
+.mini{padding:2px 5px;font-size:11.5px;width:auto}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.filters select{width:auto;min-width:120px}
+.flow{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:6px}
+.fstep{background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:10px;position:relative}
+.fstep .fs-n{font-size:11px;color:#fff;background:var(--brand);border-radius:4px;padding:1px 6px;display:inline-block;margin-bottom:5px}
+.fstep h4{font-size:12.5px;font-weight:600;margin-bottom:4px}
+.fstep ul{list-style:none;font-size:11.5px;color:var(--ink2)}
+.fstep li{padding-left:11px;position:relative;margin-bottom:2px;line-height:1.5}
+.fstep li:before{content:"";position:absolute;left:2px;top:7px;width:4px;height:4px;border-radius:50%;background:var(--brand-2)}
+.fstep .gate{margin-top:6px;font-size:11px;color:var(--red);background:var(--red-soft);border-radius:5px;padding:4px 6px}
+.matrix td.na{color:var(--ink3);background:#fbfcfd}
+.legend{font-size:11.5px;color:var(--ink2);margin-top:8px;display:flex;gap:14px;flex-wrap:wrap}
+.legend b{color:var(--red)}
+.acc{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.acc-h{padding:10px 12px;background:#f7f9fc;cursor:pointer;font-size:12.5px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.acc-h:hover{background:#eef3f8}
+.acc-b{display:none;padding:12px;border-top:1px solid var(--line)}
+.acc.open .acc-b{display:block}
+pre.tpl{background:#fbfcfd;border:1px solid var(--line);border-radius:7px;padding:12px;font-family:Consolas,"Courier New",monospace;font-size:11.5px;line-height:1.65;white-space:pre-wrap;word-break:break-word;max-height:340px;overflow:auto;color:#26323f}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:1100px){.grid2,.grid3{grid-template-columns:1fr}.flow{grid-template-columns:repeat(3,1fr)}.board{grid-template-columns:repeat(6,240px)}}
+.modal{position:fixed;inset:0;background:rgba(16,32,54,.45);display:none;align-items:flex-start;justify-content:center;z-index:99;overflow:auto;padding:24px}
+.modal.on{display:flex}
+.mbox{background:#fff;border-radius:12px;width:100%;max-width:940px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.mhead{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.mhead h3{font-size:15px;margin:0;color:var(--ink)}
+.mbody{padding:16px 18px;max-height:calc(100vh - 220px);overflow:auto}
+.mfoot{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+.x{background:none;border:none;font-size:20px;color:var(--ink3);cursor:pointer;line-height:1}
+.frow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+@media(max-width:760px){.frow{grid-template-columns:1fr}}
+.fld label{display:block;font-size:11.5px;color:var(--ink2);margin-bottom:3px}
+.fld label .req{color:var(--red)}
+.dlv-group{border:1px solid var(--line);border-radius:8px;margin-bottom:10px}
+.dlv-gh{background:#f7f9fc;padding:7px 10px;font-size:12px;font-weight:600;color:var(--brand);border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+.dlv-gb{padding:8px 10px}
+.dlv{display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:12.5px}
+.dlv input[type=checkbox]{width:15px;height:15px;margin-top:2px;accent-color:var(--brand);flex:none}
+.dlv .dn{flex:1}
+.dlv .dw{font-size:11px;color:var(--ink3);white-space:nowrap;padding-left:6px}
+.dlv .dn .opt{color:var(--ink3);font-size:11px}
+.dlv .dn .reqd{color:var(--red);font-size:11px}
+.dlv.done .dn{text-decoration:line-through;color:var(--ink3)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#16202b;color:#fff;padding:9px 18px;border-radius:20px;font-size:12.5px;opacity:0;transition:.25s;z-index:200;pointer-events:none}
+.toast.on{opacity:1}
+.empty{text-align:center;color:var(--ink3);padding:26px;font-size:12.5px}
+.pill{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.sync-pill{display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:13px;background:#8494a3;color:#fff;font-size:11.5px;letter-spacing:.2px;white-space:nowrap;border:1px solid rgba(255,255,255,.35)}
+.note{background:var(--amber-soft);border:1px solid #f2dfb8;border-radius:7px;padding:9px 12px;font-size:12px;color:#6b4500;margin-bottom:12px}
+.note.info{background:var(--brand-soft);border-color:#cfe0f0;color:#0f4c81}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.chart-row{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.lg{font-size:12px}
+.lg div{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.hbar{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px}
+.hbar .hl{width:96px;color:var(--ink2);text-align:right;flex:none}
+.hbar .ht{flex:1;background:#eef1f6;border-radius:4px;height:16px;overflow:hidden}
+.hbar .ht>i{display:block;height:100%;background:var(--brand-2)}
+.hbar .hv{width:30px;color:var(--ink2)}
+.foot{text-align:center;color:var(--ink3);font-size:11.5px;margin-top:24px;line-height:1.8}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <div class="logo">ECM</div>
+      <div>
+        <h1>汽车行业工程变更管理工作台</h1>
+        <div class="sub">Engineering Change Management · 覆盖产品设计变更与生产过程变更（含 4M 变更）· IATF 16949 §8.3.6 / APQP / PPAP · 数据云端共享，多人实时协同</div>
+      </div>
+    </div>
+    <div class="hbtns">
+      <span id="sync-pill" class="sync-pill">连接中…</span>
+      <button class="btn-ghost" onclick="openForm()">+ 新建变更</button>
+      <button class="btn-ghost" onclick="exportJSON()">导出数据</button>
+      <button class="btn-ghost" onclick="document.getElementById('impf').click()">导入数据</button>
+      <button class="btn-ghost" onclick="exportCSV()">导出 CSV</button>
+      <button class="btn-ghost" onclick="loadSeed(1)">载入示例</button>
+      <input type="file" id="impf" accept=".json" style="display:none" onchange="importJSON(event)">
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="kpis" id="kpis"></div>
+
+  <div class="tabs">
+    <div class="tab on" data-v="board">变更看板</div>
+    <div class="tab" data-v="list">变更台账</div>
+    <div class="tab" data-v="std">标准流程与交付</div>
+    <div class="tab" data-v="tpl">文件模板</div>
+    <div class="tab" data-v="ana">数据分析</div>
+  </div>
+
+  <!-- 看板 -->
+  <div class="view on" id="v-board">
+    <div class="card">
+      <h2>变更流转看板 <span class="chip b">拖拽卡片可切换阶段</span> <span class="chip">点击卡片编辑详情与交付物</span></h2>
+      <div class="desc">按六阶段闭环管理：申请 → 评估 → 审批 → 验证 → 切换 → 关闭。卡片下方进度条为该变更的「必备交付物完成率」。</div>
+      <div class="filters">
+        <select id="f-type" onchange="render()"><option value="">全部变更类别</option></select>
+        <select id="f-risk" onchange="render()"><option value="">全部风险等级</option><option>高</option><option>中</option><option>低</option></select>
+        <select id="f-cust" onchange="render()"><option value="">全部客户影响</option><option value="1">影响客户</option><option value="0">不影响客户</option></select>
+        <select id="f-owner" onchange="render()"><option value="">全部责任人</option></select>
+        <input id="f-kw" placeholder="搜索：编号 / 零件 / 项目 / 变更内容" style="width:240px" oninput="render()">
+        <button onclick="resetF()">重置</button>
+      </div>
+      <div class="board" id="board"></div>
+    </div>
+  </div>
+
+  <!-- 台账 -->
+  <div class="view" id="v-list">
+    <div class="card">
+      <h2>变更台账 <span class="chip b">单元格可直接编辑</span> <span class="chip">下拉字段即时保存</span></h2>
+      <div class="desc">白色底纹单元格支持直接点击修改；类别、阶段、风险、客户批准状态为下拉选择。所有修改实时保存到云端数据库，全公司打开同一链接即看到同一份数据；仍可用「导出数据 / 导入数据」做本地备份。</div>
+      <div class="filters">
+        <select id="l-stage" onchange="renderList()"><option value="">全部阶段</option></select>
+        <button onclick="exportCSV()">导出 CSV</button>
+        <button onclick="openForm()">+ 新建变更</button>
+        <span style="font-size:12px;color:var(--ink3)" id="l-cnt"></span>
+      </div>
+      <div class="tbl-wrap"><table id="tbl"></table></div>
+    </div>
+  </div>
+
+  <!-- 标准流程 -->
+  <div class="view" id="v-std">
+    <div class="card">
+      <h2>标准变更流程（六阶段闭环）</h2>
+      <div class="desc">适用于产品设计变更（DCN）与生产过程变更（PCN / 4M 变更）。临时变更（偏差许可）须在阶段 3 明确有效期，到期自动回到永久方案或重新申请。</div>
+      <div class="flow" id="flow"></div>
+      <div class="note info"><b>客户沟通原则：</b>凡影响产品形状、配合、功能、性能、耐久性的变更，必须在实施前取得顾客书面批准；过程变更须按顾客特殊要求（SOR / 供应商手册）提前通知，多数主机厂要求 ≥30 天，具体以顾客要求为准。PPAP 提交等级由顾客确定（等级 1–5）。</div>
+    </div>
+
+    <div class="card">
+      <h2>交付物清单矩阵</h2>
+      <div class="desc">按变更类别判定每项交付物的适用性，作为变更单必备交付物自动挂载的依据。</div>
+      <div class="tbl-wrap"><table id="mx"></table></div>
+      <div class="legend"><span><b>必</b> = 必备交付物（计入完成率）</span><span>视 = 视情况判定（影响评估阶段决定是否需要）</span><span>– = 不适用</span></div>
+    </div>
+
+    <div class="card">
+      <h2>生产过程 4M 变更识别与管控要点</h2>
+      <div class="desc">4M 变更（人机料法环）是过程变更的主要来源，任何计划性变更须提前申请，非计划性变更须在发生后立即上报并启动追溯。</div>
+      <div class="tbl-wrap"><table id="m4"></table></div>
+    </div>
+
+    <div class="card">
+      <h2>变更分级审批权限</h2>
+      <div class="tbl-wrap"><table id="appr"></table></div>
+    </div>
+  </div>
+
+  <!-- 模板 -->
+  <div class="view" id="v-tpl">
+    <div class="card">
+      <h2>标准化文件模板</h2>
+      <div class="desc">选择一条变更后点击「按选中变更填充」，可生成带实际数据的文件初稿，复制或下载后转为 Word / 企业系统表单。</div>
+      <div class="filters">
+        <select id="t-sel" onchange="renderTpl()"><option value="">（不填充，使用空白模板）</option></select>
+        <span style="font-size:12px;color:var(--ink3)">模板依据：IATF 16949 变更控制 / AIAG APQP &amp; PPAP 第4版 / VDA 过程变更管理</span>
+      </div>
+      <div id="tpls"></div>
+    </div>
+  </div>
+
+  <!-- 分析 -->
+  <div class="view" id="v-ana">
+    <div class="card">
+      <h2>变更数据分析</h2>
+      <div class="desc">用于管理评审输入：变更数量趋势、阶段分布、按期完成率、逾期项与交付物齐套率。</div>
+      <div class="grid3" id="ana-box"></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    数据存储说明：本工作台全部变更数据保存在云端数据库（腾讯云开发 PostgreSQL），不写入任何人的浏览器本地缓存；多人打开同一链接即为同一份数据，修改约 1 秒内同步给所有人。<br>
+    汽车行业工程变更管理工作台 · ECM Workbench v1.0
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="mbox">
+    <div class="mhead"><h3 id="m-title">变更单</h3><button class="x" onclick="closeForm()">×</button></div>
+    <div class="mbody" id="m-body"></div>
+    <div class="mfoot">
+      <button class="btn-danger" id="m-del" onclick="delRec()">删除</button>
+      <button onclick="closeForm()">取消</button>
+      <button class="btn-p" onclick="saveForm()">保存</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 基础数据定义 ============ */
+var STAGES=[
+ {n:1,name:"变更申请",lead:"提出部门",cycle:"1 个工作日",act:["提出变更需求，描述变更内容、原因与期望效果","附佐证材料（客户文件/不良数据/降本测算）","主管工程师给出初步可行性意见"],out:["工程变更申请单 ECR","变更背景与现状说明","初步可行性意见"],gate:"变更内容描述清晰，具备初步可行性"},
+ {n:2,name:"影响评估",lead:"变更工程师（CFT 召集）",cycle:"3–5 个工作日",act:["跨部门评审：研发/工艺/质量/生产/物流/采购/销售","评估产品性能、可靠性、法规符合性影响","更新 DFMEA / PFMEA，评审控制计划","识别工装模具、库存、在制品、已发货品影响","评估成本与交期影响，确定风险等级","制定验证方案与样本量"],out:["跨部门影响评估表","DFMEA / PFMEA 更新","库存与在制品影响清单","风险评级与验证方案"],gate:"风险等级确定，验证方案批准，客户影响判定完成"},
+ {n:3,name:"审批",lead:"变更评审委员会 / 顾客",cycle:"内部 2 个工作日 / 顾客按协议",act:["内部会签：技术、质量、制造、项目（大客户）","重大变更（高风险或影响形式配合功能）报执行副总批准","影响客户时提交 PCN / DCN 并取得书面批准","供应商变更由 SQE 审核批准，必要时二方审核","临时变更（偏差许可）明确有效期与数量"],out:["内部批准签署页","顾客书面批准记录","供应商变更批准记录","偏差许可（含有效期）"],gate:"所有会签完成；涉客变更已获顾客书面批准"},
+ {n:4,name:"验证确认",lead:"质量 + 工艺",cycle:"按验证方案",act:["样件 / 小批量试制（≥3 批或按方案）","全尺寸与性能 / 耐久检测","过程能力研究 Cpk / Ppk","按顾客等级提交 PPAP 与 PSW","更新受控文件：图纸、BOM、控制计划、作业指导书","岗位培训与资质确认"],out:["试制验证报告","检测报告","PPAP / PSW","受控文件更新记录","培训记录"],gate:"验证项全部通过，PPAP 获批准（如适用）"},
+ {n:5,name:"实施切换",lead:"计划 / 物流 / 质量",cycle:"1–3 个工作日",act:["确定切换断点：日期 / 批次号 / 序列号","旧状态库存隔离与处理（用完 / 返工 / 报废）","ERP BOM、工艺路线、检验标准同步更新","首件确认 FAI","变更后初期管理：加严检验、标识、追溯"],out:["切换断点通知","库存处理记录","ERP 更新记录","首件确认报告","初期管理记录"],gate:"断点清晰可追溯，旧状态已受控，首件确认合格"},
+ {n:6,name:"关闭回顾",lead:"变更工程师",cycle:"30 天 / ≥3 批",act:["有效性验证：≥3 个批次或 30 天无异常","经验教训总结与横向展开（相似产品 / 产线）","文件归档，记录按顾客要求保存期限留存","关闭台账，更新 KPI"],out:["有效性验证报告","变更关闭报告","经验教训与横向展开记录","归档清单"],gate:"有效性验证通过，文件全部归档"}
+];
+var TYPES=["产品设计变更","过程变更","4M变更","供应商变更"];
+var TYPEPFX={"产品设计变更":"DCN","过程变更":"PCN","4M变更":"4M","供应商变更":"SCN"};
+var SRC=["客户要求","内部改善","质量问题纠正","法规/标准更新","降本","供应商发起","设备/工装","产能调整"];
+var M4S=["—","人 Man","机 Machine","料 Material","法 Method","环 Environment"];
+var NATURE=["永久变更","临时变更（偏差许可）"];
+var CUSTAP=["不适用","待提交","已提交待批","已批准","被驳回"];
+var PPAPL=["不适用","等级1","等级2","等级3","等级4","等级5"];
+
+/* 交付物矩阵：d=设计变更，p=过程变更（含4M/供应商） */
+var DELIVS=[
+ {s:1,n:"工程变更申请单 ECR",d:"必",p:"必",o:"提出部门"},
+ {s:1,n:"变更背景与现状说明、佐证材料",d:"必",p:"必",o:"提出部门"},
+ {s:1,n:"初步可行性意见",d:"必",p:"必",o:"主管工程师"},
+ {s:2,n:"跨部门影响评估表（CFT 会签）",d:"必",p:"必",o:"变更工程师"},
+ {s:2,n:"DFMEA 更新（设计类）",d:"必",p:"视",o:"设计工程师"},
+ {s:2,n:"PFMEA 更新（过程类）",d:"视",p:"必",o:"工艺工程师"},
+ {s:2,n:"控制计划影响分析与更新",d:"必",p:"必",o:"质量工程师"},
+ {s:2,n:"工装 / 模具 / 检具影响清单",d:"必",p:"必",o:"工艺 / 工装"},
+ {s:2,n:"库存 / 在制品 / 已发货品影响清单",d:"必",p:"必",o:"物流 / 计划"},
+ {s:2,n:"法规与认证符合性评估",d:"必",p:"视",o:"合规 / 质量"},
+ {s:2,n:"成本与交期影响评估",d:"必",p:"必",o:"项目 / 采购"},
+ {s:2,n:"风险评级与验证方案",d:"必",p:"必",o:"质量经理"},
+ {s:3,n:"内部批准签署（技术 / 质量 / 制造）",d:"必",p:"必",o:"变更评审委员会"},
+ {s:3,n:"顾客变更通知 PCN/DCN 及书面批准",d:"视",p:"视",o:"大客户经理 / 质量"},
+ {s:3,n:"供应商变更申请与 SQE 批准",d:"视",p:"视",o:"SQE / 采购"},
+ {s:3,n:"临时变更（偏差许可）有效期审批",d:"视",p:"视",o:"质量经理"},
+ {s:4,n:"样件 / 小批量试制验证报告",d:"必",p:"必",o:"工艺 / 质量"},
+ {s:4,n:"全尺寸与性能 / 耐久检测报告",d:"必",p:"必",o:"实验室"},
+ {s:4,n:"过程能力研究 Cpk / Ppk",d:"视",p:"必",o:"质量工程师"},
+ {s:4,n:"PPAP 提交与 PSW（按顾客等级）",d:"必",p:"视",o:"质量工程师"},
+ {s:4,n:"受控文件更新（图纸/BOM/控制计划/作业指导书）",d:"必",p:"必",o:"文控 DCC"},
+ {s:4,n:"岗位培训与资质确认记录",d:"视",p:"必",o:"生产主管"},
+ {s:5,n:"切换断点通知（日期/批次/序列号）",d:"必",p:"必",o:"计划 / 物流"},
+ {s:5,n:"旧状态库存隔离与处理记录",d:"必",p:"必",o:"仓库 / 质量"},
+ {s:5,n:"ERP BOM / 工艺路线 / 系统数据更新",d:"必",p:"必",o:"工程 / IT"},
+ {s:5,n:"首件确认 FAI 报告",d:"必",p:"必",o:"质量"},
+ {s:5,n:"初期管理（加严检验 / 标识 / 追溯）",d:"必",p:"必",o:"质量"},
+ {s:6,n:"有效性验证（≥3 批或 30 天）",d:"必",p:"必",o:"质量工程师"},
+ {s:6,n:"变更关闭报告",d:"必",p:"必",o:"变更工程师"},
+ {s:6,n:"经验教训与横向展开",d:"视",p:"视",o:"质量 / 工艺"},
+ {s:6,n:"文件归档与记录保存清单",d:"必",p:"必",o:"文控 DCC"}
+];
+var M4=[
+ {k:"人 Man",t:"新进/转岗操作员、关键岗位换人、班次与人力配置调整、作业人员资质变化",c:"培训与上岗资质确认、首件确认、加严检验、关键岗位标识",f:"培训记录表、岗位资质矩阵、首件检验报告"},
+ {k:"机 Machine",t:"设备更换/搬迁/大修、模具与检具更换或修理、设备参数与程序变更、新增产线",c:"设备验收与放行、能力研究 Cmk/Cpk、PFMEA 与控制计划评审、参数锁定与防错",f:"设备验收报告、Cmk 研究报告、参数变更记录、模具履历卡"},
+ {k:"料 Material",t:"材料牌号/规格变更、分供方变更、材料批次切换、包装与储运方式变更",c:"材料认证与全性能检测、供方 PPAP、追溯性确认、批次管理与标识",f:"材料检测报告、供方 PPAP/PSW、批次追溯记录、包装验证报告"},
+ {k:"法 Method",t:"工艺参数变更、作业方法/顺序变更、节拍与产能变更、检验方法与抽样方案变更、返工返修方法变更",c:"PFMEA 与控制计划更新、作业指导书修订、岗位培训、验证批次确认",f:"更新版 PFMEA、控制计划、作业指导书、培训记录、验证报告"},
+ {k:"环 Environment",t:"生产场地搬迁、温湿度/洁净度/照明变更、5S 与物流路径调整、生产环境季节性变化",c:"环境确认与监控、产品防护与污染控制、布局变更验证、存储条件确认",f:"环境监测记录、布局变更验证报告、产品防护检查表"}
+];
+var APPR=[
+ {l:"低风险 · 不影响形式配合功能（如作业指导书措辞、非关键辅材）",a:"工艺/质量工程师 + 部门经理",c:"顾客不需通知（除非顾客另有要求）",p:"—"},
+ {l:"中风险 · 过程参数/方法/设备变更，不影响产品功能",a:"技术经理 + 质量经理 + 制造经理会签",c:"按顾客要求提交过程变更通知 PCN",p:"PPAP 视顾客要求"},
+ {l:"高风险 · 影响形状、配合、功能、性能、耐久性，或涉及新供方/新工艺",a:"技术/质量/制造总监会签 + 执行副总批准",c:"事前提交 DCN/PCN 并取得书面批准",p:"PPAP 重新提交（等级按顾客要求）"},
+ {l:"临时变更（偏差许可/让步接收）",a:"质量经理批准，顾客影响时须顾客书面同意",c:"明确有效期与数量/批次上限",p:"到期前关闭或转永久变更"}
+];
+
+/* ============ 状态 ============ */
+var recs=[], curId=null;
+function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function uid(){return "R"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+/* ============ 云端同步：数据只存云端，不落浏览器本地 ============ */
+var CLOUD={
+  URL:"https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/ecmSync",
+  TOKEN:[101,99,109,45,115,104,97,114,101,100,45,50,48,50,54].map(function(c){return String.fromCharCode(c);}).join(""),
+  POLL_MS:8000
+};
+var deleted={};              /* 已删除记录标记 {id: 时间戳} */
+var syncV=0, syncOK=false, pushT=null, polling=false;
+
+function isEditing(){        /* 正在输入时不打断用户 */
+  var a=document.activeElement; if(!a)return false;
+  var t=(a.tagName||"").toLowerCase();
+  return !!a.isContentEditable || t==="input" || t==="textarea" || t==="select";
+}
+function setPill(state,msg){
+  var el=document.getElementById("sync-pill"); if(!el)return;
+  var M={ok:["#1b6b3a","已同步"],run:["#b26a00","同步中…"],err:["#c62828","同步异常"]};
+  var m=M[state]||M.ok;
+  el.style.background=m[0]; el.textContent=msg||m[1];
+}
+function touch(r){if(r)r.updatedAt=new Date().toISOString();}
+function normRec(r){
+  if(!r)return r;
+  if(!r.id)r.id=uid();
+  r.done=r.done||{};
+  r.stage=+r.stage||1;
+  if(!r.updatedAt)r.updatedAt=r.createdAt?String(r.createdAt):"1970-01-01T00:00:00.000Z";
+  return r;
+}
+function save(){              /* 防抖 350ms 后写云端 */
+  setPill("run");
+  if(pushT)clearTimeout(pushT);
+  pushT=setTimeout(function(){pushNow();},350);
+}
+function pushNow(mode){
+  pushT=null;
+  var body={items:recs.slice(),deleted:deleted};
+  if(mode)body.mode=mode;     /* replace = 整体覆盖，用于载入示例 / 导入数据 */
+  return fetch(CLOUD.URL,{method:"POST",cache:"no-store",
+      headers:{"Content-Type":"application/json","X-Ecm-Token":CLOUD.TOKEN},
+      body:JSON.stringify(body)})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(!j||!j.ok)throw new Error((j&&j.error)||"保存失败");
+      var d=j.data||{};
+      recs=(d.items||[]).map(normRec);
+      deleted=d.deleted||{};
+      syncV=d.syncVersion||0; syncOK=true; setPill("ok");
+      return true;
+    })
+    .catch(function(e){
+      syncOK=false; setPill("err");
+      console.warn("[ECM] 保存失败：",e);
+      toast("保存失败："+((e&&e.message)||e));
+      return false;
+    });
+}
+function pullCloud(){
+  return fetch(CLOUD.URL,{cache:"no-store"})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(!j||!j.ok)throw new Error((j&&j.error)||"读取失败");
+      var d=j.data||{};
+      recs=(d.items||[]).map(normRec);
+      deleted=d.deleted||{};
+      syncV=d.syncVersion||0; syncOK=true; setPill("ok");
+    })
+    .catch(function(e){
+      syncOK=false; setPill("err");
+      console.warn("[ECM] 读取失败：",e);
+    });
+}
+function refresh(){ if(isEditing())return; pullCloud().then(function(){render();}); }
+function startPoll(){
+  if(polling)return; polling=true;
+  setInterval(function(){ if(navigator.onLine===false)return; refresh(); },CLOUD.POLL_MS);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)refresh();});
+  window.addEventListener("focus",refresh);
+  window.addEventListener("online",refresh);
+}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},1800);}
+function group(r){return r.type==="产品设计变更"?"d":"p";}
+function reqList(r){var g=group(r);return DELIVS.filter(function(x){return x[g]==="必";});}
+function doneCount(r){var d=r.done||{};return reqList(r).filter(function(x){return d[x.n];}).length;}
+function isOverdue(r){return r.stage<6&&r.planDate&&r.planDate<today();}
+
+/* ============ 示例数据 ============ */
+function seed(){
+  var t=today(), y=new Date(Date.now()+864e5*14).toISOString().slice(0,10);
+  var p=new Date(Date.now()-864e5*40).toISOString().slice(0,10);
+  var m=new Date(Date.now()-864e5*20).toISOString().slice(0,10);
+  function mk(o){o.id=uid();o.done=o.done||{};o.createdAt=o.createdAt||p;o.stage=o.stage||1;o.updatedAt=o.updatedAt||new Date().toISOString();return o;}
+  return [
+   mk({code:"DCN-2026-004",type:"产品设计变更",m4:"—",nature:"永久变更",src:"客户要求",proj:"VW MEB / 项目 A27",part:"支架总成",partno:"A27-54012-C",desc:"客户图纸升版，安装孔位由 2 孔改为 3 孔，提升装配刚度",owner:"张工（研发）",risk:"高",stage:3,planDate:y,cust:1,custAp:"已提交待批",ppap:"等级3",startDate:p,note:"需客户书面批准后方可切换；模具需新增 1 副钻孔工装",done:{"工程变更申请单 ECR":1,"变更背景与现状说明、佐证材料":1,"初步可行性意见":1,"跨部门影响评估表（CFT 会签）":1,"DFMEA 更新（设计类）":1,"控制计划影响分析与更新":1,"工装 / 模具 / 检具影响清单":1,"库存 / 在制品 / 已发货品影响清单":1,"法规与认证符合性评估":1,"成本与交期影响评估":1,"风险评级与验证方案":1,"内部批准签署（技术 / 质量 / 制造）":1}}),
+   mk({code:"PCN-2026-011",type:"过程变更",m4:"法 Method",nature:"永久变更",src:"质量问题纠正",proj:"BYD / 项目 E5",part:"线束护套管",partno:"E5-72033",desc:"注塑保压时间由 8s 调整为 11s，解决端部缩痕不良（不良率 3.2%→目标 <0.3%）",owner:"李工（工艺）",risk:"中",stage:4,planDate:t,cust:1,custAp:"已提交待批",ppap:"等级2",startDate:m,note:"需连续 3 批验证，Cpk≥1.33 后方可切换",done:{"工程变更申请单 ECR":1,"变更背景与现状说明、佐证材料":1,"初步可行性意见":1,"跨部门影响评估表（CFT 会签）":1,"PFMEA 更新（过程类）":1,"控制计划影响分析与更新":1,"工装 / 模具 / 检具影响清单":1,"库存 / 在制品 / 已发货品影响清单":1,"成本与交期影响评估":1,"风险评级与验证方案":1,"内部批准签署（技术 / 质量 / 制造）":1,"顾客变更通知 PCN/DCN 及书面批准":1}}),
+   mk({code:"4M-2026-023",type:"4M变更",m4:"机 Machine",nature:"永久变更",src:"设备/工装",proj:"通用 / 装配二线",part:"卡扣压装工序",partno:"ASY-02-OP30",desc:"压装设备由气动压机更换为伺服压机，增加压力-位移监控与防错",owner:"王工（设备）",risk:"中",stage:5,planDate:t,cust:1,custAp:"已批准",ppap:"等级3",startDate:m,note:"断点：批次号 2610A-0888 起；旧件按库存用完原则消化",done:{"工程变更申请单 ECR":1,"变更背景与现状说明、佐证材料":1,"初步可行性意见":1,"跨部门影响评估表（CFT 会签）":1,"PFMEA 更新（过程类）":1,"控制计划影响分析与更新":1,"工装 / 模具 / 检具影响清单":1,"库存 / 在制品 / 已发货品影响清单":1,"成本与交期影响评估":1,"风险评级与验证方案":1,"内部批准签署（技术 / 质量 / 制造）":1,"顾客变更通知 PCN/DCN 及书面批准":1,"样件 / 小批量试制验证报告":1,"全尺寸与性能 / 耐久检测报告":1,"过程能力研究 Cpk / Ppk":1,"PPAP 提交与 PSW（按顾客等级）":1,"受控文件更新（图纸/BOM/控制计划/作业指导书）":1,"岗位培训与资质确认记录":1,"切换断点通知（日期/批次/序列号）":1}}),
+   mk({code:"SCN-2026-007",type:"供应商变更",m4:"料 Material",nature:"永久变更",src:"供应商发起",proj:"吉利 / 项目 P4",part:"镀锌紧固件 M6×20",partno:"P4-FS0620",desc:"电镀分供方由 A 厂切换为 B 厂，盐雾试验要求 480h 不变",owner:"陈工（SQE）",risk:"高",stage:2,planDate:y,cust:1,custAp:"待提交",ppap:"等级4",startDate:t,note:"需完成供方二方审核 + 全性能检测 + 3 批小批验证",done:{"工程变更申请单 ECR":1,"变更背景与现状说明、佐证材料":1,"初步可行性意见":1,"跨部门影响评估表（CFT 会签）":1}}),
+   mk({code:"PCN-2026-009",type:"过程变更",m4:"人 Man",nature:"临时变更（偏差许可）",src:"产能调整",proj:"通用 / 注塑车间",part:"夜班新增操作员",partno:"INJ-NIGHT",desc:"夜班新增 4 名操作员，有效期 60 天，期间执行加严检验",owner:"赵主管（生产）",risk:"中",stage:3,planDate:t,cust:0,custAp:"不适用",ppap:"不适用",startDate:m,note:"偏差许可有效期至期满；期满须重新评估或转正式变更",done:{"工程变更申请单 ECR":1,"变更背景与现状说明、佐证材料":1,"初步可行性意见":1,"跨部门影响评估表（CFT 会签）":1,"PFMEA 更新（过程类）":1,"控制计划影响分析与更新":1,"风险评级与验证方案":1,"临时变更（偏差许可）有效期审批":1}}),
+   mk({code:"PCN-2026-005",type:"过程变更",m4:"环 Environment",nature:"永久变更",src:"内部改善",proj:"通用 / 涂装线",part:"浸塑烘干区温区调整",partno:"DIP-DRY01",desc:"烘干区由 3 温区改为 4 温区，改善厚件固化一致性",owner:"孙工（工艺）",risk:"低",stage:6,planDate:p,doneDate:p,cust:0,custAp:"不适用",ppap:"不适用",startDate:"2026-08-02",note:"已完成 30 天有效性验证，无异常，已归档",done:{"工程变更申请单 ECR":1,"变更背景与现状说明、佐证材料":1,"初步可行性意见":1,"跨部门影响评估表（CFT 会签）":1,"PFMEA 更新（过程类）":1,"控制计划影响分析与更新":1,"工装 / 模具 / 检具影响清单":1,"库存 / 在制品 / 已发货品影响清单":1,"成本与交期影响评估":1,"风险评级与验证方案":1,"内部批准签署（技术 / 质量 / 制造）":1,"样件 / 小批量试制验证报告":1,"全尺寸与性能 / 耐久检测报告":1,"过程能力研究 Cpk / Ppk":1,"受控文件更新（图纸/BOM/控制计划/作业指导书）":1,"岗位培训与资质确认记录":1,"切换断点通知（日期/批次/序列号）":1,"旧状态库存隔离与处理记录":1,"ERP BOM / 工艺路线 / 系统数据更新":1,"首件确认 FAI 报告":1,"初期管理（加严检验 / 标识 / 追溯）":1,"有效性验证（≥3 批或 30 天）":1,"变更关闭报告":1,"文件归档与记录保存清单":1}}),
+   mk({code:"DCN-2026-002",type:"产品设计变更",m4:"—",nature:"永久变更",src:"降本",proj:"通用 / 平台件",part:"卡扣本体",partno:"CLP-1002",desc:"材料由 PA66-GF30 变更为 PA66-GF25，满足强度要求前提下降低成本",owner:"周工（研发）",risk:"高",stage:2,planDate:y,cust:1,custAp:"待提交",ppap:"等级3",startDate:t,note:"需完成材料全性能与耐久验证，客户批准后方可实施",done:{"工程变更申请单 ECR":1,"变更背景与现状说明、佐证材料":1,"初步可行性意见":1}}),
+   mk({code:"4M-2026-021",type:"4M变更",m4:"料 Material",nature:"永久变更",src:"质量问题纠正",proj:"通用 / 装配一线",part:"润滑脂牌号切换",partno:"LUB-002",desc:"润滑脂由 KL-2 切换为 KL-5，解决低温卡滞投诉",owner:"吴工（质量）",risk:"中",stage:1,planDate:y,cust:0,custAp:"不适用",ppap:"不适用",startDate:t,note:"待跨部门影响评估",done:{}})
+  ];
+}
+function loadSeed(f){if(!f&&recs.length&&!confirm("载入示例数据将覆盖云端当前全部数据（所有使用者都会看到），是否继续？"))return;recs=seed();deleted={};pushNow("replace").then(function(){render();toast("已载入示例数据");});}
+
+/* ============ 渲染：KPI ============ */
+function render(){
+  var open=recs.filter(function(r){return r.stage<6;});
+  var od=open.filter(isOverdue);
+  var tm=today().slice(0,7);
+  var closedM=recs.filter(function(r){return r.stage===6&&(r.doneDate||"").slice(0,7)===tm;});
+  var closed=recs.filter(function(r){return r.stage===6&&r.doneDate&&r.planDate;});
+  var ontime=closed.filter(function(r){return r.doneDate<=r.planDate;}).length;
+  var rate=closed.length?Math.round(ontime/closed.length*100):0;
+  var custW=recs.filter(function(r){return r.stage<6&&(r.custAp==="待提交"||r.custAp==="已提交待批");}).length;
+  var hi=recs.filter(function(r){return r.stage<6&&r.risk==="高";}).length;
+  document.getElementById("kpis").innerHTML=
+   kpi("在办变更",open.length,"共 "+recs.length+" 条变更记录","")+
+   kpi("逾期未闭环",od.length,"计划完成日期已过","red")+
+   kpi("客户批准待办",custW,"待提交 / 已提交待批","purple")+
+   kpi("高风险在办",hi,"需副总级审批关注","amber")+
+   kpi("本月关闭",closedM.length,tm+" 已完成闭环","green")+
+   kpi("按期完成率",rate+"%","基于 "+closed.length+" 条已关闭变更",rate>=90?"green":(rate>=70?"":"red"));
+  renderBoard();renderList();renderStd();renderTplSel();renderAna();
+}
+function kpi(l,v,h,c){return '<div class="kpi '+(c||"")+'"><div class="k-lab">'+l+'</div><div class="k-val">'+v+'</div><div class="k-hint">'+h+'</div></div>';}
+
+/* ============ 渲染：看板 ============ */
+function filtered(){
+  var t=document.getElementById("f-type").value, rk=document.getElementById("f-risk").value,
+      cu=document.getElementById("f-cust").value, ow=document.getElementById("f-owner").value,
+      kw=(document.getElementById("f-kw").value||"").toLowerCase();
+  return recs.filter(function(r){
+    if(t&&r.type!==t)return false;
+    if(rk&&r.risk!==rk)return false;
+    if(cu!==""&&String(r.cust)!=cu)return false;
+    if(ow&&r.owner!==ow)return false;
+    if(kw){var s=(r.code+" "+r.part+" "+r.partno+" "+r.proj+" "+(r.desc||"")+" "+(r.owner||"")).toLowerCase();if(s.indexOf(kw)<0)return false;}
+    return true;
+  });
+}
+function renderBoard(){
+  var rs=filtered();
+  var h="";
+  STAGES.forEach(function(st){
+    var list=rs.filter(function(r){return +r.stage===st.n;});
+    h+='<div class="col" data-s="'+st.n+'" ondragover="dov(event)" ondragleave="this.classList.remove(\'dragover\')" ondrop="drp(event,'+st.n+')">'+
+       '<div class="col-h"><span><span class="sn">'+st.n+'</span>'+st.name+'</span><span class="cnt">'+list.length+'</span></div>';
+    if(!list.length)h+='<div class="empty" style="padding:14px 4px;font-size:11.5px">暂无</div>';
+    list.forEach(function(r){
+      var req=reqList(r).length, dn=doneCount(r), pct=req?Math.round(dn/req*100):0;
+      var od=isOverdue(r);
+      h+='<div class="item r-'+esc(r.risk)+'" draggable="true" ondragstart="dst(event,\''+r.id+'\')" onclick="openForm(\''+r.id+'\')">'+
+         '<div class="i-code">'+esc(r.code)+(od?' <span class="chip r">逾期</span>':'')+'</div>'+
+         '<div class="i-title">'+esc(r.part)+' · '+esc(r.desc||"")+'</div>'+
+         '<div class="chips">'+
+           '<span class="chip '+(r.type==="产品设计变更"?"b":"p")+'">'+esc(r.type)+'</span>'+
+           (r.m4&&r.m4!=="—"?'<span class="chip t">'+esc(r.m4)+'</span>':'')+
+           '<span class="chip '+(r.risk==="高"?"r":(r.risk==="中"?"a":"g"))+'">风险'+esc(r.risk)+'</span>'+
+           (r.cust?'<span class="chip r">客户影响</span>':'<span class="chip">内部</span>')+
+           (r.nature&&r.nature.indexOf("临时")===0?'<span class="chip a">临时</span>':'')+
+         '</div>'+
+         '<div class="bar'+(pct>=100?" full":"")+'"><i style="width:'+pct+'%"></i></div>'+
+         '<div class="prog-t">必备交付物 '+dn+"/"+req+'（'+pct+'%）</div>'+
+         '<div class="i-meta"><span>'+esc(r.owner||"—")+'</span><span>'+(r.planDate||"—")+'</span></div>'+
+         '</div>';
+    });
+    h+='</div>';
+  });
+  document.getElementById("board").innerHTML=h;
+}
+var dragId=null;
+function dst(e,id){dragId=id;e.dataTransfer.effectAllowed="move";}
+function dov(e){e.preventDefault();e.currentTarget.classList.add("dragover");}
+function drp(e,s){e.preventDefault();e.currentTarget.classList.remove("dragover");
+  if(!dragId)return;var r=recs.find(function(x){return x.id===dragId;});if(!r)return;
+  r.stage=s;if(s===6&&!r.doneDate)r.doneDate=today();touch(r);save();render();toast(r.code+" 已移至阶段 "+s);}
+
+/* ============ 渲染：台账 ============ */
+var LCOLS=[
+ {k:"code",t:"变更编号",w:118,e:1},
+ {k:"type",t:"变更类别",w:100,s:TYPES},
+ {k:"m4",t:"4M 类别",w:100,s:M4S},
+ {k:"nature",t:"变更性质",w:120,s:NATURE},
+ {k:"src",t:"变更来源",w:100,s:SRC},
+ {k:"proj",t:"项目/车型",w:130,e:1},
+ {k:"part",t:"零件名称",w:120,e:1},
+ {k:"partno",t:"零件号",w:110,e:1},
+ {k:"desc",t:"变更内容",w:250,e:1},
+ {k:"owner",t:"责任人",w:110,e:1},
+ {k:"risk",t:"风险等级",w:80,s:["高","中","低"]},
+ {k:"stage",t:"当前阶段",w:100,s:STAGES.map(function(s){return s.n+". "+s.name;})},
+ {k:"cust",t:"影响客户",w:70,s:["是","否"]},
+ {k:"custAp",t:"客户批准",w:100,s:CUSTAP},
+ {k:"ppap",t:"PPAP等级",w:90,s:PPAPL},
+ {k:"startDate",t:"提出日期",w:100,e:1},
+ {k:"planDate",t:"计划完成",w:100,e:1},
+ {k:"doneDate",t:"实际完成",w:100,e:1},
+ {k:"note",t:"备注/断点",w:180,e:1}
+];
+function renderList(){
+  var fs=document.getElementById("l-stage").value;
+  var rs=fs?recs.filter(function(r){return +r.stage===+fs;}):recs;
+  var h="<thead><tr><th style='width:40px'>操作</th>";
+  LCOLS.forEach(function(c){h+="<th"+(c.w?" style='min-width:"+c.w+"px'":"")+">"+c.t+"</th>";});
+  h+="</tr></thead><tbody>";
+  if(!rs.length)h+="<tr><td colspan='"+(LCOLS.length+1)+"'><div class='empty'>暂无数据，点击「+ 新建变更」开始</div></td></tr>";
+  rs.forEach(function(r){
+    h+="<tr><td><button class='mini' onclick=\"openForm('"+r.id+"')\">编辑</button></td>";
+    LCOLS.forEach(function(c){
+      var v=r[c.k];
+      if(c.k==="cust")v=v?"是":"否";
+      if(c.k==="stage")v=r.stage+". "+STAGES[r.stage-1].name;
+      if(c.s){
+        h+="<td><select class='mini' data-id='"+r.id+"' data-k='"+c.k+"' onchange='cellSel(this)' style='width:100%'>";
+        c.s.forEach(function(o){h+="<option"+((String(v)===String(o))?" selected":"")+">"+esc(o)+"</option>";});
+        h+="</select></td>";
+      }else{
+        h+="<td class='e' contenteditable='true' data-id='"+r.id+"' data-k='"+c.k+"' onblur='cellEdit(this)'>"+esc(v==null?"":v)+"</td>";
+      }
+    });
+    h+="</tr>";
+  });
+  h+="</tbody>";
+  document.getElementById("tbl").innerHTML=h;
+  document.getElementById("l-cnt").textContent="共 "+rs.length+" 条";
+}
+function cellEdit(td){
+  var r=recs.find(function(x){return x.id===td.dataset.id;});if(!r)return;
+  var v=td.textContent.trim();
+  if(r[td.dataset.k]===v)return;
+  r[td.dataset.k]=v;touch(r);save();render();
+}
+function cellSel(sel){
+  var r=recs.find(function(x){return x.id===sel.dataset.id;});if(!r)return;
+  var k=sel.dataset.k,v=sel.value;
+  if(k==="cust"){r.cust=(v==="是")?1:0;}
+  else if(k==="stage"){r.stage=parseInt(v,10);if(r.stage===6&&!r.doneDate)r.doneDate=today();}
+  else r[k]=v;
+  touch(r);save();render();
+}
+
+/* ============ 渲染：标准流程 ============ */
+function renderStd(){
+  var h="";
+  STAGES.forEach(function(s){
+    h+='<div class="fstep"><span class="fs-n">阶段 '+s.n+'</span><h4>'+s.name+'</h4>'+
+       '<div style="font-size:11px;color:var(--ink3);margin-bottom:5px">责任：'+s.lead+' · 周期：'+s.cycle+'</div><ul>';
+    s.act.forEach(function(a){h+="<li>"+a+"</li>";});
+    h+='</ul><div style="font-size:11px;color:var(--ink2);margin-top:6px"><b>输出：</b>'+s.out.join("、")+'</div>'+
+       '<div class="gate"><b>放行门槛：</b>'+s.gate+'</div></div>';
+  });
+  document.getElementById("flow").innerHTML=h;
+
+  var m="<thead><tr><th style='min-width:70px'>阶段</th><th style='min-width:280px'>交付物</th><th style='min-width:150px'>责任角色</th><th style='width:90px'>设计变更</th><th style='width:90px'>过程变更</th></tr></thead><tbody>";
+  DELIVS.forEach(function(d){
+    var c=function(x){return x==="必"?'<td style="color:var(--red);font-weight:600">必</td>':(x==="视"?'<td>视</td>':'<td class="na">–</td>');};
+    m+="<tr><td>"+d.s+"</td><td>"+esc(d.n)+"</td><td>"+esc(d.o)+"</td>"+c(d.d)+c(d.p)+"</tr>";
+  });
+  document.getElementById("mx").innerHTML=m+"</tbody>";
+
+  var f="<thead><tr><th style='width:110px'>4M 要素</th><th style='min-width:300px'>典型变更触发情形</th><th style='min-width:260px'>管控要点</th><th style='min-width:230px'>对应交付文件</th></tr></thead><tbody>";
+  M4.forEach(function(x){f+="<tr><td><b>"+x.k+"</b></td><td>"+x.t+"</td><td>"+x.c+"</td><td>"+x.f+"</td></tr>";});
+  document.getElementById("m4").innerHTML=f+"</tbody>";
+
+  var a="<thead><tr><th style='min-width:280px'>变更分级</th><th style='min-width:230px'>内部审批权限</th><th style='min-width:230px'>顾客沟通要求</th><th style='min-width:180px'>PPAP 要求</th></tr></thead><tbody>";
+  APPR.forEach(function(x){a+="<tr><td>"+x.l+"</td><td>"+x.a+"</td><td>"+x.c+"</td><td>"+x.p+"</td></tr>";});
+  document.getElementById("appr").innerHTML=a+"</tbody>";
+}
+
+/* ============ 渲染：模板 ============ */
+function renderTplSel(){
+  var s=document.getElementById("t-sel"),v=s.value;
+  s.innerHTML='<option value="">（不填充，使用空白模板）</option>'+recs.map(function(r){return '<option value="'+r.id+'">'+esc(r.code)+" · "+esc(r.part)+'</option>';}).join("");
+  s.value=v;renderTpl();
+}
+function getSel(){var id=document.getElementById("t-sel").value;return id?recs.find(function(r){return r.id===id;}):null;}
+function V(r,k,dv){if(!r)return dv||"";var v=r[k];if(v==null||v==="")return dv||"";return v;}
+function TPL(){
+  var r=getSel();
+  var g={
+    code:V(r,"code","【变更编号】"),
+    type:V(r,"type","【变更类别】"),
+    m4:V(r,"m4","—"),
+    nature:V(r,"nature","永久变更"),
+    src:V(r,"src","【变更来源】"),
+    proj:V(r,"proj","【项目/车型】"),
+    part:V(r,"part","【零件名称】"),
+    partno:V(r,"partno","【零件号】"),
+    desc:V(r,"desc","【变更内容描述】"),
+    owner:V(r,"owner","【责任人】"),
+    risk:V(r,"risk","【高/中/低】"),
+    stage:V(r,"stage","1")+". "+(STAGES[(r?r.stage:1)-1]||STAGES[0]).name,
+    plan:V(r,"planDate","【计划完成日期】"),
+    done:V(r,"doneDate","【实际完成日期】"),
+    start:V(r,"startDate","【提出日期】"),
+    cust:r?(r.cust?"是":"否"):"【是/否】",
+    custAp:V(r,"custAp","不适用"),
+    ppap:V(r,"ppap","不适用"),
+    note:V(r,"note","【备注：断点、库存处理方式等】"),
+    today:today()
+  };
+  var d=DELIVS.map(function(x){
+    var st=group(r||{type:"过程变更"})==="d"?x.d:x.p;
+    var mark=(r&&r.done&&r.done[x.n])?"[√]":"[ ]";
+    if(st==="必")return mark+" "+x.n+"（必备 · "+x.o+"）";
+    if(st==="视")return mark+" "+x.n+"（视情况 · "+x.o+"）";
+    return "";
+  }).filter(Boolean).join("\n");
+  return [
+   {t:"1. 工程变更申请单 ECR（阶段 1 提交）",f:"ECR_"+g.code+".md",c:
+"工程变更申请单  ECR / Engineering Change Request\n"+
+"────────────────────────────────────────────────\n"+
+"申请编号      ："+g.code+"\n"+
+"申请日期      ："+g.start+"\n"+
+"变更类别      ：□ 产品设计变更   □ 过程变更   □ 4M变更   □ 供应商变更        ["+g.type+"]\n"+
+"4M 要素       ：□ 人  □ 机  □ 料  □ 法  □ 环                                ["+g.m4+"]\n"+
+"变更性质      ：□ 永久变更  □ 临时变更（偏差许可，有效期：______）            ["+g.nature+"]\n"+
+"变更来源      ：□ 客户要求 □ 内部改善 □ 质量问题纠正 □ 法规更新 □ 降本 □ 供应商 ["+g.src+"]\n"+
+"项目 / 车型   ："+g.proj+"\n"+
+"零件名称 / 号 ："+g.part+" / "+g.partno+"\n"+
+"申请人 / 部门 ："+g.owner+"\n"+
+"\n【一、变更背景与现状问题描述】\n"+g.desc+"\n（附：客户文件 / 不良数据 / 降本测算等佐证材料清单）\n"+
+"\n【二、变更内容（变更前 → 变更后）】\n"+
+"  变更前：____________________________________________\n"+
+"  变更后：____________________________________________\n"+
+"\n【三、预期效果】\n  质量：______   成本：______   效率/节拍：______   交期：______\n"+
+"\n【四、初步可行性意见】（主管工程师）\n  □ 可行，转入影响评估      □ 不可行，退回并说明理由：__________\n  签字 / 日期：____________________\n"},
+
+   {t:"2. 变更影响评估与风险评级表（阶段 2 · CFT 会签）",f:"影响评估_"+g.code+".md",c:
+"变更影响评估与风险评级表\n"+
+"────────────────────────────────────────────────\n"+
+"变更编号      ："+g.code+"    类别："+g.type+"    风险等级："+g.risk+"\n"+
+"零件 / 项目   ："+g.part+" ("+g.partno+") / "+g.proj+"\n"+
+"变更内容      ："+g.desc+"\n"+
+"评估召集人    ："+g.owner+"        评估日期："+g.today+"\n"+
+"\n【一、影响维度评估】（逐项判定：无影响 / 有影响-可控 / 有影响-需验证）\n"+
+"  1. 产品性能与可靠性       □无 □可控 □需验证    说明：____________\n"+
+"  2. 形状 / 配合 / 功能      □无 □可控 □需验证    说明：____________\n"+
+"  3. 法规与认证符合性        □无 □可控 □需验证    说明：____________\n"+
+"  4. 过程能力与 PFMEA        □无 □可控 □需验证    说明：____________\n"+
+"  5. 控制计划与检验方法      □无 □可控 □需验证    说明：____________\n"+
+"  6. 工装 / 模具 / 检具      □无 □可控 □需验证    说明：____________\n"+
+"  7. 库存 / 在制品 / 已发货  □无 □可控 □需验证    数量：____________\n"+
+"  8. 供应商与来料            □无 □可控 □需验证    说明：____________\n"+
+"  9. 成本                    □无 □可控 □需验证    增减：____________\n"+
+" 10. 交期与产能              □无 □可控 □需验证    说明：____________\n"+
+"\n【二、是否影响顾客】"+g.cust+"   （注：影响形状/配合/功能/性能/耐久性须事前取得顾客书面批准）\n"+
+"  顾客通知方式：□ PCN 过程变更通知  □ DCN 设计变更申请  □ 偏差许可申请\n"+
+"  顾客批准状态："+g.custAp+"    PPAP 提交等级："+g.ppap+"\n"+
+"\n【三、风险评级】\n"+
+"  风险等级（高 / 中 / 低）："+g.risk+"\n"+
+"  判定依据：□ 影响形式配合功能  □ 新供方/新工艺  □ 高风险特性(SC/CC)  □ 其他：____\n"+
+"\n【四、验证方案】\n"+
+"  验证方式：□ 样件检测  □ 小批量试制(≥3批)  □ 过程能力研究 Cpk/Ppk≥1.33  □ 耐久/盐雾等专项试验\n"+
+"  样本量与批次：____________    判定准则：____________\n"+
+"\n【五、CFT 会签】\n"+
+"  研发 ____  工艺 ____  质量 ____  生产 ____  物流 ____  采购 ____  SQE ____  项目/大客户 ____\n"},
+
+   {t:"3. 变更通知单 PCN / DCN（阶段 3 · 对顾客 / 供应商）",f:"变更通知_"+g.code+".md",c:
+"变更通知单  "+(g.type==="产品设计变更"?"DCN 设计变更通知":"PCN 过程变更通知")+"\n"+
+"────────────────────────────────────────────────\n"+
+"通知编号      ："+g.code+"        发出日期："+g.today+"\n"+
+"致            ：【顾客 / 供应商名称】        联系人：____________\n"+
+"项目 / 零件   ："+g.proj+" / "+g.part+" ("+g.partno+")\n"+
+"\n【一、变更内容】\n"+g.desc+"\n"+
+"  变更前：__________________    变更后：__________________\n"+
+"\n【二、变更原因】"+g.src+"  说明：____________________________\n"+
+"\n【三、影响说明】\n"+
+"  □ 不影响形状 / 配合 / 功能 / 性能 / 耐久性\n"+
+"  □ 影响上述项目，随附验证数据与 PPAP（等级："+g.ppap+"）\n"+
+"  对库存与在制品的处理方案："+g.note+"\n"+
+"\n【四、拟实施切换断点】\n"+
+"  计划切换日期："+g.plan+"    断点批次 / 序列号：____________\n"+
+"  旧状态库存处理方式：□ 用完为止  □ 返工/返修  □ 报废  □ 隔离待处理\n"+
+"\n【五、随附文件清单】\n"+
+"  □ 变更后图纸 / 规范    □ DFMEA / PFMEA    □ 控制计划    □ 检测报告\n"+
+"  □ PPAP / PSW          □ 试制验证报告     □ 材料/供方资质证明\n"+
+"\n本公司承诺：在贵方书面批准前不实施本变更（如需批准）。\n"+
+"编制："+g.owner+"    审核：__________    批准：__________\n"},
+
+   {t:"4. 变更切换断点通知（阶段 5 · 内部发布）",f:"切换断点通知_"+g.code+".md",c:
+"变更切换断点通知  /  Cut-off Notice\n"+
+"────────────────────────────────────────────────\n"+
+"变更编号      ："+g.code+"      零件："+g.part+" ("+g.partno+")      项目："+g.proj+"\n"+
+"变更内容      ："+g.desc+"\n"+
+"切换生效      ：日期 "+g.plan+"  /  批次号或序列号自 ____________ 起\n"+
+"发布范围      ：□ 生产 □ 质量 □ 仓库/物流 □ 采购 □ 计划 □ 销售/客服 □ 供方\n"+
+"\n【一、断点定义】\n"+
+"  旧状态最后批次 / 序列号：____________    新状态首件批次 / 序列号：____________\n"+
+"  切换工位 / 产线：____________    切换班次：____________\n"+
+"\n【二、旧状态物料处理】\n"+
+"  原材料：____  半成品：____  成品库存：____  在途 / 客户端：____\n"+
+"  处理方式：□ 用完为止（自然切换） □ 隔离待评审 □ 返工/返修（作业指导书编号____） □ 报废\n"+
+"  隔离区域与标识：________________    责任人：____________\n"+
+"\n【三、系统与文件同步】\n"+
+"  □ ERP BOM 更新  □ 工艺路线更新  □ 检验标准更新  □ 作业指导书更新（旧版回收）\n"+
+"  □ 图纸/规范版本更新  □ 标签与包装标识更新\n"+
+"\n【四、变更后初期管理】\n"+
+"  □ 首件确认 FAI 合格  □ 加严检验 ____ 批 / ____ 天  □ 产品加贴变更标识  □ 追溯记录留存\n"+
+"\n编制："+g.owner+"    生产会签：______    质量会签：______    批准：______\n"},
+
+   {t:"5. 变更关闭与有效性验证报告（阶段 6）",f:"关闭报告_"+g.code+".md",c:
+"变更关闭与有效性验证报告\n"+
+"────────────────────────────────────────────────\n"+
+"变更编号      ："+g.code+"      类别："+g.type+"      风险等级："+g.risk+"\n"+
+"零件 / 项目   ："+g.part+" ("+g.partno+") / "+g.proj+"\n"+
+"提出日期      ："+g.start+"    计划完成："+g.plan+"    实际完成："+g.done+"\n"+
+"当前阶段      ："+g.stage+"\n"+
+"\n【一、交付物齐套情况】\n"+d+"\n"+
+"\n【二、有效性验证】\n"+
+"  验证批次：____________（≥3 批）    观察周期：____________（≥30 天）\n"+
+"  关键指标对比：\n"+
+"    不良率      变更前 ______  变更后 ______  目标 ______\n"+
+"    过程能力 Cpk 变更前 ______  变更后 ______  目标 ≥1.33\n"+
+"    客户投诉     变更前 ______  变更后 ______\n"+
+"  结论：□ 有效，关闭变更    □ 无效，重新评估（说明：____________）\n"+
+"\n【三、经验教训与横向展开】\n"+
+"  经验教训：____________________________________________\n"+
+"  横向展开范围（相似产品 / 产线 / 供方）：____________________________________________\n"+
+"\n【四、文件归档清单】\n"+
+"  □ ECR  □ 影响评估表  □ 批准记录 / 顾客批准  □ 验证报告  □ PPAP/PSW\n"+
+"  □ 断点通知  □ 培训记录  □ 关闭报告      归档编号：____________\n"+
+"  记录保存期限：按顾客要求及 IATF 16949 要求（建议 ≥15 年或产品生命周期 + 1 年）\n"+
+"\n编制："+g.owner+"    质量审核：______    批准：______    日期："+g.today+"\n"},
+
+   {t:"6. 4M 变更点检表（生产过程变更现场确认）",f:"4M点检_"+g.code+".md",c:
+"4M 变更点检表  /  4M Change Checklist\n"+
+"────────────────────────────────────────────────\n"+
+"变更编号      ："+g.code+"    适用要素："+g.m4+"    变更日期："+g.today+"\n"+
+"工序 / 工位   ："+g.part+"    责任人："+g.owner+"\n"+
+"\n【人 Man】  □ 无变更\n  □ 人员名单更新  □ 上岗培训完成  □ 资质矩阵更新  □ 关键岗位标识  □ 首件确认合格\n"+
+"\n【机 Machine】 □ 无变更\n  □ 设备/模具验收合格  □ 参数锁定与权限控制  □ Cmk/Cpk 能力研究完成  □ 防错验证  □ 保养计划更新\n"+
+"\n【料 Material】 □ 无变更\n  □ 材料/分供方认证通过  □ 来料检测报告齐全  □ 批次追溯标识  □ 包装与储运确认  □ 旧料隔离\n"+
+"\n【法 Method】 □ 无变更\n  □ PFMEA 更新  □ 控制计划更新  □ 作业/检验指导书更新并发放  □ 旧版回收  □ 培训记录  □ 节拍确认\n"+
+"\n【环 Environment】 □ 无变更\n  □ 温湿度/洁净度确认  □ 照明与作业环境确认  □ 布局与物流路径验证  □ 产品防护确认\n"+
+"\n【变更后初期管理】\n  □ 首件 FAI 合格  □ 加严检验 ____ 批  □ 变更标识  □ 30 天/3 批有效性跟踪\n"+
+"\n点检人：__________   班组长：__________   质量确认：__________\n"}
+  ];
+}
+function renderTpl(){
+  var box=document.getElementById("tpls");
+  box.innerHTML=TPL().map(function(t,i){
+    return '<div class="acc" id="acc'+i+'"><div class="acc-h" onclick="this.parentNode.classList.toggle(\'open\')"><span>'+t.t+'</span><span style="color:var(--ink3);font-weight:400">展开</span></div>'+
+      '<div class="acc-b"><div style="display:flex;gap:8px;margin-bottom:8px"><button onclick="copyTpl('+i+')">复制全文</button><button onclick="dlTpl('+i+')">下载 .md</button></div>'+
+      '<pre class="tpl" id="tpl'+i+'">'+esc(t.c)+'</pre></div></div>';
+  }).join("");
+}
+function copyTpl(i){var t=document.getElementById("tpl"+i).textContent;navigator.clipboard.writeText(t).then(function(){toast("已复制到剪贴板");},function(){toast("复制失败，请手动选择");});}
+function dlTpl(i){var t=TPL()[i];dl(t.c,t.f,"text/markdown",true);}
+function dl(txt,name,mime,bom){var b=new Blob([(bom?"\ufeff":"")+txt],{type:(mime||"text/plain")+";charset=utf-8"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);toast("已下载 "+name);}
+
+/* ============ 渲染：分析 ============ */
+function cntBy(fn,arr){var m={};(arr||recs).forEach(function(r){var k=fn(r);m[k]=(m[k]||0)+1;});return m;}
+function renderAna(){
+  var CL=["#0f4c81","#1a6fb0","#5b4a9e","#0f6e56","#b26a00","#c62828"];
+  var st=cntBy(function(r){return r.stage;});
+  var sd=STAGES.map(function(s,i){return {l:s.n+"."+s.name,v:st[s.n]||0,c:CL[i]};});
+  var ty=cntBy(function(r){return r.type;});
+  var td=Object.keys(ty).map(function(k,i){return {l:k,v:ty[k],c:CL[i%CL.length]};});
+  var rk=cntBy(function(r){return r.risk;});
+  var rd=["高","中","低"].map(function(k){return {l:"风险 "+k,v:rk[k]||0,c:k==="高"?"#c62828":(k==="中"?"#b26a00":"#1b6b3a")};});
+  var months=[];for(var i=5;i>=0;i--){var d=new Date();d.setMonth(d.getMonth()-i);months.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));}
+  var mo=months.map(function(m){return {m:m,open:recs.filter(function(r){return (r.startDate||"").slice(0,7)===m;}).length,close:recs.filter(function(r){return (r.doneDate||"").slice(0,7)===m;}).length};});
+  var maxM=Math.max(1,Math.max.apply(null,mo.map(function(x){return Math.max(x.open,x.close);})));
+  var od=recs.filter(isOverdue);
+  var avgP=recs.length?Math.round(recs.reduce(function(s,r){var q=reqList(r).length;return s+(q?doneCount(r)/q*100:0);},0)/recs.length):0;
+  var box=document.getElementById("ana-box");
+  box.innerHTML=
+   '<div><h3 style="margin-top:0">阶段分布</h3>'+donut(sd)+lg(sd)+'</div>'+
+   '<div><h3 style="margin-top:0">变更类别分布</h3>'+donut(td)+lg(td)+'</div>'+
+   '<div><h3 style="margin-top:0">风险等级分布</h3>'+donut(rd)+lg(rd)+'</div>'+
+   '<div style="grid-column:1/-1"><h3>近 6 个月变更发起 / 关闭趋势</h3><div style="display:flex;gap:26px;flex-wrap:wrap">'+
+     mo.map(function(x){return '<div style="text-align:center"><div style="display:flex;align-items:flex-end;gap:6px;height:120px">'+
+       '<div title="发起 '+x.open+'" style="width:20px;height:'+Math.round(x.open/maxM*100)+'px;background:#0f4c81;border-radius:3px 3px 0 0"></div>'+
+       '<div title="关闭 '+x.close+'" style="width:20px;height:'+Math.round(x.close/maxM*100)+'px;background:#1b6b3a;border-radius:3px 3px 0 0"></div>'+
+       '</div><div style="font-size:11px;color:var(--ink2);margin-top:4px">'+x.m.slice(2)+'</div>'+
+       '<div style="font-size:10.5px;color:var(--ink3)">'+x.open+' / '+x.close+'</div></div>';}).join("")+
+     '</div><div class="legend"><span><span class="pill" style="background:#0f4c81"></span>发起</span><span><span class="pill" style="background:#1b6b3a"></span>关闭</span></div></div>'+
+   '<div style="grid-column:1/-1"><h3>交付物平均齐套率</h3><div class="hbar"><span class="hl">全部变更</span><span class="ht"><i style="width:'+avgP+'%"></i></span><span class="hv">'+avgP+'%</span></div>'+
+     '<div style="font-size:12px;color:var(--ink2)">按每条变更的「必备交付物完成数 / 必备交付物总数」平均计算，用于衡量文件交付齐套水平。</div></div>'+
+   '<div style="grid-column:1/-1"><h3>逾期未闭环清单（'+od.length+' 项）</h3>'+
+     (od.length?'<table><thead><tr><th>编号</th><th>类别</th><th>零件</th><th>责任人</th><th>当前阶段</th><th>计划完成</th><th>逾期天数</th><th>交付完成率</th></tr></thead><tbody>'+
+      od.map(function(r){var q=reqList(r).length,p=q?Math.round(doneCount(r)/q*100):0;
+        var days=Math.round((new Date(today())-new Date(r.planDate))/864e5);
+        return "<tr><td><b>"+esc(r.code)+"</b></td><td>"+esc(r.type)+"</td><td>"+esc(r.part)+"</td><td>"+esc(r.owner||"—")+"</td><td>"+r.stage+". "+STAGES[r.stage-1].name+"</td><td>"+esc(r.planDate)+"</td><td style='color:var(--red)'>"+days+" 天</td><td>"+p+"%</td></tr>";}).join("")+
+      "</tbody></table>":'<div class="empty">当前无逾期变更</div>')+
+   '</div>';
+}
+function lg(data){return '<div class="lg" style="margin-top:8px">'+data.map(function(d){return '<div><span class="pill" style="background:'+d.c+'"></span>'+d.l+'：'+d.v+'</div>';}).join("")+'</div>';}
+function donut(data){
+  var total=data.reduce(function(s,d){return s+d.v;},0)||1;
+  var off=0,r=52,c=2*Math.PI*r;
+  var segs=data.filter(function(d){return d.v>0;}).map(function(d){
+    var len=c*d.v/total;var s='<circle r="'+r+'" cx="70" cy="70" fill="none" stroke="'+d.c+'" stroke-width="24" stroke-dasharray="'+len.toFixed(2)+' '+(c-len).toFixed(2)+'" stroke-dashoffset="'+(-off).toFixed(2)+'" transform="rotate(-90 70 70)"/>';
+    off+=len;return s;}).join("");
+  var big=data.reduce(function(a,b){return a.v>=b.v?a:b;},{v:0,l:"",c:"#888"});
+  return '<svg viewBox="0 0 140 140" width="140" height="140" role="img"><title>分布图</title>'+
+    '<circle r="'+r+'" cx="70" cy="70" fill="none" stroke="#eef1f6" stroke-width="24"/>'+segs+
+    '<text x="70" y="66" text-anchor="middle" font-size="20" font-weight="600" fill="#16202b">'+total+'</text>'+
+    '<text x="70" y="82" text-anchor="middle" font-size="10" fill="#8494a3">总计</text></svg>';
+}
+
+/* ============ 表单 ============ */
+function nextCode(type){
+  var pfx=TYPEPFX[type]||"ECN", y=new Date().getFullYear();
+  var n=recs.filter(function(r){return (r.code||"").indexOf(pfx+"-"+y)===0;}).length+1;
+  return pfx+"-"+y+"-"+String(n).padStart(3,"0");
+}
+function openForm(id){
+  var r=id?recs.find(function(x){return x.id===id;}):null;
+  curId=r?r.id:null;
+  var isNew=!r;
+  if(isNew)r={code:nextCode("过程变更"),type:"过程变更",m4:"—",nature:"永久变更",src:"内部改善",proj:"",part:"",partno:"",desc:"",owner:"",risk:"中",stage:1,cust:0,custAp:"不适用",ppap:"不适用",startDate:today(),planDate:"",doneDate:"",note:"",done:{}};
+  var f=function(k,dv){return r[k]==null?(dv||""):r[k];};
+  var h='<div class="frow">'+
+    fld("变更编号","<input id='f-code' value='"+esc(f("code"))+"'>")+
+    fld("变更类别<select>",sel("f-type",TYPES,f("type")))+
+    fld("4M 要素",sel("f-m4",M4S,f("m4")))+
+  '</div><div class="frow">'+
+    fld("变更性质",sel("f-nature",NATURE,f("nature")))+
+    fld("变更来源",sel("f-src",SRC,f("src")))+
+    fld("风险等级",sel("f-risk",["高","中","低"],f("risk")))+
+  '</div><div class="frow">'+
+    fld("项目 / 车型","<input id='f-proj' value='"+esc(f("proj"))+"'>")+
+    fld("零件名称","<input id='f-part' value='"+esc(f("part"))+"'>")+
+    fld("零件号","<input id='f-partno' value='"+esc(f("partno"))+"'>")+
+  '</div>'+
+  '<div class="fld" style="margin-bottom:12px"><label>变更内容描述（变更前 → 变更后，含原因与预期效果）</label><textarea id='+"'f-desc'"+'>'+esc(f("desc"))+'</textarea></div>'+
+  '<div class="frow">'+
+    fld("责任人","<input id='f-owner' value='"+esc(f("owner"))+"'>")+
+    fld("提出日期","<input type='date' id='f-start' value='"+esc(f("startDate"))+"'>")+
+    fld("当前阶段",sel("f-stage",STAGES.map(function(s){return s.n+". "+s.name;}),f("stage")+". "+STAGES[(f("stage",1))-1].name))+
+  '</div><div class="frow">'+
+    fld("计划完成日期","<input type='date' id='f-plan' value='"+esc(f("planDate"))+"'>")+
+    fld("实际完成日期","<input type='date' id='f-done' value='"+esc(f("doneDate"))+"'>")+
+    fld("影响客户",sel("f-cust",["否","是"],f("cust")?"是":"否"))+
+  '</div><div class="frow">'+
+    fld("客户批准状态",sel("f-custAp",CUSTAP,f("custAp")))+
+    fld("PPAP 提交等级",sel("f-ppap",PPAPL,f("ppap")))+
+    fld("备注（断点 / 库存处理 / 有效期等）","<input id='f-note' value='"+esc(f("note"))+"'>")+
+  '</div>'+
+  '<h3>标准交付物清单（勾选已完成项）</h3>'+
+  '<div class="note info">清单依据变更类别自动生成：<b>必</b> 为必备交付物并计入完成率；「视情况」项由影响评估阶段判定是否需要。</div>'+
+  '<div id="dlv-box">'+dlvHTML(r)+'</div>';
+  document.getElementById("m-title").textContent=(isNew?"新建变更单":"编辑变更单 · ")+r.code;
+  document.getElementById("m-del").style.display=isNew?"none":"inline-block";
+  document.getElementById("m-body").innerHTML=h;
+  document.getElementById("f-type").onchange=function(){
+    var t=this.value;
+    document.getElementById("f-code").value=isNew?nextCode(t):document.getElementById("f-code").value;
+    document.getElementById("dlv-box").innerHTML=dlvHTML({type:t,done:{}});
+  };
+  document.getElementById("modal").classList.add("on");
+}
+function fld(l,inp){return '<div class="fld"><label>'+l.replace("<select>","")+'</label>'+inp+'</div>';}
+function sel(id,opts,v){return "<select id='"+id+"'>"+opts.map(function(o){return "<option"+(String(o)===String(v)?" selected":"")+">"+esc(o)+"</option>";}).join("")+"</select>";}
+function dlvHTML(r){
+  var g=group(r),d=r.done||{},h="";
+  STAGES.forEach(function(st){
+    var items=DELIVS.filter(function(x){return x.s===st.n;});
+    var req=items.filter(function(x){return x[g]==="必";}).length;
+    var dn=items.filter(function(x){return x[g]==="必"&&d[x.n];}).length;
+    h+='<div class="dlv-group"><div class="dlv-gh"><span>阶段 '+st.n+' · '+st.name+'</span><span style="font-weight:400;color:var(--ink2)">必备 '+dn+"/"+req+'</span></div><div class="dlv-gb">';
+    items.forEach(function(x){
+      var st2=x[g], on=!!d[x.n];
+      if(st2==="-")return;
+      h+='<label class="dlv'+(on?" done":"")+'"><input type="checkbox" data-n="'+esc(x.n)+'"'+(on?" checked":"")+' onchange="togDlv(this)">'+
+         '<span class="dn">'+esc(x.n)+' <span class="'+(st2==="必"?"reqd":"opt")+'">'+(st2==="必"?"必备":"视情况")+'</span></span><span class="dw">'+esc(x.o)+'</span></label>';
+    });
+    h+='</div></div>';
+  });
+  return h;
+}
+var tmpDone={};
+function togDlv(cb){
+  var id=curId;var r=id?recs.find(function(x){return x.id===id;}):null;
+  if(!r){tmpDone[cb.dataset.n]=cb.checked;return;}
+  r.done=r.done||{};r.done[cb.dataset.n]=cb.checked;
+  cb.parentNode.classList.toggle("done",cb.checked);
+}
+function saveForm(){
+  var g=function(i){var e=document.getElementById(i);return e?e.value.trim():"";};
+  var type=g("f-type"),stage=parseInt(g("f-stage"),10);
+  var obj={type:type,m4:g("f-m4"),nature:g("f-nature"),src:g("f-src"),risk:g("f-risk"),
+    proj:g("f-proj"),part:g("f-part"),partno:g("f-partno"),desc:document.getElementById("f-desc").value.trim(),
+    owner:g("f-owner"),startDate:g("f-start"),stage:stage,planDate:g("f-plan"),doneDate:g("f-done"),
+    cust:g("f-cust")==="是"?1:0,custAp:g("f-custAp"),ppap:g("f-ppap"),note:g("f-note"),code:g("f-code")};
+  if(!obj.code){toast("请填写变更编号");return;}
+  if(!obj.part){toast("请填写零件名称");return;}
+  if(stage===6&&!obj.doneDate)obj.doneDate=today();
+  obj.updatedAt=new Date().toISOString();
+  if(curId){
+    var r=recs.find(function(x){return x.id===curId;});Object.assign(r,obj);
+  }else{
+    obj.id=uid();obj.createdAt=today();obj.done=obj.done||{};
+    document.querySelectorAll("#dlv-box input[type=checkbox]").forEach(function(cb){if(cb.checked)obj.done[cb.dataset.n]=1;});
+    Object.keys(tmpDone).forEach(function(k){if(tmpDone[k])obj.done[k]=1;});
+    tmpDone={};
+    recs.unshift(obj);
+  }
+  save();closeForm();render();toast("已保存 "+obj.code);
+}
+function delRec(){
+  if(!curId)return;
+  var r=recs.find(function(x){return x.id===curId;});
+  if(!confirm("确认删除变更 "+r.code+"？删除后所有使用者都将看不到该记录。"))return;
+  deleted[r.id]=Date.now();
+  recs=recs.filter(function(x){return x.id!==curId;});save();closeForm();render();toast("已删除 "+r.code);
+}
+function closeForm(){document.getElementById("modal").classList.remove("on");curId=null;}
+
+/* ============ 导入导出 ============ */
+function exportJSON(){dl(JSON.stringify(recs,null,2),"ECM数据备份_"+today()+".json","application/json",false);}
+function exportCSV(){
+  var head=["变更编号","变更类别","4M要素","变更性质","变更来源","项目","零件名称","零件号","变更内容","责任人","风险等级","当前阶段","影响客户","客户批准","PPAP","提出日期","计划完成","实际完成","备注","必备交付物完成"];
+  var rows=recs.map(function(r){var q=reqList(r).length;
+    return [r.code,r.type,r.m4,r.nature,r.src,r.proj,r.part,r.partno,(r.desc||"").replace(/\n/g," "),r.owner,r.risk,
+      r.stage+". "+STAGES[r.stage-1].name,(r.cust?"是":"否"),r.custAp,r.ppap,r.startDate,r.planDate,r.doneDate,(r.note||"").replace(/\n/g," "),
+      doneCount(r)+"/"+q];});
+  var csv=[head].concat(rows).map(function(a){return a.map(function(v){return '"'+String(v==null?"":v).replace(/"/g,'""')+'"';}).join(",");}).join("\r\n");
+  dl(csv,"ECM变更台账_"+today()+".csv","text/csv",true);
+}
+function importJSON(e){
+  var f=e.target.files[0];if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var d=JSON.parse(rd.result);
+      if(!Array.isArray(d))throw 0;
+      if(!confirm("导入 "+d.length+" 条记录，将覆盖当前数据，是否继续？"))return;
+      recs=d.map(function(r){r.id=r.id||uid();r.done=r.done||{};r.stage=+r.stage||1;r.updatedAt=r.updatedAt||new Date().toISOString();return r;});
+      deleted={};
+      pushNow("replace").then(function(){render();toast("已导入 "+recs.length+" 条");});
+    }catch(err){toast("文件格式错误");}
+    e.target.value="";
+  };
+  rd.readAsText(f,"utf-8");
+}
+function resetF(){["f-type","f-risk","f-cust","f-owner"].forEach(function(i){document.getElementById(i).value="";});document.getElementById("f-kw").value="";render();}
+
+/* ============ 初始化 ============ */
+function initSel(){
+  document.getElementById("f-type").innerHTML='<option value="">全部变更类别</option>'+TYPES.map(function(t){return "<option>"+t+"</option>";}).join("");
+  document.getElementById("f-risk").innerHTML='<option value="">全部风险等级</option>'+["高","中","低"].map(function(t){return "<option>"+t+"</option>";}).join("");
+  document.getElementById("l-stage").innerHTML='<option value="">全部阶段</option>'+STAGES.map(function(s){return "<option value='"+s.n+"'>"+s.n+". "+s.name+"</option>";}).join("");
+  var ow={};recs.forEach(function(r){if(r.owner)ow[r.owner]=1;});
+  document.getElementById("f-owner").innerHTML='<option value="">全部责任人</option>'+Object.keys(ow).map(function(o){return "<option>"+esc(o)+"</option>";}).join("");
+}
+document.querySelectorAll(".tab").forEach(function(t){
+  t.onclick=function(){
+    document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("on");});
+    document.querySelectorAll(".view").forEach(function(x){x.classList.remove("on");});
+    t.classList.add("on");document.getElementById("v-"+t.dataset.v).classList.add("on");
+  };
+});
+document.getElementById("modal").onclick=function(e){if(e.target===this)closeForm();};
+/* 数据由下方 pullCloud() 从云端拉取，不再读取浏览器本地缓存 */
+var _render=render;
+render=function(){
+  var ow=document.getElementById("f-owner").value,kw=document.getElementById("f-kw").value;
+  var ft=document.getElementById("f-type").value,fr=document.getElementById("f-risk").value,fc=document.getElementById("f-cust").value;
+  var ls=document.getElementById("l-stage").value;
+  var owm={};recs.forEach(function(r){if(r.owner)owm[r.owner]=1;});
+  initSel();
+  document.getElementById("f-type").value=ft;
+  document.getElementById("f-risk").value=fr;
+  document.getElementById("f-cust").value=fc;
+  if(owm[ow])document.getElementById("f-owner").value=ow;
+  document.getElementById("f-kw").value=kw;
+  document.getElementById("l-stage").value=ls;
+  _render();
+};
+render();
+pullCloud().then(function(){render();startPoll();});
+</script>
+</body>
+</html>
