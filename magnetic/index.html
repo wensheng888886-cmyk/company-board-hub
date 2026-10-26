@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html data-page-node-id="VjoL321PySH0RqfowqANaQ" lang="zh-CN">
+<head data-page-node-id="16SkZ1GpLbA7NMqnsxu9c4">
+<script data-page-node-id="YKMHiVzTpWoFCeUFJkkf76" src="/page/page_comm/inject.js"></script>
+<meta data-page-node-id="OK1Sgq7GfDITydlKGZj3nH" charset="UTF-8">
+<meta data-page-node-id="Q68XdsrJxeW8Pu7UhRPqzz" content="width=device-width,initial-scale=1" name="viewport">
+<title data-page-node-id="XAZd31RHEMI6YfjDEeDtdw" data-pnid-children="YQVBSQ0PY3cyyoJ6CjwC67">磁芯样件交付看板 | Magnetic Core Delivery Dashboard</title>
+<script data-page-node-id="6DBn14S7A6QouIHoQIIx9l" src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style data-page-node-id="xM9ocOXK672WE3ohbq7Ock" data-pnid-children="uemZZ76fUfZeM9FK12m4lU">
+:root{
+  --bg-0:#04070f; --bg-1:#070d1b; --bg-2:#0a1424;
+  --panel:rgba(12,22,40,.72);
+  --panel-solid:#0b1526;
+  --line:rgba(66,140,208,.22);
+  --line-2:rgba(66,140,208,.42);
+  --cy:#25e0ff; --cy-d:#0891b2;
+  --pu:#a06bff; --gn:#22e6a8; --or:#ffb547; --rd:#ff5f7e; --bl:#4b8dff;
+  --txt:#dceaf7; --txt-2:#8fa9c4; --txt-3:#5b7695;
+  --glow:0 0 0 1px rgba(37,224,255,.18), 0 0 22px rgba(37,224,255,.10);
+  --r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"Segoe UI","Microsoft YaHei",-apple-system,BlinkMacSystemFont,Roboto,sans-serif;
+  background:var(--bg-0); color:var(--txt); overflow-x:hidden;
+  font-size:13px; line-height:1.55; min-height:100vh;
+}
+/* ===== 背景科技层 ===== */
+.bg-layer{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bg-grid{
+  position:absolute;inset:-40% -20% -20% -20%;
+  background-image:linear-gradient(rgba(37,224,255,.055) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(37,224,255,.055) 1px,transparent 1px);
+  background-size:54px 54px;
+  transform:perspective(560px) rotateX(58deg); transform-origin:50% 100%;
+  animation:gridMove 18s linear infinite;
+}
+@keyframes gridMove{from{background-position:0 0}to{background-position:0 54px}}
+.bg-glow{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5}
+.bg-glow.g1{width:620px;height:620px;left:-180px;top:-160px;background:radial-gradient(circle,rgba(37,224,255,.34),transparent 68%)}
+.bg-glow.g2{width:560px;height:560px;right:-160px;top:6%;background:radial-gradient(circle,rgba(160,107,255,.30),transparent 68%)}
+.bg-glow.g3{width:520px;height:520px;left:32%;bottom:-220px;background:radial-gradient(circle,rgba(34,230,168,.18),transparent 68%)}
+.bg-scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.014) 0 1px,transparent 1px 3px)}
+.bg-beam{position:absolute;left:0;right:0;height:130px;background:linear-gradient(180deg,transparent,rgba(37,224,255,.055),transparent);animation:beam 9s linear infinite}
+@keyframes beam{0%{top:-140px}100%{top:105%}}
+/* ===== 布局 ===== */
+.wrap{position:relative;z-index:2;max-width:1640px;margin:0 auto;padding:16px 20px 40px}
+/* 顶栏 */
+header.top{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:13px 18px;margin-bottom:14px;
+  background:linear-gradient(120deg,rgba(10,20,38,.92),rgba(10,22,42,.72));
+  border:1px solid var(--line-2);border-radius:var(--r);
+  box-shadow:var(--glow),inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(12px);position:relative;overflow:hidden;
+}
+header.top::before{content:"";position:absolute;left:0;top:0;height:2px;width:100%;
+  background:linear-gradient(90deg,transparent,var(--cy),var(--pu),transparent);opacity:.85}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:38px;height:38px;flex:0 0 38px;position:relative}
+.logo i{position:absolute;inset:0;border:2px solid var(--cy);border-radius:50%;border-right-color:transparent;border-bottom-color:var(--pu);animation:spin 3.6s linear infinite}
+.logo i:nth-child(2){inset:8px;border-color:var(--pu);border-left-color:transparent;border-top-color:var(--cy);animation-duration:2.4s;animation-direction:reverse}
+.logo::after{content:"";position:absolute;inset:15px;background:var(--cy);border-radius:50%;box-shadow:0 0 12px var(--cy)}
+@keyframes spin{to{transform:rotate(360deg)}}
+h1{font-size:17px;font-weight:650;letter-spacing:.6px;
+  background:linear-gradient(90deg,#eaf7ff,var(--cy) 55%,var(--pu));
+  -webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.sub{font-size:11px;color:var(--txt-3);letter-spacing:1.6px;text-transform:uppercase;white-space:nowrap}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none;
+  padding:7px 13px;border-radius:8px;font-size:12px;font-weight:600;letter-spacing:.3px;
+  background:rgba(37,224,255,.08);border:1px solid rgba(37,224,255,.34);color:#bfefff;
+  transition:.18s;white-space:nowrap;
+}
+.btn:hover{background:rgba(37,224,255,.18);box-shadow:0 0 14px rgba(37,224,255,.3);transform:translateY(-1px)}
+.btn.ghost{background:rgba(255,255,255,.03);border-color:var(--line-2);color:var(--txt-2)}
+.btn.ghost:hover{color:var(--txt);border-color:var(--cy-d);background:rgba(37,224,255,.08);box-shadow:none}
+.btn.solid{background:linear-gradient(120deg,var(--cy-d),#0e7490);border-color:transparent;color:#eafbff}
+.btn.solid:hover{background:linear-gradient(120deg,#0891b2,#06b6d4)}
+.btn.danger{background:rgba(255,95,126,.1);border-color:rgba(255,95,126,.4);color:#ffc2ce}
+.btn.danger:hover{background:rgba(255,95,126,.2);box-shadow:0 0 14px rgba(255,95,126,.28)}
+.btn i{font-style:normal;font-size:13px;line-height:1}
+.clock{font-size:11px;color:var(--txt-3);font-variant-numeric:tabular-nums;letter-spacing:.5px}
+/* 导航 */
+nav.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tab{
+  position:relative;cursor:pointer;padding:9px 20px;border-radius:9px;font-size:13px;font-weight:600;
+  background:rgba(255,255,255,.025);border:1px solid var(--line);color:var(--txt-2);transition:.18s;
+  display:flex;align-items:center;gap:8px;
+}
+.tab:hover{color:var(--txt);border-color:var(--line-2);background:rgba(37,224,255,.06)}
+.tab.on{color:#eafbff;border-color:rgba(37,224,255,.6);background:linear-gradient(120deg,rgba(37,224,255,.18),rgba(160,107,255,.14));box-shadow:0 0 18px rgba(37,224,255,.2)}
+.tab.on::after{content:"";position:absolute;left:20%;right:20%;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent,var(--cy),transparent)}
+.tab b{font-weight:700;font-size:11px;padding:1px 6px;border-radius:20px;background:rgba(37,224,255,.16);color:var(--cy);font-variant-numeric:tabular-nums}
+.tab.on b{background:rgba(37,224,255,.3);color:#eafbff}
+/* 过滤器 */
+.filters{
+  display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:10px 14px;margin-bottom:14px;
+  background:rgba(9,17,32,.62);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(8px);
+}
+.fl-t{font-size:11px;color:var(--txt-3);letter-spacing:1.4px;font-weight:700}
+.fchip{
+  cursor:pointer;user-select:none;padding:5px 12px;border-radius:20px;font-size:12px;
+  background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--txt-2);transition:.16s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.fchip:hover{color:var(--txt);border-color:var(--line-2)}
+.fchip.on{background:rgba(37,224,255,.16);border-color:rgba(37,224,255,.6);color:#dff8ff;box-shadow:0 0 12px rgba(37,224,255,.22)}
+.fchip.on.pu{background:rgba(160,107,255,.18);border-color:rgba(160,107,255,.58);color:#ecdcff;box-shadow:0 0 12px rgba(160,107,255,.24)}
+.fchip.on.or{background:rgba(255,181,71,.16);border-color:rgba(255,181,71,.55);color:#ffe6bb;box-shadow:0 0 12px rgba(255,181,71,.22)}
+.fchip.on.rd{background:rgba(255,95,126,.16);border-color:rgba(255,95,126,.55);color:#ffd0da;box-shadow:0 0 12px rgba(255,95,126,.22)}
+.fchip .x{font-size:11px;opacity:.75}
+.sep{width:1px;height:18px;background:var(--line);margin:0 3px}
+select.fsel,input.fsel{
+  background:rgba(4,10,20,.9);border:1px solid var(--line);color:var(--txt);border-radius:7px;
+  padding:5px 9px;font-size:12px;outline:none;font-family:inherit;transition:.16s;
+}
+select.fsel:focus,input.fsel:focus{border-color:var(--cy-d);box-shadow:0 0 0 2px rgba(37,224,255,.14)}
+.filters .clear{margin-left:auto;cursor:pointer;font-size:11.5px;color:var(--txt-3);border-bottom:1px dashed var(--txt-3)}
+.filters .clear:hover{color:var(--rd);border-color:var(--rd)}
+/* 视图 */
+.view{display:none;animation:fadeUp .34s ease both}
+.view.on{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* 卡片 */
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px 16px;backdrop-filter:blur(10px);position:relative;overflow:hidden;
+  box-shadow:0 6px 26px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.035);
+}
+.card::before{content:"";position:absolute;left:0;top:0;width:100%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(37,224,255,.6),transparent);opacity:.6}
+.card-h{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.card-h h3{font-size:13.5px;font-weight:650;letter-spacing:.4px;color:#e8f4ff}
+.card-h .dot{width:7px;height:7px;border-radius:2px;background:var(--cy);box-shadow:0 0 10px var(--cy);transform:rotate(45deg)}
+.card-h .dot.pu{background:var(--pu);box-shadow:0 0 10px var(--pu)}
+.card-h .dot.gn{background:var(--gn);box-shadow:0 0 10px var(--gn)}
+.card-h .dot.or{background:var(--or);box-shadow:0 0 10px var(--or)}
+.card-h .dot.rd{background:var(--rd);box-shadow:0 0 10px var(--rd)}
+.card-h .r{margin-left:auto;font-size:11px;color:var(--txt-3)}
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(186px,1fr));gap:12px;margin-bottom:14px}
+.kpi{padding:14px 15px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,rgba(13,25,45,.9),rgba(9,17,32,.72));
+  border:1px solid var(--line);border-radius:var(--r);backdrop-filter:blur(8px);transition:.2s}
+.kpi:hover{border-color:var(--line-2);transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.4)}
+.kpi::after{content:"";position:absolute;right:-30px;top:-30px;width:100px;height:100px;border-radius:50%;
+  background:radial-gradient(circle,rgba(37,224,255,.16),transparent 70%)}
+.kpi.k-pu::after{background:radial-gradient(circle,rgba(160,107,255,.18),transparent 70%)}
+.kpi.k-gn::after{background:radial-gradient(circle,rgba(34,230,168,.16),transparent 70%)}
+.kpi.k-or::after{background:radial-gradient(circle,rgba(255,181,71,.16),transparent 70%)}
+.kpi.k-rd::after{background:radial-gradient(circle,rgba(255,95,126,.16),transparent 70%)}
+.kpi .lb{font-size:11.5px;color:var(--txt-2);letter-spacing:.7px;display:flex;align-items:center;gap:6px;position:relative}
+.kpi .vl{font-size:27px;font-weight:700;letter-spacing:-.5px;margin:6px 0 2px;position:relative;
+  font-variant-numeric:tabular-nums;color:#f0f9ff;text-shadow:0 0 22px rgba(37,224,255,.28)}
+.kpi .vl small{font-size:12px;font-weight:500;color:var(--txt-2);margin-left:3px;letter-spacing:0}
+.kpi .ft{font-size:11px;color:var(--txt-3);position:relative;display:flex;align-items:center;gap:6px}
+.up{color:var(--gn)} .down{color:var(--rd)} .warn{color:var(--or)}
+/* 图表 */
+.grid{display:grid;gap:12px;margin-bottom:12px}
+.g-2{grid-template-columns:1fr 1fr}
+.g-3{grid-template-columns:1.35fr 1fr 1fr}
+.g-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.g-21{grid-template-columns:1.6fr 1fr}
+.cv-wrap{position:relative;width:100%}
+canvas{display:block;width:100%}
+/* 进度条 */
+.bars{display:flex;flex-direction:column;gap:9px}
+.bar-row{display:grid;grid-template-columns:112px 1fr 74px;align-items:center;gap:10px;font-size:12px}
+.bar-row .nm{color:var(--txt-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.bar-row .nm:hover{color:var(--cy)}
+.bar-tr{height:9px;border-radius:6px;background:rgba(255,255,255,.055);overflow:hidden;position:relative}
+.bar-fl{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--cy-d),var(--cy));box-shadow:0 0 10px rgba(37,224,255,.4);
+  transition:width .5s cubic-bezier(.4,0,.2,1);position:relative}
+.bar-fl.pu{background:linear-gradient(90deg,#7c4dff,var(--pu));box-shadow:0 0 10px rgba(160,107,255,.4)}
+.bar-fl.gn{background:linear-gradient(90deg,#0f9e78,var(--gn));box-shadow:0 0 10px rgba(34,230,168,.4)}
+.bar-fl.or{background:linear-gradient(90deg,#c47c12,var(--or));box-shadow:0 0 10px rgba(255,181,71,.4)}
+.bar-fl.rd{background:linear-gradient(90deg,#c4253f,var(--rd));box-shadow:0 0 10px rgba(255,95,126,.4)}
+.bar-row .vv{text-align:right;font-variant-numeric:tabular-nums;color:var(--txt);font-weight:600}
+/* 已发 + 未发 整合条 */
+.bar-st{display:flex;width:100%;height:9px;border-radius:6px;overflow:hidden;background:rgba(255,255,255,.055)}
+.bar-st i{display:block;height:100%;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.bar-st .s-done{background:linear-gradient(90deg,#0f9e78,var(--gn));box-shadow:0 0 10px rgba(34,230,168,.35)}
+.bar-st .s-part{background:linear-gradient(90deg,#0891b2,var(--cy));box-shadow:0 0 10px rgba(37,224,255,.35)}
+.bar-st .s-over{background:linear-gradient(90deg,#c4253f,var(--rd));box-shadow:0 0 10px rgba(255,95,126,.4)}
+.bar-st .s-none{background:repeating-linear-gradient(45deg,rgba(255,181,71,.55) 0 5px,rgba(255,181,71,.18) 5px 10px)}
+.bar-st.big{height:14px;border-radius:8px}
+.st-lb{display:block;margin-top:4px;font-size:10.5px;color:var(--txt-3);font-variant-numeric:tabular-nums;line-height:1.35}
+.st-lb em{font-style:normal;font-weight:650}
+.st-lb .c1{color:#7ff0cd} .st-lb .c2{color:#ffd79a} .st-lb .c3{color:#ffb3c3}
+/* 整合总条 */
+.ovbar{border:1px solid var(--line);border-radius:10px;background:rgba(6,12,24,.5);padding:10px 12px 9px;margin-bottom:11px}
+.ovbar-h{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--txt-2);margin-bottom:7px}
+.ovbar-h b.t{color:#eaf6ff;font-size:12px;font-weight:650;letter-spacing:.3px}
+.ovbar-h em{font-style:normal;font-weight:650}
+.ovbar-h .c1{color:#7ff0cd} .ovbar-h .c2{color:#ffd79a}
+.ovbar-h .sp2{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--txt-3)}
+.ovbar-f{display:flex;gap:12px;font-size:10.5px;color:var(--txt-3);margin-top:5px;font-variant-numeric:tabular-nums}
+.ovbar-f .sp2{margin-left:auto}
+/* 分段切换 */
+.seg{display:inline-flex;margin-left:10px;border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
+.seg span{padding:3px 10px;font-size:11px;color:var(--txt-3);cursor:pointer;transition:.15s;user-select:none}
+.seg span.on{background:linear-gradient(90deg,rgba(37,224,255,.2),rgba(160,107,255,.2));color:#eaf6ff}
+.seg span:hover{color:var(--cy)}
+/* 总览左列堆叠（待交付看板 + 已发完汇总） */
+.col-stack{display:flex;flex-direction:column;gap:12px;min-width:0}
+/* 一周发货趋势：紧凑版（置于总览右侧窄栏） */
+.card.wk-card{padding:10px 13px 9px}
+.card.wk-card .card-h{margin-bottom:6px;gap:7px;flex-wrap:wrap}
+.card.wk-card .card-h h3{font-size:13px}
+.card.wk-card .card-h .r{font-size:10.5px;text-align:right}
+.card.wk-card .legend{margin-top:4px;gap:10px;font-size:10.5px}
+.card.wk-card .seg{margin-left:6px}
+.card.wk-card .seg span{padding:3px 8px;font-size:10.5px}
+/* 已发货完成汇总 */
+.sum-toggle{font-size:11px;color:var(--cy);cursor:pointer;user-select:none;border:1px solid var(--line-2);border-radius:7px;padding:3px 9px;transition:.15s;white-space:nowrap}
+.sum-toggle:hover{background:rgba(37,224,255,.1)}
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:9px}
+.sum-cell{border:1px solid var(--line);border-radius:9px;background:rgba(6,12,24,.5);padding:8px 10px}
+.sum-cell .l{font-size:10.5px;color:var(--txt-3);letter-spacing:.3px;white-space:nowrap}
+.sum-cell .v{font-size:16px;font-weight:700;color:#eaf6ff;font-variant-numeric:tabular-nums;margin-top:3px}
+.sum-cell .v small{font-size:10.5px;font-weight:500;color:var(--txt-2);margin-left:2px}
+.sum-list{margin-top:11px;max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:9px;background:rgba(6,12,24,.4)}
+.sum-list table{font-size:11.5px}
+.sum-list tbody tr{cursor:pointer}
+/* 表格 */
+.tb-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:rgba(6,12,24,.5);max-height:600px}
+.tb-wrap.sm{max-height:340px}
+table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+thead th{
+  position:sticky;top:0;z-index:3;background:linear-gradient(180deg,#0d1a2e,#0a1424);
+  color:var(--cy);font-weight:650;font-size:11.5px;letter-spacing:.5px;text-align:left;
+  padding:10px 11px;border-bottom:1px solid var(--line-2);white-space:nowrap;
+}
+thead th.num{text-align:right}
+tbody td{padding:9px 11px;border-bottom:1px solid rgba(66,140,208,.1);color:var(--txt);white-space:nowrap}
+tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr{transition:.13s;cursor:pointer}
+tbody tr:hover{background:rgba(37,224,255,.06)}
+tbody tr.sel{background:rgba(37,224,255,.1);box-shadow:inset 3px 0 0 var(--cy)}
+tbody tr:last-child td{border-bottom:none}
+.tb-wrap tfoot td{padding:9px 11px;border-top:1px solid var(--line-2);background:rgba(37,224,255,.055);
+  color:#dff6ff;font-weight:650;font-size:12px;position:sticky;bottom:0;z-index:2}
+.tb-wrap tfoot td.num{text-align:right}
+/* 标签 */
+.tag{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.2px}
+.t-cy{background:rgba(37,224,255,.14);color:#8feeff;border:1px solid rgba(37,224,255,.32)}
+.t-gn{background:rgba(34,230,168,.14);color:#7ff0cd;border:1px solid rgba(34,230,168,.32)}
+.t-or{background:rgba(255,181,71,.14);color:#ffd79a;border:1px solid rgba(255,181,71,.32)}
+.t-rd{background:rgba(255,95,126,.14);color:#ffb3c3;border:1px solid rgba(255,95,126,.34)}
+.t-pu{background:rgba(160,107,255,.14);color:#d5bcff;border:1px solid rgba(160,107,255,.32)}
+.t-gy{background:rgba(143,169,196,.12);color:#b8cde2;border:1px solid rgba(143,169,196,.26)}
+.mono{font-family:"Consolas","SF Mono",monospace;font-size:11.5px;color:#a8c6e0}
+.ell{max-width:250px;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:bottom}
+/* 工具行 */
+.tools{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:11px}
+.tools .sp{margin-left:auto}
+.search{position:relative}
+.search input{
+  background:rgba(4,10,20,.9);border:1px solid var(--line);color:var(--txt);border-radius:8px;
+  padding:7px 12px 7px 30px;font-size:12px;outline:none;width:230px;font-family:inherit;transition:.16s;
+}
+.search input:focus{border-color:var(--cy-d);box-shadow:0 0 0 2px rgba(37,224,255,.14);width:280px}
+.search span{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--txt-3);font-size:12px}
+.cnt{font-size:11.5px;color:var(--txt-3)}
+.cnt b{color:var(--cy);font-weight:700}
+/* 弹窗 */
+.mask{position:fixed;inset:0;z-index:100;background:rgba(2,6,14,.78);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.mask.on{display:flex}
+.dlg{
+  width:100%;max-width:760px;background:linear-gradient(160deg,#0c1729,#081120);
+  border:1px solid var(--line-2);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.66),0 0 0 1px rgba(37,224,255,.1);
+  animation:pop .26s cubic-bezier(.34,1.4,.64,1) both;max-height:90vh;display:flex;flex-direction:column;
+}
+@keyframes pop{from{opacity:0;transform:scale(.95) translateY(14px)}to{opacity:1;transform:none}}
+.dlg-h{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--line);position:relative}
+.dlg-h::before{content:"";position:absolute;left:0;top:0;height:2px;width:100%;background:linear-gradient(90deg,var(--cy),var(--pu),transparent)}
+.dlg-h h3{font-size:14.5px;font-weight:650;color:#eaf6ff}
+.dlg-h .cls{margin-left:auto;cursor:pointer;color:var(--txt-3);font-size:19px;line-height:1;padding:0 4px;transition:.15s}
+.dlg-h .cls:hover{color:var(--rd);transform:rotate(90deg)}
+.dlg-b{padding:16px 18px;overflow:auto;flex:1}
+.dlg-f{display:flex;gap:10px;padding:13px 18px;border-top:1px solid var(--line);justify-content:flex-end;background:rgba(4,10,20,.4)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.fg{display:flex;flex-direction:column;gap:5px;min-width:0}
+.fg.full{grid-column:1/-1}
+.fg label{font-size:11.5px;color:var(--txt-2);letter-spacing:.4px;font-weight:600}
+.fg label .req{color:var(--rd)}
+.fg input,.fg select,.fg textarea{
+  background:rgba(3,8,18,.92);border:1px solid var(--line);color:var(--txt);border-radius:8px;
+  padding:8px 11px;font-size:12.5px;outline:none;font-family:inherit;transition:.16s;width:100%;
+}
+.fg textarea{resize:vertical;min-height:62px;line-height:1.5}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--cy-d);box-shadow:0 0 0 2px rgba(37,224,255,.14)}
+.fg input[readonly]{opacity:.6;cursor:not-allowed}
+.fg .hint{font-size:10.5px;color:var(--txt-3)}
+.opt-ok{color:var(--gn);font-size:11px}
+/* 抽屉 */
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,94vw);z-index:110;
+  background:linear-gradient(200deg,#0b1626,#070f1c);border-left:1px solid var(--line-2);
+  box-shadow:-24px 0 64px rgba(0,0,0,.6);transform:translateX(102%);transition:transform .32s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.drawer-h{padding:15px 18px;border-bottom:1px solid var(--line);position:relative}
+.drawer-h::before{content:"";position:absolute;left:0;top:0;height:2px;width:100%;background:linear-gradient(90deg,var(--cy),var(--pu),transparent)}
+.drawer-h .t1{font-size:15px;font-weight:650;color:#eaf6ff;margin-bottom:3px;padding-right:26px}
+.drawer-h .t2{font-size:11.5px;color:var(--txt-3);display:flex;gap:10px;flex-wrap:wrap}
+.drawer-h .cls{position:absolute;right:15px;top:14px;cursor:pointer;color:var(--txt-3);font-size:19px;line-height:1}
+.drawer-h .cls:hover{color:var(--rd)}
+.drawer-b{padding:16px 18px;overflow:auto;flex:1}
+.mini-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.mini{background:rgba(9,17,32,.75);border:1px solid var(--line);border-radius:9px;padding:9px 10px}
+.mini .l{font-size:10.5px;color:var(--txt-3);letter-spacing:.3px}
+.mini .v{font-size:18px;font-weight:700;color:#eaf6ff;font-variant-numeric:tabular-nums;margin-top:2px}
+.sec-t{font-size:11.5px;color:var(--cy);letter-spacing:1.4px;font-weight:700;margin:16px 0 9px;
+  display:flex;align-items:center;gap:8px}
+.sec-t::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line-2),transparent)}
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl{display:grid;grid-template-columns:16px 1fr;gap:10px;padding-bottom:12px;position:relative}
+.tl::before{content:"";position:absolute;left:7px;top:9px;bottom:-1px;width:1px;background:linear-gradient(180deg,var(--line-2),transparent)}
+.tl:last-child::before{display:none}
+.tl .pt{width:9px;height:9px;border-radius:50%;background:var(--bg-1);border:2px solid var(--cy);margin-top:3px;box-shadow:0 0 8px rgba(37,224,255,.5);z-index:1}
+.tl .bd{font-size:12px}
+.tl .bd .d1{color:var(--txt);display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.tl .bd .d2{color:var(--txt-3);font-size:11px;margin-top:2px}
+/* 空状态 */
+.empty{padding:38px 20px;text-align:center;color:var(--txt-3);font-size:12.5px}
+.empty .ic{font-size:30px;opacity:.35;margin-bottom:8px}
+/* toast */
+.toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{
+  padding:9px 17px;border-radius:9px;font-size:12.5px;font-weight:600;letter-spacing:.2px;
+  background:rgba(11,22,38,.96);border:1px solid var(--line-2);color:var(--txt);
+  box-shadow:0 10px 30px rgba(0,0,0,.5);animation:tin .3s ease both;display:flex;align-items:center;gap:8px;
+}
+.toast.ok{border-color:rgba(34,230,168,.5);color:#a6f5da}
+.toast.err{border-color:rgba(255,95,126,.5);color:#ffc0cd}
+.toast.info{border-color:rgba(37,224,255,.5);color:#b8edff}
+@keyframes tin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+/* 图例 */
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--txt-2);margin-top:8px}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle}
+/* 提示条 */
+.alert{display:flex;align-items:flex-start;gap:9px;padding:10px 13px;border-radius:9px;font-size:12px;margin-bottom:12px;line-height:1.6}
+.alert.or{background:rgba(255,181,71,.09);border:1px solid rgba(255,181,71,.3);color:#ffdca8}
+.alert.cy{background:rgba(37,224,255,.07);border:1px solid rgba(37,224,255,.26);color:#b9e9fb}
+.alert .ai{font-size:14px;line-height:1.3}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:rgba(255,255,255,.03)}
+::-webkit-scrollbar-thumb{background:rgba(66,140,208,.34);border-radius:5px}
+::-webkit-scrollbar-thumb:hover{background:rgba(37,224,255,.5)}
+@media(max-width:1180px){.g-3,.g-4{grid-template-columns:1fr 1fr}.g-21{grid-template-columns:1fr}}
+@media(max-width:820px){
+  .g-2,.g-3,.g-4{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .mini-kpis{grid-template-columns:1fr 1fr}
+  h1{font-size:15px}.sub{display:none}
+  .wrap{padding:12px}
+  .search input{width:150px}.search input:focus{width:180px}
+}
+</style>
+</head>
+<body data-page-node-id="JBTylM1BHR96KtnRw5BKQ4">
+<div data-page-node-id="H85CjAVHKWIJTEnJUaoAsU" class="bg-layer">
+  <div data-page-node-id="gZUfy8YetZ3tTK2jFFlOMo" class="bg-grid"></div>
+  <div data-page-node-id="E0GDxfKUMAR1qirkvYuYs9" class="bg-glow g1"></div><div data-page-node-id="SOghTq0WzJX22gfCPI9xQ1" class="bg-glow g2"></div><div data-page-node-id="Nnsj6fD4FRvk3wT5L5cixG" class="bg-glow g3"></div>
+  <div data-page-node-id="uNJrAhrwdxqm3QKLLKAYfp" class="bg-scan"></div><div data-page-node-id="1wQeZBLvrZkb8aVThG2cVM" class="bg-beam"></div>
+</div>
+
+<div data-page-node-id="0hfYcpzMX8mA2iiUhan36n" class="wrap">
+  <header data-page-node-id="9wOfSsUBPRk0mtVYSzUcqu" class="top">
+    <div data-page-node-id="DohgeT0ld7E5Te2orgwWac" class="brand">
+      <div data-page-node-id="rZHHCdKHvaZJqMn7izZ99V" class="logo"><i data-page-node-id="zHODBMpqg10yxjO1d8qSKz"></i><i data-page-node-id="YmWCjcrRMEf83MeCtueQEy"></i></div>
+      <div data-page-node-id="gKrH6yD5t9Za6K42CGgjkb">
+        <h1 data-page-node-id="chuIyVZIlVNb5LlAsv2ahF"><!--pnid:yLJBcBHML495sCFRjUrscn-->磁芯样件交付看板</h1>
+        <div data-page-node-id="FUeQXIipy3sfJCzaegkr9Q" class="sub"><!--pnid:TqoFvdBPPJYMxY80oByZ9l-->Magnetic Core Sample · Delivery Control Center</div>
+      </div>
+    </div>
+    <div data-page-node-id="Wp8n9QZv21I8KT2IcUua1O" class="top-right">
+      <span data-page-node-id="BOG0pZVpLt9hWgBaIBMYq8" class="clock" id="clock"></span>
+      <button data-page-node-id="HymeYplWOyV9GRQQ5rOKec" class="btn ghost" id="btnImport" title="导入 xlsx 覆盖当前数据"><i data-page-node-id="LdmZkXJOXpZHIYrn40WAYN"><!--pnid:UbQEOyDnMzSdSYXoWPhj2G-->⤒</i><!--pnid:9ywC1lXONi5ipaF11LBth0-->导入 Excel</button>
+      <button data-page-node-id="xZgrLNlEahdbnEzdsVTfSZ" class="btn ghost" id="btnExport" title="导出当前数据为 xlsx"><i data-page-node-id="kcEAV5gugU7kxjMNU3c91v"><!--pnid:HUtvnoseOUfHOkifEVg4uE-->⤓</i><!--pnid:braXbDoQUUwgkDi5etGLH6-->导出</button>
+      <button data-page-node-id="IWLdz1B66FLYHDolTfRGF2" class="btn danger" id="btnReset" title="恢复为源表初始数据"><i data-page-node-id="02Jy1zZodQDw1OajRLLOBC"><!--pnid:ONdq8IkFYFd44inveVHxhu-->⟲</i><!--pnid:lco5k2BXlqWBRNCI7GU6dx-->重置数据</button>
+    </div>
+  </header>
+
+  <nav data-page-node-id="8yrPpP6vPfhklEsQGbNKjA" class="tabs" id="tabs">
+    <div data-page-node-id="9QJYXlyDJjbznIKhx0o2LU" class="tab on" data-v="overview"><!--pnid:x2IoztbdNQ5Q9ZhYkDm8No-->总览 <b data-page-node-id="SF2GmhCUyJzBsBlfX2NiZj" id="cOv"><!--pnid:hTKanjbQPASlA2Xu0ezc4J-->0</b></div>
+    <div data-page-node-id="TnwXrb8Be1B67REPRYC03C" class="tab" data-v="project"><!--pnid:nJyNqqUgUJhnkwG0USKHRM-->项目订单 <b data-page-node-id="3LGCFCIMpxTHS2NrtPxBX3" id="cPr"><!--pnid:TTAFpJAGYTdmcsPXU0u0KF-->0</b></div>
+    <div data-page-node-id="rXLP5JphOtfsFxDKuaYpHd" class="tab" data-v="ship"><!--pnid:BFIAbQF1MYVnjBRsG68fPl-->发货明细 <b data-page-node-id="c9YAMnnwBhoQrwlSOJrOx6" id="cSh"><!--pnid:Y7a4eLFpToxmMHxZcvlO3A-->0</b></div>
+    <div data-page-node-id="l3qmpB5mch8ruGC7ZFPTPh" class="tab" data-v="complaint"><!--pnid:xRe2EC0YJZ0IpLzoPF15LG-->客诉记录 <b data-page-node-id="hsYIRUGaMe2P6Im9uTWqe8" id="cCo"><!--pnid:G3OrC04brMnpiPlLNL76Ru-->0</b></div>
+  </nav>
+
+  <div data-page-node-id="nyhvP27J4lGM6twxOfRkmf" class="filters" id="filters">
+    <span data-page-node-id="6XGcMmvu9xbOOVFjpGU3mp" class="fl-t"><!--pnid:YQWfiJsc6PhUOikbmZfEhZ-->全局筛选</span>
+    <div data-page-node-id="OVbK2wMGqY89goWTxesVmW" id="fcustomer" style="display:flex; gap:6px; flex-wrap:wrap"></div>
+    <div data-page-node-id="kr8OptjsiisSgdDg0BcnWB" id="fstatus" style="display:flex; gap:6px; flex-wrap:wrap"></div>
+    <span data-page-node-id="6PBsuKdwlsLNQVVnZlJNwB" class="sep"></span>
+    <select data-page-node-id="l8VLdCKEM46sYTgm7bvUBP" class="fsel" id="fmonth"><option data-page-node-id="rVYAk7ZlpUmkSQJOUz2gsp" value><!--pnid:Ks5Oef0IEcOVnQCxLULlDt-->全部发货月份</option></select>
+    <select data-page-node-id="16cLTWLJDnmySuqIs3i7JF" class="fsel" id="fdeliver">
+      <option data-page-node-id="DaeZIh8UeEhWb5wqlJuqFP" value><!--pnid:ZTauNwp7HvRGhPEI0BbOEK-->全部交付状态</option>
+      <option data-page-node-id="DiNgDBSoTiAAWe6AXMYBlj" value="done"><!--pnid:ZwdHLMNG97RWUVa9uSv3V2-->已交付完成</option>
+      <option data-page-node-id="s0HgxQWwGAHONa1Pxq9EAw" value="part"><!--pnid:AcWabZFIkA5dUaNBcYE5qG-->部分交付</option>
+      <option data-page-node-id="u8SuegFI4qMghg7E9HTdue" value="none"><!--pnid:xDdAe32HUTDDCfkUlppqJI-->尚未发货</option>
+      <option data-page-node-id="APA5EYsXvp4EPZG6CzQAbq" value="over"><!--pnid:SD0kuvHZyF1go4eXNBhmkN-->超发</option>
+    </select>
+    <span data-page-node-id="cCbdT4FGzkbWvL4sTmkeoW" class="clear" id="btnClear"><!--pnid:kmmRPAHq6kL7aNNXdi3auc-->清除全部筛选</span>
+  </div>
+
+  <div data-page-node-id="BIZNXxbRoLtBSuPfnVk2Q9" id="filterTip"></div>
+
+  <!--pnid:5cQZGCEJoJHBlRdnaoXbc7--><!-- ============ 总览 ============ -->
+  <section data-page-node-id="mkIejmvM3WDSCz1fmp3gh5" class="view on" id="view-overview">
+    <div data-page-node-id="oROVeW9SsVED9i2cHXoToj" class="kpis" id="kpis"></div>
+    <div data-page-node-id="qiiLEnH1qGkN77HUb3TkGg" class="grid g-3">
+      <div data-page-node-id="feUcwRia34MVXnQnHaM4TE" class="card">
+        <div data-page-node-id="zU7gOill75XIrPM4zTCZzp" class="card-h"><span data-page-node-id="GmZ3pqzM6MlaMxzYMshg4I" class="dot"></span><h3 data-page-node-id="60Z7JG0H0kJRBoEFrR6PQs"><!--pnid:nqKftUPwok1NWwujSTrD5J-->月发货统计</h3><span data-page-node-id="72ZkrsX3DBAqgL6RcFASAm" class="r" id="moMeta"><!--pnid:WP5L1IoMVat3XvdO04x8QQ-->按发货月份</span></div>
+        <div data-page-node-id="jqspKog0YIq2zBjDJVo11Y" class="cv-wrap"><canvas data-page-node-id="KW1txr0oR78CHUmSjdruhA" height="230" id="cvTrend"></canvas></div>
+        <div data-page-node-id="7JQla5NM7Wtxq2DnM0Pjcb" class="legend">
+          <span data-page-node-id="oA2yfUgdBSmFNhCJAdnnvB"><i data-page-node-id="Lz6gZX5oMaYb2UkiJq7KeR" style="background:linear-gradient(90deg,#0891b2,#25e0ff)"></i><!--pnid:DRr6didgYrWCRJeRUlxKpS-->发货数量</span>
+          <span data-page-node-id="LXa2LlOJndFAb2FTfzh5UK"><i data-page-node-id="WSbjP8dt7jX8SBlZzzzIEt" style="background:linear-gradient(90deg,#0f9e78,#22e6a8)"></i><!--pnid:ORGu9nNzWEVpV680gkrrbD-->合格数量</span>
+          <span data-page-node-id="pmGwixLyPgeZSOBdTVujdB"><i data-page-node-id="ekMOZCWHUQYdXGkVK5cDeq" style="background:linear-gradient(90deg,#c47c12,#ffb547)"></i><!--pnid:33gDm0Nh1Gf8dGKCU7R9jw-->最新月份</span>
+        </div>
+      </div>
+      <div data-page-node-id="MAEz2CugZgupUpPtxCb5VL" class="card">
+        <div data-page-node-id="nOSQqgF9ch1SYQ3Jl3zGe2" class="card-h"><span data-page-node-id="pEc5rvxB1LnW9o09c7dbdy" class="dot pu"></span><h3 data-page-node-id="x5eouYxHM13Ph1is2jWqtl"><!--pnid:Sx9rWG0eIBSjC8IGD8VE6o-->交付状态构成</h3><span data-page-node-id="voii2c9CrZheEyB5juW5GK" class="r"><!--pnid:HMVNwVTYLMk0fY4buKxpBY-->按订单条目</span></div>
+        <div data-page-node-id="U6Z2yWH4A71ZD0mmjHTtH0" class="cv-wrap"><canvas data-page-node-id="Ma0p5bP9RTPaSCEDP731PP" height="230" id="cvDonut"></canvas></div>
+        <div data-page-node-id="4sVL2Y7rgiuVoTOug04TRD" class="legend" id="lgDonut"></div>
+      </div>
+      <div data-page-node-id="DXHEnw2nWYyHa0pV5UsptV" class="card">
+        <div data-page-node-id="VybL5TCwq8NDKPcHPPqQNl" class="card-h"><span data-page-node-id="IFBQjN6nNzqmkjNqkQBaJT" class="dot gn"></span><h3 data-page-node-id="TExGBzSlk51PTZWrfNwBZt"><!--pnid:OLfa6ceVNvaVJqfmBfx0E0-->客户订单量排名</h3><span data-page-node-id="FPa323eWIKPLwL2QdS7WCS" class="r"><!--pnid:OZPQvBCh8dpUI9cjr7uulY-->Top 8</span></div>
+        <div data-page-node-id="biUVpmtduiZFcxGaB2zHY1" class="bars" id="barCust"></div>
+      </div>
+    </div>
+    <div data-page-node-id="fQAzzU8H0TVQ2QUDYY3sdB" class="grid g-21">
+      <div data-page-node-id="RK0jcZqtHsJGAtffLFx9er" class="col-stack">
+        <div data-page-node-id="PXI9CgMZtkYiEupzBjiNXc" class="card">
+          <div data-page-node-id="qd1wSbLt9hmQPSTAlluBA9" class="card-h"><span data-page-node-id="NW4W4H72ir8jKyZZM3oQoG" class="dot or"></span><h3 data-page-node-id="2D1rTZzfwwQdam4EFPFrhY"><!--pnid:JWouL5HZ8a82o282Z0fTg1-->待交付订单进度（未发 / 未发完）</h3><span data-page-node-id="7BMzVh5BTULIEWD7MzjP69" class="r"><!--pnid:mVWFSGKy84olbfLyntPO3B-->按未发货量降序 · 点击行看明细</span></div>
+          <div data-page-node-id="HT7qUSw7Yks2A95CKFloKm" class="ovbar" id="ovIntegrate"></div>
+          <div data-page-node-id="1aEd2S6JzHgBC8DRVCD5Fp" class="tb-wrap sm">
+            <table data-page-node-id="PWGUfGgIhysHcmmMsA9eOE" id="tbOvOrder">
+              <thead data-page-node-id="d8uEsmCa82UjL2ikWCm0JW"><tr data-page-node-id="RKWPn3QLA8DH5HijD4bsgc">
+                <th data-page-node-id="Rq1uV5HBRjK0Vspe1qYMGV" style="width:34px"><!--pnid:iwmbltH64BKaC597z90ine-->#</th><th data-page-node-id="OyCgh8CAsjlW6BybyaI8Bb"><!--pnid:QzwVaF162vamxddTw4M32x-->项目单号</th><th data-page-node-id="J3xBkScRUXKqtvWVa8aM28"><!--pnid:eYHUY7XTOuwGqEEAs7zjk1-->客户</th>
+                <th data-page-node-id="BRrFx8XKHoUWgt5GMtskP4" class="num"><!--pnid:aJrF7wYdtVQkohFBhItKiW-->订单数量</th>
+                <th data-page-node-id="ZSCxlo8EhW3hI4J5grYpTk" style="width:230px"><!--pnid:oOFhVv0hYYygaMIdhVeqMr-->已发 / 未发（整合）</th>
+                <th data-page-node-id="qWG6GYKB0864Edw6EdRKwr" class="num"><!--pnid:vVZxaRir88one5LencmpoZ-->客诉</th>
+              </tr></thead>
+              <tbody data-page-node-id="83oIn5xEflbUzvwSnY7vc6"></tbody>
+              <tfoot data-page-node-id="SN8TN23ngXkbOBdd8etjVk"></tfoot>
+            </table>
+          </div>
+        </div>
+        <div data-page-node-id="frVxCcZ2yNpsNn3spdfif8" class="card">
+          <div data-page-node-id="FMsQFvBJgupTDNeERqh9yB" class="card-h"><span data-page-node-id="fAzqc5z9qMlmGJN4fOlAfH" class="dot gn"></span><h3 data-page-node-id="IWFboEVTnXKNdZdj8wroTS"><!--pnid:OAxNm2f9oZUgJwbJZCL3rr-->已发货完成汇总</h3><span data-page-node-id="vLRZ863oYyRUH5DFatVFMo" class="r" id="sumMeta"></span>
+            <span data-page-node-id="PzjPrCJ5XvTMYeQxRDU4Hb" class="sum-toggle" id="sumToggle"><!--pnid:M7tHgxOIveIHDLYnkVjtct-->展开明细</span>
+          </div>
+          <div data-page-node-id="p6ZZA7g22rAynPlUTiipIS" class="sum-grid" id="sumCounts"></div>
+          <div data-page-node-id="QGbldEzNWAsQksydByoYP9" id="sumBar"></div>
+          <div data-page-node-id="MORTVFVUOeJTLSNlRLt5PC" id="sumList"></div>
+        </div>
+      </div>
+      <div data-page-node-id="jVlTdz8s1jhAKEA7lCRlTB" class="col-stack">
+        <div data-page-node-id="MjIR7AwvTIjd4G06qifwHz" class="card wk-card">
+          <div data-page-node-id="5AvyZEXbdKucxMnpOil6eG" class="card-h"><span data-page-node-id="qdrJ07SKtyOzWEUusRsWBX" class="dot gn"></span><h3 data-page-node-id="gVr7msrloIK0qcdBdGdL9U"><!--pnid:axpVnBnmfdGHPVC2mmBDvJ-->一周发货趋势</h3><span data-page-node-id="HLsZ7uNLdBXxjDb3cvrhXb" class="r" id="wkMeta"><!--pnid:9sIy49ZWnEkWahzkTHQ0TW-->按自然周</span>
+            <div data-page-node-id="yNHEEYWfqdIbclFqm1Hh2e" class="seg" id="wkSeg"><span data-page-node-id="nDbb8ggm8fTO8WzOzc86nh" class="on" data-m="week"><!--pnid:yr1JCQyPPxCcfLAO8kVdEp-->按周</span><span data-page-node-id="G6eq5U7iiXrmI2VYp4KFYM" data-m="day"><!--pnid:VRDlaNd6NZvGXhMljHEElS-->近 7 天</span></div>
+          </div>
+          <div data-page-node-id="ptRAStrlL1pg4bxl6x3jlu" class="cv-wrap"><canvas data-page-node-id="eZkH4N6U53aOy2ZgDre3ng" height="138" id="cvWeekly"></canvas></div>
+          <div data-page-node-id="D3LugjSmodzyOws4S40119" class="legend">
+            <span data-page-node-id="yQ97Ed7qHtrV1QFJcGy8NM"><i data-page-node-id="cLf24SPOLjfLsX6bhDiwbq" style="background:linear-gradient(90deg,#0891b2,#25e0ff)"></i><!--pnid:UAblXi2ueQJ0iULkrRlgdY-->发货量</span>
+            <span data-page-node-id="mdS8l8PqNPvU0ONC44FiOt"><i data-page-node-id="Fqwn1aZ8AqIWynTxEPtnD0" style="background:linear-gradient(90deg,#c47c12,#ffb547)"></i><!--pnid:ZnBbnkACKSAoUrnyMr9Hzr-->最新周期</span>
+            <span data-page-node-id="rLGh56stn8LnORX3IYCnNa"><i data-page-node-id="rbz3r4P5IqWvkOmqDk3p3V" style="background:linear-gradient(90deg,#0f9e78,#22e6a8)"></i><!--pnid:FEIZsUVgIFpXFvm1OOCUFt-->合格量</span>
+            <span data-page-node-id="CmK1NC963wUpV34ggY2QNd"><i data-page-node-id="M2RaLvzItJaAXQZRyadBGz" style="background:repeating-linear-gradient(90deg,#8fa9c4 0 4px,transparent 4px 8px)"></i><!--pnid:liAWZ306Iq3uxtFh7oLDOi-->均值</span>
+          </div>
+        </div>
+        <div data-page-node-id="TuimNq4OEVVQgaL61YFGQM" class="card">
+          <div data-page-node-id="KD5LmRuXYyxvBanZiowF0Z" class="card-h"><span data-page-node-id="qMqFstshAogdX0gmi7oxVE" class="dot rd"></span><h3 data-page-node-id="7CD4TF9FAn9uOGXx6cvnig"><!--pnid:Du8DVaKvvfjvHK8SIfjMkv-->风险提示</h3><span data-page-node-id="zMFgS4A7KtPhXXVg0xIpHh" class="r"><!--pnid:kfVpHY0buLsxRoIW5ITu8A-->自动识别</span></div>
+          <div data-page-node-id="t31fiEWhwihaJhai7a2yor" id="riskList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!--pnid:g6abeJ1iqHOte6rGMOI3n9--><!-- ============ 项目订单 ============ -->
+  <section data-page-node-id="IKDSNpZvoH3wRT2jNRtXAG" class="view" id="view-project">
+    <div data-page-node-id="wymnpXWTahjofRf9jMdZ1u" class="tools">
+      <div data-page-node-id="HCwGXLZdr8MfZcgGKOaCHg" class="search"><span data-page-node-id="36QWdTJh9rg8WyLrY6MhKO"><!--pnid:qMEVaX1w5UARiAPETXtaCi-->🔍</span><input data-page-node-id="i4GPn2tJUwpC1NtSvolJup" id="qProject" placeholder="搜索项目单号 / 项目名称 / 客户"></div>
+      <button data-page-node-id="jjL1kMtB0mcTSbF7HsHPnU" class="btn solid" id="addProject"><i data-page-node-id="qX2uujaHtthQzysrXtd4Ah"><!--pnid:fL3yTG5ALeCLDvFLqNy2oI-->＋</i><!--pnid:wXIWobQlt85ZZg5DW9kTBV-->新增项目订单</button>
+      <span data-page-node-id="ZndK3toa9vs6CViptqPF1G" class="cnt sp" id="cntProject"></span>
+    </div>
+    <div data-page-node-id="0hWr0PWNnuxihuvOlnF0up" class="card">
+      <div data-page-node-id="iIVSCw4ciHFhletRK1kaed" class="tb-wrap">
+        <table data-page-node-id="PB3tJzkJ55ykwkgGg27iJz" id="tbProject">
+          <thead data-page-node-id="rStTYVrlljq5AzbgybtjUz"><tr data-page-node-id="sz04WNp3CpLpiDb0ltjsYb">
+            <th data-page-node-id="HosXcgWrcf1qfR9WBAYopT" style="width:34px"><!--pnid:8QRgLYoDzsvbQg9sRMAb9v-->#</th><th data-page-node-id="9oS2eAva1gUIQeXGnaahu0"><!--pnid:OrtD6E4RoLp5nkQhnTsAeX-->项目单号</th><th data-page-node-id="EUzzmyViCyxSN6rVXUe6AL"><!--pnid:JAMMv5OVOdlokXlFdO31Ay-->项目名称</th><th data-page-node-id="RVlJlbVYYdpAkgGhplQF10"><!--pnid:TyWd1tQjlS9rs0a1J5WF5k-->订单号</th><th data-page-node-id="Mgx4Aa5TdNQqfU8VHSt3px"><!--pnid:38VlnO6xJNGIE00pklLZrC-->客户</th>
+            <th data-page-node-id="cdVqMk0GVnveviFYGNoitd" class="num"><!--pnid:sqLvIdJ5rGj5YT5cUFlcEV-->订单数量</th><th data-page-node-id="82ms5RaTm9KYAIdKSJX3Kf" class="num"><!--pnid:tXkNaUJQpVWIPrErDhMV4S-->已发货数量</th><th data-page-node-id="AN1lSGEUTuQWwR2FB6w5v9" class="num"><!--pnid:Ve4KCm1LMkaXRSHdJkbnxt-->已合格数量</th>
+            <th data-page-node-id="ggimBT0jerXlkfY4aembw4" class="num"><!--pnid:3wlrgT8SAWI1dZXAwaHCXp-->剩余待发</th><th data-page-node-id="olt3hBbfYZuR2svA37rVCz" style="width:140px"><!--pnid:5J0whAgqtdeC9fVghRZE7H-->交付进度</th>
+            <th data-page-node-id="SkgLnD2sdtl7D4yqD7Zsoq" class="num"><!--pnid:O6OEBv5ax8e3zl78AqhcUF-->发货笔数</th><th data-page-node-id="9JQhJTDYK36Hb2lbHE0wo6" class="num"><!--pnid:0EWlfV0ULnbn4RVwuvFSQr-->客诉</th><th data-page-node-id="ddgQtrfjs4Xfd127CNRYxP" style="width:96px"><!--pnid:12exufnIBWRjBV12JkyW2O-->操作</th>
+          </tr></thead>
+          <tbody data-page-node-id="glvW1xXFd35JkjhiNwKsor"></tbody>
+          <tfoot data-page-node-id="UYOpyB8Z23s5xMVyaFaEKT"></tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!--pnid:tyW7RHPWC8lrscdQkMxnZR--><!-- ============ 发货明细 ============ -->
+  <section data-page-node-id="rdSlwpkWbtX76Yxp1nzN0U" class="view" id="view-ship">
+    <div data-page-node-id="FZ12fbFGbDhK13ow3vxwnD" class="tools">
+      <div data-page-node-id="urcg1bro9lGqcWFQOdj4Gu" class="search"><span data-page-node-id="UrlvF7Pc7NS0Gdr1F0Muok"><!--pnid:pYZEgGuxi5cHYLEjjFNAKC-->🔍</span><input data-page-node-id="aAGjz3v2TeRrCpP825pg54" id="qShip" placeholder="搜索项目单号 / 项目名称 / 客户"></div>
+      <button data-page-node-id="XyTev4OBFZxu0IAWomazkR" class="btn solid" id="addShip"><i data-page-node-id="DmNteGvQpbIklzaRfjmMc9"><!--pnid:XAR09KOduqtBMIRCGAFS4m-->＋</i><!--pnid:1nxsZsTw9wi220udXUY2sR-->新增发货记录</button>
+      <span data-page-node-id="ao3HzL63iGRyVEHrCHwVrq" class="cnt sp" id="cntShip"></span>
+    </div>
+    <div data-page-node-id="tEdaPzxvPuFFkzjmYqIpy7" class="card">
+      <div data-page-node-id="W2g9O92czIzUamWBVEuWnU" class="tb-wrap">
+        <table data-page-node-id="GOsI4lfLQUmcDBwwuG5T6Y" id="tbShip">
+          <thead data-page-node-id="AcwjycrXHm54m2rhTPHiZK"><tr data-page-node-id="TKh1awX9Ih20buX0hPH7wa">
+            <th data-page-node-id="bBRVCTzYBRWPO4qlhbHWBG" style="width:34px"><!--pnid:CcvGFDGSUGMhkw06AcxNpQ-->#</th><th data-page-node-id="mpBcCtt7sZiQhBSBtmkZpo"><!--pnid:A8XKNG6ZA8isGKskljp0qQ-->发货日期</th><th data-page-node-id="3mWikO96QcDezXGURlna8e"><!--pnid:amWt5tZITVnJCMvIwIivis-->项目单号</th><th data-page-node-id="J7yyNmu7otprQDgkXGDema"><!--pnid:5OGIY0Q1scYuzBw4P4rfjY-->项目名称</th><th data-page-node-id="kM81VMb94SCSRifQpYyx4J"><!--pnid:pcMt0VnONkH6jOYLXGQok1-->客户</th>
+            <th data-page-node-id="hmd3ezbjn2rcMYhrhW9HPT" class="num"><!--pnid:hmDid1tSVH16pbk8BHiuPQ-->发货数量</th><th data-page-node-id="4mugIU9UAuuQafAl2RXzUa" class="num"><!--pnid:2ShTXxHV3a6wl5n6KnRkWc-->合格数量</th><th data-page-node-id="BJshNW3TnbxoydNmU7Suvv" class="num"><!--pnid:Ybhtoqx7vpnkEFzVEAWKux-->合格率</th>
+            <th data-page-node-id="6B8mKeVktQvMb5lKQvJ13d"><!--pnid:73xURwmEiYH4hM59q30XzZ-->状态</th><th data-page-node-id="EoNpnl2pngH1gCkZNukbej"><!--pnid:ZD72Cs6WBWSCZVTlydgaSN-->类型</th><th data-page-node-id="83VpM7JNHuSYcWIG0KROtV"><!--pnid:Ua3L8QcCmKvyYcfbFp5BPU-->备注</th><th data-page-node-id="bHhvshq1wYHPZNMpU8pPcj" style="width:96px"><!--pnid:nG7P9nkVc1KyGb7goug5yD-->操作</th>
+          </tr></thead>
+          <tbody data-page-node-id="qraHWWzvOTIC26FPjGlMfw"></tbody>
+          <tfoot data-page-node-id="4UhbhlVAJfC22qGKcTsZvE"></tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!--pnid:ADbpna38srDSeuJk4Ck66V--><!-- ============ 客诉记录 ============ -->
+  <section data-page-node-id="x9izoamP8ZxbTH6jKbpUEm" class="view" id="view-complaint">
+    <div data-page-node-id="l3AFrTcVcUeDF7FvGczTmC" class="tools">
+      <div data-page-node-id="fy2nOP0Og60oNVM3z6gZJt" class="search"><span data-page-node-id="5OPlnJAANIrUHMXW0YSUy3"><!--pnid:MkcuU1TgMrqYZ48XDDlr5m-->🔍</span><input data-page-node-id="Jy5uAn0dK2ORv0EuYHkf8y" id="qComplaint" placeholder="搜索项目单号 / 项目名称 / 问题描述"></div>
+      <button data-page-node-id="WyTXgCuYLLqpFYNZO8vrpI" class="btn solid" id="addComplaint"><i data-page-node-id="Yb3lDKCpy6SA3hvALJXYgg"><!--pnid:RePzmu9gk6ZZoMK7J4lOV0-->＋</i><!--pnid:4AlQze29OQ9JCHrinS4Pk1-->新增客诉记录</button>
+      <span data-page-node-id="2gUrrq7jQfwWFirECrM7fu" class="cnt sp" id="cntComplaint"></span>
+    </div>
+    <div data-page-node-id="UeiAf20whkvFNuCXxKokAS" class="grid g-2" id="complaintStats"></div>
+    <div data-page-node-id="zPwvF3ksF0SElOnEX0GqTE" class="card">
+      <div data-page-node-id="Cw3EJjayOBXk2BuxMR8nz5" class="tb-wrap">
+        <table data-page-node-id="vhYLRtUjImJt1ymK0RDv1t" id="tbComplaint">
+          <thead data-page-node-id="msk6t3FC1bp96uWRziQtJs"><tr data-page-node-id="Js3CTPW9EOeS1vXHSHUolA">
+            <th data-page-node-id="uL71sGCp7o3kj5wzR8ABVo" style="width:34px"><!--pnid:1Hi4vUXTBWJP5A6s2BOvYd-->#</th><th data-page-node-id="dSIVJkNXUo8ap2J2RJOImu"><!--pnid:qM2KCqG1fl4r9AKkoWNtlm-->日期</th><th data-page-node-id="YDq07d7x5Tf6q6Yat6reio"><!--pnid:dB9SSYs6dLams1VGdOsCp9-->项目单号</th><th data-page-node-id="o8cy4wkN19XOPT4Y5xkbuU"><!--pnid:QhmGDjf4sIWr9HaGffpbqi-->项目名称</th>
+            <th data-page-node-id="rE574YlHDDaV0IBvengYV5"><!--pnid:LrgWhm1AUP2k15EKri4Vee-->问题描述</th><th data-page-node-id="bXX64ThtpkzhHeClS9kz8z"><!--pnid:wBA3oIB4iPM2itQqhXZuhK-->严重度</th><th data-page-node-id="Y7tjwSUlnAkjPYnhExGkNK"><!--pnid:hWdquNciPISuBcT6wmrUhh-->状态</th><th data-page-node-id="HXkGAyqNgtWYU0edGlCCYO"><!--pnid:imAaDURxtB3g4QpAV1czjx-->负责人</th><th data-page-node-id="vigrF09K70jujivnN329y7"><!--pnid:RoJiJsXSUC24p0BNdgw8vx-->备注</th><th data-page-node-id="8f3JohwignMWj8PNLZ0Tgb" style="width:96px"><!--pnid:7A0dYP83pTsXUD1wmCLQdy-->操作</th>
+          </tr></thead>
+          <tbody data-page-node-id="jkwQmO2Drak3TXQUk8RfBy"></tbody>
+          <tfoot data-page-node-id="6VzgJQOWZWAYEliRnh52vC"></tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!--pnid:So8ZEQgrHl7m9l5KzP9f1Z--><!-- 抽屉 -->
+<div data-page-node-id="i9sbBN42FY4BJPiYJvnngs" class="mask" id="maskDrawer" style="background:rgba(2,6,14,.5)"></div>
+<aside data-page-node-id="VL0TJDNx3lBfipCHyvqdyK" class="drawer" id="drawer">
+  <div data-page-node-id="8IygpaLkS2wnEojPVToid2" class="drawer-h">
+    <div data-page-node-id="IKBAOy3qBJ1PC7LiHODlH3" class="t1" id="dwTitle"><!--pnid:IDaYi8g7EJBOSKahjSDr5Z-->—</div>
+    <div data-page-node-id="937fhQfrcRwXWiCerd0ktd" class="t2" id="dwMeta"></div>
+    <span data-page-node-id="QajETYSbVJFLazeTC8pVLo" class="cls" id="dwClose"><!--pnid:PWuUG0Dvx8KtZ4ggQh2CPE-->×</span>
+  </div>
+  <div data-page-node-id="PJO8AwIHf81NOSDZfyZZzV" class="drawer-b" id="dwBody"></div>
+</aside>
+
+<!--pnid:DNap694z5Get1XPWTYSqTK--><!-- 编辑弹窗 -->
+<div data-page-node-id="RFSE0rxO0IhhmBRRewGNqT" class="mask" id="maskEdit">
+  <div data-page-node-id="1Tw5cCj45thH0uWsm3SUew" class="dlg">
+    <div data-page-node-id="6j6LDEnHEk54F65SjSG7wf" class="dlg-h"><h3 data-page-node-id="RUIRrzFLoKlLVpXBWZfPPF" id="edTitle"><!--pnid:ksRMHVHGKLeRIIE5h09QMH-->编辑</h3><span data-page-node-id="999y7Qbb3RkfgOwBxrzUif" class="cls" id="edClose"><!--pnid:i6xH60BsDp2wbnkmn2LZGX-->×</span></div>
+    <div data-page-node-id="SnVsJSqTE8HKM1PWQh8QLy" class="dlg-b"><div data-page-node-id="YudrtxesH36UguCGv4Uqgy" class="form-grid" id="edForm"></div></div>
+    <div data-page-node-id="1H3nzFXDll5A2rDMTwFJNG" class="dlg-f">
+      <button data-page-node-id="W9RBGZaHCX4BJAwn9TcTao" class="btn ghost" id="edCancel"><!--pnid:IQkHPqXhx7TIuA5x3kRknz-->取消</button>
+      <button data-page-node-id="tHgveDJFcDbUyVPF5GDb1e" class="btn solid" id="edSave"><!--pnid:dpIt5DEFZ1Y4OqUweDoev5-->保存</button>
+    </div>
+  </div>
+</div>
+
+<!--pnid:Z1iNUZruNxl7FMUqpNWiiT--><!-- 导入弹窗 -->
+<div data-page-node-id="4jBJrbBU9vm23NPPupiCAp" class="mask" id="maskImport">
+  <div data-page-node-id="VoWVWdEAqog84VJzS4mfGF" class="dlg" style="max-width:660px">
+    <div data-page-node-id="axmfmZgphWSjc7rDwBXyGw" class="dlg-h"><h3 data-page-node-id="GfvwcBv5foW20loLFFezRA"><!--pnid:ysR7nc5hpwDDNhtWxJjjUN-->导入 Excel 数据</h3><span data-page-node-id="Af9efSSMIZt5H4QGvbuJ4M" class="cls" id="imClose"><!--pnid:0g0ySogkWgjiPjaE0jZBuu-->×</span></div>
+    <div data-page-node-id="kaC5eo3msfJFqS3GMLPpzb" class="dlg-b">
+      <div data-page-node-id="yym4bWQwkxWNbRTAMS185W" class="alert cy"><span data-page-node-id="cQ291eK1WVp8V48PLeXx71" class="ai"><!--pnid:TklN1a4kCGXcnOPst9fmxq-->ⓘ</span><div data-page-node-id="iVNva1quGg5s7L1te91uOl"><!--pnid:1sOAB1n7bB2JBMXhWAZVW8-->
+        识别名称含「发货」「明细」的工作表 → 发货明细；含「订单」「项目」→ 项目订单；含「客诉」「投诉」→ 客诉记录。<br data-page-node-id="J56cLJwmpfL3E7JtiTzDAE"><!--pnid:ElOiT5PcS1JpwHePYXmylm-->
+        备份文件（如 <span data-page-node-id="1MZ4UEZDXrqWrb2RLRq3Oo" class="mono"><!--pnid:L7kKPQtDcYhjuic0Um2mzS-->磁芯样件_项目订单_2026-10-10.xlsx</span><!--pnid:G8ADCUv9jiE7IWwwGoeGUo-->）可直接导入，含单表亦可。
+      </div></div>
+      <div data-page-node-id="RKANcz5jBvU6e2Iv3Fs9et" class="fg"><label data-page-node-id="m0UpneBEY95IBtFd4rOgLj"><!--pnid:aTQvWQvXiXTKOc6PCO7LUx-->选择一个或多个 .xlsx / .xls / .csv 文件</label>
+        <input data-page-node-id="AMSGw9Tt84nLMPa11qiERD" accept=".xlsx,.xls,.csv" id="imFile" multiple type="file">
+      </div>
+      <div data-page-node-id="BTp7AdNycWDaT2QkYFwdNX" id="imPreview" style="margin-top:12px"></div>
+    </div>
+    <div data-page-node-id="ERpm4NDIivlIUtJHno0qJN" class="dlg-f">
+      <button data-page-node-id="TaK5HiIn5IQfokGJ64zJwb" class="btn ghost" id="imCancel"><!--pnid:WHQXaae7glr3nYo9IyuEPh-->取消</button>
+      <button data-page-node-id="1cUx2VATawM3NAXCcy9Z2z" class="btn solid" disabled id="imConfirm"><!--pnid:JqqeAtjdURKJJBa9Ir4MxD-->确认覆盖导入</button>
+    </div>
+  </div>
+</div>
+
+<!--pnid:vH3tHpMtNftnvCz7iA8Msf--><!-- 重置确认 -->
+<div data-page-node-id="mAJBn4yXk1EYS6Bt2PWUD5" class="mask" id="maskReset">
+  <div data-page-node-id="uVqfb6xTvDZAS7i2DPlZxb" class="dlg" style="max-width:420px">
+    <div data-page-node-id="7TrRzfxSPBvfhbmHnIjX8t" class="dlg-h"><h3 data-page-node-id="Tz9VYHY4oB6rXF62ncUiGs"><!--pnid:7EG29XmtI4vFwHtIH8tSKo-->确认重置数据</h3><span data-page-node-id="dgBffrBVZ8jTP2A0kBfuK7" class="cls" id="rsClose"><!--pnid:h7HGWn06UcSwctvTcaJjxJ-->×</span></div>
+    <div data-page-node-id="HHlVstgd6ELrT9NKCR4jJf" class="dlg-b"><div data-page-node-id="jzisu6BC990QnaUcnTL6SA" class="alert or"><span data-page-node-id="pde0s3UeEyoGUGrCmRncfi" class="ai"><!--pnid:JoHmMF2TpJJKJCQvkKsjaq-->⚠</span><div data-page-node-id="oaJo3BDmokultA2fUXHdyT"><!--pnid:zGQ9bLoaCHO1m8T2z4k02C-->
+      将丢弃当前所有新增与修改，恢复为源表「磁芯样件_发货明细_2026-10-10.xlsx」的 31 条订单 / 31 条发货 / 1 条客诉。此操作不可撤销。
+    </div></div></div>
+    <div data-page-node-id="gdtxRhySKUpPbZGxESkQKf" class="dlg-f"><button data-page-node-id="xGZUuJcNqwoAJKWnwvtbAj" class="btn ghost" id="rsCancel"><!--pnid:DcHtxVfo2l0IYoaR8S3muR-->取消</button><button data-page-node-id="2WljsjE4huERrE09l6co2g" class="btn danger" id="rsOk"><!--pnid:F1JW28EhoAygCkEgblQ48i-->确认重置</button></div>
+  </div>
+</div>
+
+<div data-page-node-id="3RqQcDfCZPnmklyGjqNUqH" class="toasts" id="toasts"></div>
+
+<script data-page-node-id="T9DMtZnSyLMQBtlUm3Q4gJ" data-pnid-children="CKKWduDPvpFNcmPvSOJuNC">
+/* ============================================================
+   磁芯样件交付看板
+   数据源：磁芯样件_发货明细_2026-10-10.xlsx（三个工作表）
+   关系：项目订单(键=项目单号) ←1:N→ 发货明细(外键 pid)；客诉记录(外键 pid)
+   ============================================================ */
+
+/* ---------- 1. 源数据 ---------- */
+const SEED = {
+  project:[
+    {pid:'日精EV0116',name:'日精EV0116',order:'',qty:1800,sent:1800,ok:1800},
+    {pid:'广州稳颖236.5*201*30 跑道',name:'广州稳颖236.5*201*30 跑道',order:'',qty:20,sent:20,ok:20},
+    {pid:'七星HD-P-800V裸芯',name:'七星HD-P-800V裸芯',order:'',qty:10,sent:10,ok:10},
+    {pid:'上汽NP52-第1单',name:'上汽NP52',order:'第1单',qty:70,sent:70,ok:70},
+    {pid:'日精L503-第1单',name:'日精L503',order:'第1单',qty:65,sent:65,ok:65},
+    {pid:'日精NE253521',name:'日精NE253521',order:'',qty:60,sent:60,ok:60},
+    {pid:'英大科特 NE1315825喷涂-1',name:'英大科特 NE1315825喷涂',order:'1',qty:2,sent:4,ok:4},
+    {pid:'七星ID4(NE824118)',name:'七星ID4(NE824118)',order:'',qty:20,sent:20,ok:20},
+    {pid:'日精L503-第2单',name:'日精L503',order:'第2单',qty:25,sent:25,ok:25},
+    {pid:'英大科特 NE1315825喷涂-第2单',name:'英大科特 NE1315825喷涂',order:'第2单',qty:4,sent:4,ok:4},
+    {pid:'日精L503-第3单',name:'日精L503',order:'第3单',qty:50,sent:46,ok:46},
+    {pid:'峰成FT46X16X7铁氧体',name:'峰成FT46X16X7铁氧体',order:'',qty:16,sent:16,ok:16},
+    {pid:'上汽NP52-第2单',name:'上汽NP52',order:'第2单',qty:110,sent:110,ok:110},
+    {pid:'ALF-V20P13P（12-20-8）共模绕线',name:'ALF-V20P13P（12-20-8）共模绕线',order:'',qty:200,sent:200,ok:200},
+    {pid:'七星NE443806 磁芯',name:'七星NE443806 磁芯',order:'',qty:4,sent:4,ok:4},
+    {pid:'七星NE4438011 （FT46X40X11）铁氧体',name:'七星NE4438011 （FT46X40X11）铁氧体',order:'',qty:4,sent:4,ok:4},
+    {pid:'HD-P800(裸芯)',name:'HD-P800(裸芯)',order:'',qty:15,sent:15,ok:15},
+    {pid:'130-160-30轨道',name:'北京130-160-30轨道',order:'',qty:8,sent:8,ok:8},
+    {pid:'七星NE372817',name:'七星NE372817',order:'',qty:5,sent:0,ok:0},
+    {pid:'七星NE372817-B',name:'七星NE372817-B',order:'',qty:5,sent:0,ok:0},
+    {pid:'碧彩30X44X25裸芯',name:'碧彩30X44X25裸芯',order:'',qty:2,sent:2,ok:2},
+    {pid:'北京T55x36x25共模电感',name:'北京T55x36x25共模电感',order:'',qty:2,sent:2,ok:2},
+    {pid:'104/132*20轨道(N0132104-IRC350-01)',name:'104/132*20轨道(N0132104-IRC350-01)',order:'',qty:202,sent:0,ok:0},
+    {pid:'海美NE602745',name:'海美NE602745',order:'',qty:18,sent:0,ok:0},
+    {pid:'烟台杰瑞130/160*25',name:'烟台杰瑞130/160*25',order:'',qty:10,sent:10,ok:10},
+    {pid:'日精L503-第4单',name:'日精L503',order:'第4单',qty:180,sent:0,ok:0},
+    {pid:'智绿NE666110',name:'智绿NE666110',order:'第一单',qty:150,sent:0,ok:0},
+    {pid:'北京 38-63-25共模电感',name:'北京 38-63-25共模电感',order:'',qty:2,sent:0,ok:0},
+    {pid:'华中信25/32*10',name:'华中信25/32*10',order:'',qty:20,sent:20,ok:20},
+    {pid:'北京25/40*15',name:'北京25/40*15',order:'',qty:100,sent:0,ok:0},
+    {pid:'日精LYON',name:'日精LYON',order:'',qty:2,sent:2,ok:2}
+  ],
+  ship:[
+    {pid:'日精EV0116',qty:1800,ok:1800,date:'2026-08-21',status:'已发货',type:'正常',note:''},
+    {pid:'广州稳颖236.5*201*30 跑道',qty:20,ok:20,date:'2026-08-21',status:'已发货',type:'正常',note:''},
+    {pid:'七星HD-P-800V裸芯',qty:10,ok:10,date:'2026-08-19',status:'已发货',type:'正常',note:''},
+    {pid:'英大科特 NE1315825喷涂-1',qty:4,ok:4,date:'2026-08-24',status:'已签收',type:'正常',note:'超发：订单2只，实发4只'},
+    {pid:'日精L503-第1单',qty:15,ok:15,date:'2026-08-25',status:'已发货',type:'正常',note:''},
+    {pid:'日精NE253521',qty:5,ok:5,date:'2026-08-27',status:'已发货',type:'正常',note:''},
+    {pid:'日精L503-第1单',qty:14,ok:14,date:'2026-08-27',status:'已发货',type:'正常',note:''},
+    {pid:'七星ID4(NE824118)',qty:20,ok:20,date:'2026-08-27',status:'已发货',type:'正常',note:''},
+    {pid:'日精L503-第1单',qty:28,ok:28,date:'2026-08-29',status:'已发货',type:'正常',note:''},
+    {pid:'日精NE253521',qty:36,ok:36,date:'2026-08-29',status:'已发货',type:'正常',note:''},
+    {pid:'日精NE253521',qty:19,ok:19,date:'2026-09-01',status:'已发货',type:'正常',note:''},
+    {pid:'英大科特 NE1315825喷涂-第2单',qty:4,ok:4,date:'2026-09-01',status:'已发货',type:'正常',note:''},
+    {pid:'日精L503-第1单',qty:8,ok:8,date:'2026-09-04',status:'已发货',type:'正常',note:''},
+    {pid:'日精L503-第2单',qty:25,ok:25,date:'2026-09-04',status:'已发货',type:'正常',note:''},
+    {pid:'上汽NP52-第1单',qty:70,ok:70,date:'2026-09-10',status:'已发货',type:'正常',note:''},
+    {pid:'峰成FT46X16X7铁氧体',qty:16,ok:16,date:'2026-09-10',status:'已发货',type:'正常',note:''},
+    {pid:'HD-P800(裸芯)',qty:15,ok:15,date:'2026-09-14',status:'已发货',type:'正常',note:''},
+    {pid:'ALF-V20P13P（12-20-8）共模绕线',qty:70,ok:70,date:'2026-09-12',status:'已发货',type:'正常',note:''},
+    {pid:'ALF-V20P13P（12-20-8）共模绕线',qty:130,ok:130,date:'2026-09-18',status:'已发货',type:'正常',note:''},
+    {pid:'七星NE443806 磁芯',qty:2,ok:2,date:'2026-09-18',status:'已发货',type:'正常',note:''},
+    {pid:'七星NE4438011 （FT46X40X11）铁氧体',qty:2,ok:2,date:'2026-09-18',status:'已发货',type:'正常',note:''},
+    {pid:'北京T55x36x25共模电感',qty:2,ok:2,date:'2026-09-22',status:'已发货',type:'正常',note:''},
+    {pid:'130-160-30轨道',qty:8,ok:8,date:'2026-09-22',status:'已发货',type:'正常',note:''},
+    {pid:'碧彩30X44X25裸芯',qty:2,ok:2,date:'2026-09-22',status:'已发货',type:'正常',note:''},
+    {pid:'七星NE443806 磁芯',qty:2,ok:2,date:'2026-09-22',status:'已发货',type:'正常',note:''},
+    {pid:'七星NE4438011 （FT46X40X11）铁氧体',qty:2,ok:2,date:'2026-09-22',status:'已发货',type:'正常',note:''},
+    {pid:'日精L503-第3单',qty:46,ok:46,date:'2026-09-24',status:'已发货',type:'正常',note:''},
+    {pid:'华中信25/32*10',qty:20,ok:20,date:'2026-09-29',status:'已发货',type:'正常',note:''},
+    {pid:'日精LYON',qty:2,ok:2,date:'2026-09-29',status:'已发货',type:'正常',note:''},
+    {pid:'烟台杰瑞130/160*25',qty:10,ok:10,date:'2026-09-30',status:'已发货',type:'正常',note:''},
+    {pid:'上汽NP52-第2单',qty:110,ok:110,date:'2026-10-09',status:'已发货',type:'正常',note:''}
+  ],
+  complaint:[
+    {date:'2026-08-28',pid:'日精L503-第1单',name:'日精L503',desc:'磁芯性能偏下限',level:'一般',status:'已关闭',owner:'',note:''}
+  ]
+};
+
+/* 客户识别：源表无「客户」列，按项目名（优先）/项目单号前缀策略派生 */
+const CUSTOMER_RULES = [
+  ['日精',['日精']], ['七星',['七星']], ['上汽',['上汽']], ['英大科特',['英大科特']],
+  ['北京',['北京','130-160-30','130/160']], ['广州稳颖',['广州稳颖']], ['峰成',['峰成']],
+  ['烟台杰瑞',['烟台杰瑞','HD-P800']], ['ALF',['ALF']], ['海美',['海美']],
+  ['智绿',['智绿']], ['华中信',['华中信']], ['碧彩',['碧彩']],
+  ['104/132*20轨道',['104/132','N0132104']]
+];
+function deriveCustomer(name, pid){
+  const cands = [name, pid].filter(Boolean);
+  for(const src of cands){
+    for(const [cust,pres] of CUSTOMER_RULES){
+      for(const p of pres){
+        if(src.startsWith(p) || src.includes(p)) return cust;
+      }
+    }
+  }
+  for(const src of cands){
+    const m = src.match(/^([\u4e00-\u9fa5]{2,4})/);
+    if(m) return m[1];
+  }
+  return '其他';
+}
+
+/* 月份 */
+function monthOf(d){ return (d||'').slice(0,7); }
+
+/* ---------- 2. 数据库 ---------- */
+const LS_KEY = 'magcore_delivery_board_v1';
+let DB = null;
+const UID = () => 'sid_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function buildDB(){
+  const p = clone(SEED.project).map((r,i)=>({...r,id:'pid_'+i, customer:deriveCustomer(r.name, r.pid)}));
+  const s = clone(SEED.ship).map((r,i)=>({...r,id:'sid_'+i}));
+  const c = clone(SEED.complaint).map((r,i)=>({...r,id:'cid_'+i}));
+  return {project:p, ship:s, complaint:c, ver:1};
+}
+function loadDB(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){ const d = JSON.parse(raw); if(d && d.project && d.ship && d.complaint) return d; }
+  }catch(e){}
+  return buildDB();
+}
+function saveDB(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(DB)); }catch(e){}
+}
+
+/* ---------- 3. 筛选状态 ---------- */
+let FILTER = { customer:null, status:null, month:null, deliver:null };
+let VIEW = 'overview';
+let SELECTED = null;   // 抽屉选中的项目单号
+
+function isFiltering(){ return !!(FILTER.customer||FILTER.status||FILTER.month||FILTER.deliver); }
+
+/* 交付状态：sent=已发数量, qty=订单数量；支持传入对象（自动取 sent/qty 字段） */
+function deliverState(sent, qty){
+  if(sent && typeof sent === 'object'){
+    const o = sent;
+    sent = (o.sent!=null ? o.sent : o.shipQty);
+    qty  = (o.qty!=null ? o.qty : o.orderQty);
+  }
+  sent = +sent||0; qty = +qty||0;
+  if(qty<=0) return sent>0 ? 'over' : 'none';
+  if(sent > qty) return 'over';
+  if(sent <= 0) return 'none';
+  if(sent < qty) return 'part';
+  return 'done';
+}
+/* 兼容旧调用：deliverStateOf(项目行对象) */
+function deliverStateOf(o, shipQty){
+  const s = (shipQty!=null) ? shipQty : shipQtyOf(o.pid);
+  return deliverState(s, o.qty);
+}
+const DELIVER_LABEL = {done:'已交付', part:'部分交付', none:'尚未发货', over:'超发'};
+const DELIVER_TAG   = {done:'t-gn', part:'t-or', none:'t-gy', over:'t-rd'};
+
+/* 按筛选器取数据；筛选维度按各自表字段判定，项目筛选通过 pid 向下传导 */
+function scoped(){
+  const P = DB.project.filter(p=>{
+    if(FILTER.customer && p.customer!==FILTER.customer) return false;
+    if(FILTER.deliver && deliverStateOf(p)!==FILTER.deliver) return false;
+    return true;
+  });
+  const pids = new Set(P.map(p=>p.pid));
+  const S = DB.ship.filter(s=>{
+    if(!pids.has(s.pid)) return false;
+    if(FILTER.status && s.status!==FILTER.status) return false;
+    if(FILTER.month && monthOf(s.date)!==FILTER.month) return false;
+    return true;
+  });
+  const C = DB.complaint.filter(c=>{
+    if(!pids.has(c.pid)) return false;
+    return true;
+  });
+  // 若按发货维度筛选（月份/状态），订单列表同步收窄为「有匹配发货记录」的订单
+  let Pf = P;
+  if(FILTER.month || FILTER.status){
+    const keep = new Set(S.map(s=>s.pid));
+    Pf = P.filter(p=>keep.has(p.pid));
+  }
+  return {projects:Pf, ship:S, complaints:C};
+}
+
+/* 项目聚合：shipSet 为候选发货集合（可能是筛选后的全量），必须再按 pid 过滤 */
+function projAgg(pid, shipSet){
+  const pool = shipSet || DB.ship;
+  const src = pool.filter(s=>s.pid===pid);
+  let qty=0, ok=0, n=0, first=null, last=null;
+  src.forEach(s=>{
+    qty += (+s.qty||0); ok += (+s.ok||0); n++;
+    if(!first || s.date<first) first = s.date;
+    if(!last  || s.date>last ) last  = s.date;
+  });
+  const p = DB.project.find(x=>x.pid===pid);
+  const complaints = (DB.complaint.filter(c=>c.pid===pid)).length;
+  const openComplaints = (DB.complaint.filter(c=>c.pid===pid && c.status!=='已关闭')).length;
+  return {
+    pid, qty, ok, n, first, last,
+    orderQty: p? (+p.qty||0) : 0,
+    remain: p? Math.max(0,(+p.qty||0)-qty) : 0,
+    progress: p && +p.qty ? qty/(+p.qty) : 0,
+    complaints, openComplaints, project:p
+  };
+}
+
+/* 总计 */
+function totals(sc){
+  const pids = new Set(sc.projects.map(p=>p.pid));
+  let orderQty=0, sent=0, ok=0;
+  sc.projects.forEach(p=>{ orderQty += (+p.qty||0); });
+  sc.ship.forEach(s=>{ if(pids.has(s.pid)){ sent += (+s.qty||0); ok += (+s.ok||0); } });
+  const remain = sc.projects.reduce((a,p)=>a+Math.max(0,(+p.qty||0)-shipQtyOf(p.pid,sc.ship)),0);
+  return {
+    orderQty, sent, ok, remain,
+    progress: orderQty? sent/orderQty : 0,
+    passRate: sent? ok/sent : 0,
+    nOrder: sc.projects.length,
+    nShip: sc.ship.length,
+    nComplaint: sc.complaints.length,
+    openComplaint: sc.complaints.filter(c=>c.status!=='已关闭').length
+  };
+}
+function shipQtyOf(pid, shipSet){
+  const src = shipSet || DB.ship;
+  return src.filter(s=>s.pid===pid).reduce((a,s)=>a+(+s.qty||0),0);
+}
+
+/* ---------- 4. 工具 ---------- */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const nf = n => (n==null||isNaN(n)) ? '—' : Number(n).toLocaleString('zh-CN');
+const pct = v => (v==null||isNaN(v)) ? '—' : (v*100).toFixed(v*100%1===0?0:1)+'%';
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function toast(msg, type){
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type||'info');
+  el.textContent = msg;
+  $('#toasts').appendChild(el);
+  setTimeout(()=>{ el.style.transition='.3s'; el.style.opacity='0'; el.style.transform='translateY(8px)';
+    setTimeout(()=>el.remove(),300); }, 2400);
+}
+/* 自定义确认框（替代原生 confirm，风格统一且无头环境可用） */
+function askConfirm(msg, title){
+  return new Promise(resolve=>{
+    const mask = document.createElement('div');
+    mask.className = 'mask on';
+    mask.style.zIndex = 300;
+    mask.innerHTML = `<div class="dlg" style="max-width:440px">
+      <div class="dlg-h"><h3>${esc(title||'操作确认')}</h3></div>
+      <div class="dlg-b"><div class="alert or"><span class="ai">⚠</span><div>${esc(msg).replace(/\n/g,'<br/>')}</div></div></div>
+      <div class="dlg-f"><button class="btn ghost" data-r="0">取消</button><button class="btn danger" data-r="1">确认删除</button></div>
+    </div>`;
+    const done = v => { mask.remove(); resolve(v); };
+    mask.querySelectorAll('button[data-r]').forEach(b=> b.onclick = ()=>done(b.dataset.r==='1'));
+    mask.onclick = e=>{ if(e.target===mask) done(false); };
+    document.body.appendChild(mask);
+  });
+}
+
+/* ---------- 5. Canvas 图表 ---------- */
+function hidpi(cv, h){
+  const dpr = window.devicePixelRatio||1;
+  const w = cv.clientWidth || cv.parentElement.clientWidth || 400;
+  cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  cv.style.height = h+'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx, w, h};
+}
+/* 折线/面积趋势 */
+/* 月发货统计：按发货月份分组，发货量 / 合格量 并列柱 */
+function drawMonthly(){
+  const cv = $('#cvTrend'); if(!cv) return;
+  const sc = scoped();
+  const byK = {};
+  sc.ship.forEach(s=>{
+    const k = monthOf(s.date); if(!k) return;
+    byK[k] = byK[k] || {qty:0, ok:0, n:0};
+    byK[k].qty += (+s.qty||0); byK[k].ok += (+s.ok||0); byK[k].n++;
+  });
+  const keys = Object.keys(byK).sort();
+  const sumQ = keys.reduce((a,k)=>a+byK[k].qty, 0);
+  const sumO = keys.reduce((a,k)=>a+byK[k].ok, 0);
+  const sumN = keys.reduce((a,k)=>a+byK[k].n, 0);
+  const meta = $('#moMeta');
+  if(meta) meta.textContent = keys.length
+    ? `按发货月份 · ${keys.length} 个月 · 合计 ${nf(sumQ)} 只 / ${sumN} 笔`
+    : '按发货月份';
+
+  const {ctx, w, h} = hidpi(cv, 230);
+  ctx.clearRect(0,0,w,h);
+  const pad = {l:52,r:14,t:26,b:34};
+  const cw = w-pad.l-pad.r, ch = h-pad.t-pad.b;
+  if(!keys.length){ ctx.fillStyle='#5b7695'; ctx.font='12px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('当前筛选条件下无发货记录', w/2, h/2); return; }
+  const maxV = Math.max(1, ...keys.map(k=>Math.max(byK[k].qty, byK[k].ok)));
+  const yOf = v => pad.t + ch*(1 - v/maxV);
+  const step = cw/keys.length;
+  const gw = Math.max(12, Math.min(step*0.5, 104));    // 一组柱总宽
+  const bw = Math.max(4, gw/2 - 2);
+  const xc = i => pad.l + step*i + step/2;
+  // 网格 + Y 轴
+  ctx.strokeStyle='rgba(66,140,208,.16)'; ctx.lineWidth=1;
+  ctx.font='10px "Segoe UI",sans-serif'; ctx.fillStyle='#5b7695'; ctx.textAlign='right';
+  for(let i=0;i<=4;i++){
+    const v = maxV*i/4, y = yOf(v);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    ctx.fillText(nf(Math.round(v)), pad.l-7, y+3);
+  }
+  // 月均参考线
+  const avg = sumQ/keys.length;
+  if(avg>0){
+    const y = yOf(avg);
+    ctx.save(); ctx.setLineDash([5,5]); ctx.strokeStyle='rgba(143,169,196,.5)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke(); ctx.restore();
+    ctx.fillStyle='#8fa9c4'; ctx.font='9.5px "Segoe UI",sans-serif'; ctx.textAlign='left';
+    ctx.fillText(`月均 ${nf(Math.round(avg))}`, pad.l+4, y-4);
+  }
+  // 分组柱 + 数值 + 月份刻度
+  keys.forEach((k,i)=>{
+    const isLast = i===keys.length-1;
+    const d = byK[k];
+    const x0 = xc(i) - gw/2;
+    // 发货量
+    const yq = yOf(d.qty), hq = Math.max(2, pad.t+ch-yq);
+    const g1 = ctx.createLinearGradient(0,yq,0,pad.t+ch);
+    if(isLast){ g1.addColorStop(0,'#ffb547'); g1.addColorStop(1,'rgba(196,124,18,.22)'); }
+    else      { g1.addColorStop(0,'#25e0ff'); g1.addColorStop(1,'rgba(8,145,178,.2)'); }
+    ctx.fillStyle = g1;
+    ctx.shadowColor = isLast?'rgba(255,181,71,.5)':'rgba(37,224,255,.45)'; ctx.shadowBlur = 9;
+    rrect(ctx, x0, yq, bw, hq, Math.min(4, bw/2)); ctx.fill(); ctx.shadowBlur = 0;
+    ctx.fillStyle = isLast?'#ffd79a':'#cfe9ff'; ctx.font='700 10px "Segoe UI",sans-serif'; ctx.textAlign='center';
+    ctx.fillText(nf(d.qty), x0+bw/2, yq-5);
+    // 合格量
+    const yo = yOf(d.ok), ho = Math.max(2, pad.t+ch-yo);
+    const g2 = ctx.createLinearGradient(0,yo,0,pad.t+ch);
+    g2.addColorStop(0,'#22e6a8'); g2.addColorStop(1,'rgba(15,158,120,.2)');
+    ctx.fillStyle = g2;
+    rrect(ctx, x0+bw+4, yo, bw, ho, Math.min(4, bw/2)); ctx.fill();
+    ctx.fillStyle='#7ff0cd'; ctx.font='600 10px "Segoe UI",sans-serif';
+    ctx.fillText(nf(d.ok), x0+bw+4+bw/2, yo-5);
+    // 月份 + 笔数
+    ctx.fillStyle='#b8cde2'; ctx.font='10.5px "Segoe UI",sans-serif'; ctx.textAlign='center';
+    ctx.fillText(k.slice(2), xc(i), h-15);
+    ctx.fillStyle='#5b7695'; ctx.font='9px "Segoe UI",sans-serif';
+    ctx.fillText(`${d.n} 笔${d.qty&&d.ok<d.qty?` · 合格 ${Math.round(d.ok/d.qty*100)}%`:''}`, xc(i), h-4);
+  });
+  // 最新月份标记
+  ctx.fillStyle='#ffd79a'; ctx.font='700 9.5px "Segoe UI",sans-serif'; ctx.textAlign='center';
+  ctx.fillText('最新月', xc(keys.length-1), pad.t-13);
+}
+/* 圆角矩形路径 */
+function rrect(ctx, x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, h/2));
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y); ctx.arcTo(x+w, y, x+w, y+r, r);
+  ctx.lineTo(x+w, y+h-r); ctx.arcTo(x+w, y+h, x+w-r, y+h, r);
+  ctx.lineTo(x+r, y+h); ctx.arcTo(x, y+h, x, y+h-r, r);
+  ctx.lineTo(x, y+r); ctx.arcTo(x, y, x+r, y, r);
+  ctx.closePath();
+}
+/* ---- 一周发货趋势（周 / 日 双模式） ---- */
+let WK_MODE = 'week';
+const p2 = n => String(n).padStart(2,'0');
+const ymd = d => `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+/* 取日期所在自然周的周一（周一=周首日） */
+function weekKeyOf(dateStr){
+  if(!dateStr) return null;
+  const d = new Date(dateStr+'T00:00:00');
+  if(isNaN(d.getTime())) return null;
+  const w = (d.getDay()+6)%7;   // 周一 = 0
+  d.setDate(d.getDate()-w);
+  return ymd(d);
+}
+/* 周维度聚合（含最新周 / 上周 / 环比） */
+function weekAgg(shipSet){
+  const src = shipSet || DB.ship;
+  const byK = {};
+  src.forEach(s=>{
+    const k = weekKeyOf(s.date); if(!k) return;
+    byK[k] = byK[k] || {qty:0, ok:0, n:0};
+    byK[k].qty += (+s.qty||0); byK[k].ok += (+s.ok||0); byK[k].n++;
+  });
+  const ks = Object.keys(byK).sort();
+  const cur = ks.length ? byK[ks[ks.length-1]].qty : 0;
+  const prev = ks.length>1 ? byK[ks[ks.length-2]].qty : 0;
+  return { keys:ks, byK, cur, prev, key:ks.length?ks[ks.length-1]:null,
+           delta: prev ? (cur-prev)/prev : null, nWeek:ks.length,
+           total: ks.reduce((a,k)=>a+byK[k].qty,0) };
+}
+function drawWeekly(){
+  const cv = $('#cvWeekly'); if(!cv) return;
+  const sc = scoped();
+  const byK = {};
+  const bump = (k, s)=>{ if(!k) return; byK[k] = byK[k] || {qty:0, ok:0, n:0};
+    byK[k].qty += (+s.qty||0); byK[k].ok += (+s.ok||0); byK[k].n++; };
+  let keys = [];
+  if(WK_MODE==='week'){
+    sc.ship.forEach(s=>bump(weekKeyOf(s.date), s));
+    const ks = Object.keys(byK).sort();
+    if(ks.length){                       // 连续补齐中间空缺周
+      const s0 = new Date(ks[0]+'T00:00:00'), e0 = new Date(ks[ks.length-1]+'T00:00:00');
+      for(let d=new Date(s0); d<=e0; d.setDate(d.getDate()+7)){
+        const k = ymd(d); keys.push(k); if(!byK[k]) byK[k] = {qty:0, ok:0, n:0};
+      }
+    }
+    keys = keys.slice(-8);               // 只展示最近 8 周
+  }else{
+    sc.ship.forEach(s=>bump(s.date, s));
+    const ds = Object.keys(byK).sort();
+    if(ds.length){                       // 连续补齐近 7 天
+      const end = new Date(ds[ds.length-1]+'T00:00:00');
+      for(let i=6;i>=0;i--){
+        const d = new Date(end); d.setDate(d.getDate()-i);
+        const k = ymd(d); keys.push(k); if(!byK[k]) byK[k] = {qty:0, ok:0, n:0};
+      }
+    }
+  }
+  // 卡片右上角口径说明
+  const sum = keys.reduce((a,k)=>a+byK[k].qty, 0);
+  const curQ = keys.length ? byK[keys[keys.length-1]].qty : 0;
+  const prevQ = keys.length>1 ? byK[keys[keys.length-2]].qty : 0;
+  const meta = $('#wkMeta');
+  if(meta) meta.textContent = WK_MODE==='week'
+    ? `近 ${keys.length} 周 · 合计 ${nf(sum)} · 最新 ${nf(curQ)}${prevQ?`（${curQ>=prevQ?'+':''}${pct((curQ-prevQ)/prevQ)}）`:''}`
+    : `近 7 天 · 合计 ${nf(sum)} · 末日 ${nf(curQ)}`;
+
+  const {ctx, w, h} = hidpi(cv, 138);
+  ctx.clearRect(0,0,w,h);
+  const pad = {l:44,r:12,t:20,b:20};
+  const cw = w-pad.l-pad.r, ch = h-pad.t-pad.b;
+  if(!keys.length){ ctx.fillStyle='#5b7695'; ctx.font='12px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('当前筛选条件下无发货记录', w/2, h/2); return; }
+  const maxV = Math.max(1, ...keys.map(k=>Math.max(byK[k].qty, byK[k].ok)));
+  const yOf = v => pad.t + ch*(1 - v/maxV);
+  const step = cw/keys.length;
+  const bw = Math.max(6, Math.min(104, step*0.42));
+  const dense = step < 44;             // 窄栏：标签隔一显示，防相碰
+  const xc = i => pad.l + step*i + step/2;
+  // 网格 + Y 轴
+  ctx.strokeStyle='rgba(66,140,208,.16)'; ctx.lineWidth=1;
+  ctx.font='9px "Segoe UI",sans-serif'; ctx.fillStyle='#5b7695'; ctx.textAlign='right';
+  for(let i=0;i<=3;i++){
+    const v = maxV*i/3, y = yOf(v);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    ctx.fillText(nf(Math.round(v)), pad.l-7, y+3);
+  }
+  // 周期均值参考线
+  const avg = sum/keys.length;
+  if(avg>0){
+    const y = yOf(avg);
+    ctx.save(); ctx.setLineDash([5,5]); ctx.strokeStyle='rgba(143,169,196,.5)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke(); ctx.restore();
+    ctx.fillStyle='#8fa9c4'; ctx.font='9px "Segoe UI",sans-serif'; ctx.textAlign='left';
+    ctx.fillText(`均 ${nf(Math.round(avg))}`, pad.l+3, y-4);
+  }
+  // 柱：发货量（最新周期高亮）
+  keys.forEach((k,i)=>{
+    const v = byK[k].qty, x = xc(i)-bw/2, y = yOf(v), bh = pad.t+ch-y;
+    const isLast = i===keys.length-1;
+    if(v<=0){
+      ctx.fillStyle='rgba(143,169,196,.2)'; ctx.fillRect(x, pad.t+ch-2, bw, 2);
+      ctx.fillStyle='#5b7695'; ctx.font='10px "Segoe UI",sans-serif'; ctx.textAlign='center';
+      ctx.fillText('0', xc(i), pad.t+ch-6);
+    }else{
+      const g = ctx.createLinearGradient(0,y,0,pad.t+ch);
+      if(isLast){ g.addColorStop(0,'#ffb547'); g.addColorStop(1,'rgba(196,124,18,.22)'); }
+      else      { g.addColorStop(0,'#25e0ff'); g.addColorStop(1,'rgba(8,145,178,.2)'); }
+      ctx.fillStyle = g;
+      ctx.shadowColor = isLast ? 'rgba(255,181,71,.55)' : 'rgba(37,224,255,.45)';
+      ctx.shadowBlur = isLast ? 11 : 8;
+      rrect(ctx, x, y, bw, bh, Math.min(4, bw/2)); ctx.fill(); ctx.shadowBlur = 0;
+      if(!dense || isLast || i%2===0){
+        ctx.fillStyle = isLast ? '#ffd79a' : '#cfe9ff';
+        ctx.font = (isLast?'700 ':'600 ')+'9.5px "Segoe UI",sans-serif'; ctx.textAlign='center';
+        ctx.fillText(nf(v), xc(i), y-5);
+      }
+    }
+  });
+  // 合格量虚线
+  ctx.beginPath(); ctx.setLineDash([4,4]); ctx.strokeStyle='rgba(34,230,168,.8)'; ctx.lineWidth=1.5;
+  keys.forEach((k,i)=>{ const x=xc(i), y=yOf(byK[k].ok); i? ctx.lineTo(x,y) : ctx.moveTo(x,y); });
+  ctx.stroke(); ctx.setLineDash([]);
+  // X 轴标签
+  ctx.fillStyle='#5b7695'; ctx.font='9px "Segoe UI",sans-serif'; ctx.textAlign='center';
+  const skip = keys.length>6 ? 2 : 1;
+  keys.forEach((k,i)=>{
+    if(i%skip!==0 && i!==keys.length-1) return;
+    ctx.fillText(k.slice(5).replace('-','/'), xc(i), h-7);
+  });
+  // 最新周期标记
+  ctx.fillStyle='#ffd79a'; ctx.font='700 9px "Segoe UI",sans-serif'; ctx.textAlign='center';
+  ctx.fillText(WK_MODE==='week'?'最新周':'最新日', xc(keys.length-1), pad.t-9);
+}
+/* 环形图 */
+function drawDonut(){
+  const cv = $('#cvDonut'); if(!cv) return;
+  const sc = scoped();
+  const cnt = {done:0, part:0, none:0, over:0};
+  sc.projects.forEach(p=>cnt[deliverStateOf(p)]++);
+  const data = [
+    {k:'done', label:'已交付', v:cnt.done, c:'#22e6a8'},
+    {k:'part', label:'部分交付', v:cnt.part, c:'#ffb547'},
+    {k:'none', label:'尚未发货', v:cnt.none, c:'#4b8dff'},
+    {k:'over', label:'超发', v:cnt.over, c:'#ff5f7e'}
+  ].filter(d=>d.v>0);
+  const {ctx, w, h} = hidpi(cv, 230);
+  ctx.clearRect(0,0,w,h);
+  const cx = w/2, cy = h/2, R = Math.min(w,h)/2 - 16, r = R*0.63;
+  const total = data.reduce((a,d)=>a+d.v,0);
+  if(!total){ ctx.fillStyle='#5b7695'; ctx.font='12px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('暂无数据', cx, cy); $('#lgDonut').innerHTML=''; return; }
+  let ang = -Math.PI/2;
+  data.forEach(d=>{
+    const a = Math.PI*2*d.v/total;
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,R,ang,ang+a); ctx.closePath();
+    const g = ctx.createRadialGradient(cx,cy,r,cx,cy,R);
+    g.addColorStop(0, d.c+'cc'); g.addColorStop(1, d.c+'55');
+    ctx.fillStyle = g; ctx.fill();
+    ctx.strokeStyle = '#04070f'; ctx.lineWidth = 2.5; ctx.stroke();
+    ang += a;
+  });
+  // 内圈
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,7);
+  ctx.fillStyle = 'rgba(7,13,27,.95)'; ctx.fill();
+  ctx.strokeStyle='rgba(37,224,255,.22)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.fillStyle='#eaf6ff'; ctx.font='700 22px "Segoe UI",sans-serif'; ctx.textAlign='center';
+  ctx.fillText(total, cx, cy+2);
+  ctx.fillStyle='#8fa9c4'; ctx.font='10.5px "Segoe UI",sans-serif';
+  ctx.fillText('订单条目', cx, cy+18);
+  $('#lgDonut').innerHTML = data.map(d=>
+    `<span><i style="background:${d.c}"></i>${d.label} ${d.v} <span style="color:#5b7695">(${pct(d.v/total)})</span></span>`).join('');
+}
+/* 客户横向条 */
+function drawBarCust(){
+  const sc = scoped();
+  const g = {};
+  sc.projects.forEach(p=>{
+    const c = p.customer||'其他';
+    g[c] = g[c] || {order:0, sent:0};
+    g[c].order += (+p.qty||0);
+  });
+  const pids = new Set(sc.projects.map(p=>p.pid));
+  sc.ship.forEach(s=>{ if(!pids.has(s.pid)) return; const p = DB.project.find(x=>x.pid===s.pid);
+    const c = p? p.customer : '其他'; if(g[c]) g[c].sent += (+s.qty||0); });
+  const arr = Object.entries(g).map(([c,v])=>({c, ...v})).sort((a,b)=>b.order-a.order).slice(0,8);
+  const max = Math.max(1, ...arr.map(a=>a.order));
+  const el = $('#barCust');
+  if(!arr.length){ el.innerHTML='<div class="empty"><div class="ic">◌</div>暂无数据</div>'; return; }
+  el.innerHTML = arr.map(a=>{
+    const w = Math.max(1.5, a.order/max*100);
+    const cls = a.sent>=a.order ? 'gn' : (a.sent<=0 ? 'rd' : 'or');
+    return `<div class="bar-row" data-cust="${esc(a.c)}">
+      <span class="nm" title="${esc(a.c)}">${esc(a.c)}</span>
+      <span class="bar-tr"><span class="bar-fl ${cls}" style="width:${w}%"></span></span>
+      <span class="vv" title="已发 ${nf(a.sent)} / 订单 ${nf(a.order)}">${nf(a.sent)}<span style="color:#5b7695;font-size:11px">/${nf(a.order)}</span></span>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.bar-row').forEach(r=>{
+    r.onclick = ()=>{ const c = r.dataset.cust;
+      FILTER.customer = (FILTER.customer===c)? null : c; renderFilters(); renderAll(); };
+  });
+}
+
+/* ---------- 6. 视图渲染 ---------- */
+function renderFilters(){
+  // 客户 chips（从「未受客户筛选影响」的全量里取）
+  const custs = [...new Set(DB.project.map(p=>p.customer))].sort();
+  $('#fcustomer').innerHTML = `<span class="fl-t" style="margin-right:2px">客户</span>` + custs.map(c=>{
+    const on = FILTER.customer===c;
+    return `<span class="fchip ${on?'on':''}" data-cust="${esc(c)}">${esc(c)}${on?'<span class="x">×</span>':''}</span>`;
+  }).join('');
+  // 发货状态 chips
+  const sts = [...new Set(DB.ship.map(s=>s.status))].sort();
+  $('#fstatus').innerHTML = `<span class="fl-t" style="margin-left:6px;margin-right:2px">发货状态</span>` + sts.map(s=>{
+    const on = FILTER.status===s;
+    return `<span class="fchip ${on?'on pu':''}" data-st="${esc(s)}">${esc(s)}${on?'<span class="x">×</span>':''}</span>`;
+  }).join('');
+  // 月份
+  const ms = [...new Set(DB.ship.map(s=>monthOf(s.date)).filter(Boolean))].sort();
+  const sel = $('#fmonth');
+  sel.innerHTML = '<option value="">全部发货月份</option>' + ms.map(m=>`<option value="${m}">${m}</option>`).join('');
+  sel.value = FILTER.month||'';
+  $('#fdeliver').value = FILTER.deliver||'';
+
+  $('#fcustomer').querySelectorAll('.fchip').forEach(c=>{
+    c.onclick = ()=>{ const v = c.dataset.cust;
+      FILTER.customer = (FILTER.customer===v)?null:v; renderFilters(); renderAll(); };
+  });
+  $('#fstatus').querySelectorAll('.fchip').forEach(c=>{
+    c.onclick = ()=>{ const v = c.dataset.st;
+      FILTER.status = (FILTER.status===v)?null:v; renderFilters(); renderAll(); };
+  });
+  // 提示条
+  const chips = [];
+  if(FILTER.customer) chips.push(['客户：'+FILTER.customer,'cu']);
+  if(FILTER.status)   chips.push(['发货状态：'+FILTER.status,'st']);
+  if(FILTER.month)    chips.push(['发货月份：'+FILTER.month,'mo']);
+  if(FILTER.deliver)  chips.push(['交付状态：'+DELIVER_LABEL[FILTER.deliver],'de']);
+  $('#filterTip').innerHTML = chips.length
+    ? `<div class="alert cy" style="margin-bottom:12px"><span class="ai">⇄</span><div>
+         当前筛选：<b>${chips.map(c=>esc(c[0])).join(' ＋ ')}</b>，全站 4 个模块已联动刷新。
+         <span style="color:var(--cy);cursor:pointer;border-bottom:1px dashed var(--cy);margin-left:6px" id="tipClear">清除</span>
+       </div></div>`
+    : '';
+  const tc = $('#tipClear'); if(tc) tc.onclick = clearFilters;
+}
+
+function clearFilters(){
+  FILTER = {customer:null,status:null,month:null,deliver:null};
+  renderFilters(); renderAll();
+}
+
+function renderKpis(){
+  const t = totals(scoped());
+  const w = weekAgg(scoped().ship);
+  const cards = [
+    {lb:'订单总量', vl:nf(t.orderQty), ft:`${t.nOrder} 个订单条目`, k:'', s:'只'},
+    {lb:'已合格数量', vl:nf(t.ok), ft:`发货 ${t.nShip} 笔 · 已发 ${nf(t.sent)} 只`, k:'k-gn', s:'只'},
+    {lb:'剩余待发', vl:nf(t.remain), ft:t.remain>0?`发货交付率 ${pct(t.progress)}`:'全部发货完毕', k:'k-or', s:'只'},
+    {lb:'发货交付率', vl:pct(t.progress), ft:`已发 ${nf(t.sent)} / 订单 ${nf(t.orderQty)} 只`, k:'k-pu', s:''},
+    {lb:'最近一周发货', vl:nf(w.cur), ft: w.prev ? `较上周 ${w.cur>=w.prev?'+':''}${pct((w.cur-w.prev)/w.prev)} · 上周 ${nf(w.prev)} 只` : `近 ${w.nWeek} 周合计 ${nf(w.total)} 只`, k:'k-pu', s:'只'},
+    {lb:'一次合格率', vl:pct(t.passRate), ft:`合格 ${nf(t.ok)} 只`, k:'k-gn', s:''},
+    {lb:'未关闭客诉', vl:nf(t.openComplaint), ft:`累计客诉 ${t.nComplaint} 条`, k:t.openComplaint>0?'k-rd':'', s:'条'}
+  ];
+  $('#kpis').innerHTML = cards.map(c=>`
+    <div class="kpi ${c.k}">
+      <div class="lb">${c.lb}</div>
+      <div class="vl">${c.vl}${c.s?`<small>${c.s}</small>`:''}</div>
+      <div class="ft">${c.ft}</div>
+    </div>`).join('');
+}
+
+/* 已发 / 未发 整合段宽（百分比，两段合计 100%） */
+function segWidths(orderQty, sent, remain){
+  const o = Math.max(0, +orderQty||0);
+  const s = Math.max(0, +sent||0);
+  if(!o) return {done:0, rem:100, over:false, empty:true};
+  if(s > o) return {done:100, rem:0, over:true, empty:false};
+  const d = Math.min(100, s/o*100);
+  return {done:d, rem:Math.max(0, 100-d), over:false, empty:false};
+}
+/* 整合条 HTML：已发段 + 未发段 */
+function barStHtml(w, ds, title){
+  const cls = w.over ? 's-over' : (ds==='done' ? 's-done' : (ds==='part' ? 's-part' : 's-none'));
+  return `<span class="bar-st" title="${title}"><i class="${cls}" style="width:${w.done}%"></i><i class="s-none" style="width:${w.rem}%"></i></span>`;
+}
+/* 待交付订单（未发 / 未发完），按未发货量降序 */
+function pendingProjects(sc){
+  const s = sc || scoped();
+  return s.projects.map(p=>{
+    const a = projAgg(p.pid, s.ship);
+    return {p, a, ds: deliverStateOf(p, a.qty)};
+  }).filter(r=> r.ds==='none' || r.ds==='part')
+    .sort((x,y)=> (y.a.remain - x.a.remain) || (y.a.orderQty - x.a.orderQty) || x.p.pid.localeCompare(y.p.pid));
+}
+/* 已发完订单（已交付 / 超发） */
+function doneProjects(sc){
+  const s = sc || scoped();
+  return s.projects.map(p=>{
+    const a = projAgg(p.pid, s.ship);
+    return {p, a, ds: deliverStateOf(p, a.qty)};
+  }).filter(r=> r.ds==='done' || r.ds==='over')
+    .sort((x,y)=> y.a.orderQty - x.a.orderQty || x.p.pid.localeCompare(y.p.pid));
+}
+/* 待交付整合总条（只统计未发 / 未发完的订单） */
+function renderIntegrate(sc){
+  const el = $('#ovIntegrate'); if(!el) return;
+  const rows = pendingProjects(sc);
+  const orderQty = rows.reduce((a,r)=>a+r.a.orderQty, 0);
+  const sent  = rows.reduce((a,r)=>a+r.a.qty, 0);
+  const remain= rows.reduce((a,r)=>a+r.a.remain, 0);
+  const w = segWidths(orderQty, sent, remain);
+  const nNone = rows.filter(r=>r.ds==='none').length;
+  const nPart = rows.filter(r=>r.ds==='part').length;
+  el.innerHTML = `
+    <div class="ovbar-h">
+      <b class="t">待交付订单整合视图</b>
+      <span><em class="c1">已发</em> ${nf(sent)} 只</span>
+      <span><em class="c2">未发</em> ${nf(remain)} 只</span>
+      <span class="sp2">待交付 ${rows.length} 单 · 完成率 ${pct(orderQty? sent/orderQty : 0)}</span>
+    </div>
+    <span class="bar-st big" title="待交付订单：已发 ${nf(sent)} 只 / 未发 ${nf(remain)} 只">
+      <i class="s-part" style="width:${w.done}%"></i><i class="s-none" style="width:${w.rem}%"></i>
+    </span>
+    <div class="ovbar-f">
+      <span>待交付订单量 ${nf(orderQty)} 只</span>
+      <span>未发货 ${nNone} 单</span>
+      <span>未发完 ${nPart} 单</span>
+      <span class="sp2">已发完订单见下方汇总</span>
+    </div>`;
+}
+
+function renderOverviewTable(){
+  const sc = scoped();
+  const rows = pendingProjects(sc);
+  renderIntegrate(sc);
+  const tb = $('#tbOvOrder tbody');
+  if(!rows.length){
+    tb.innerHTML = `<tr><td colspan="6"><div class="empty"><div class="ic">◌</div>当前筛选条件下没有未发 / 未发完的订单</div></td></tr>`;
+    $('#tbOvOrder tfoot').innerHTML=''; return;
+  }
+  tb.innerHTML = rows.map((r,i)=>{
+    const {p,a,ds} = r;
+    const w = segWidths(a.orderQty, a.qty, a.remain);
+    const tip = w.over ? `订单 ${nf(a.orderQty)} 只，实发 ${nf(a.qty)} 只（超发 ${nf(a.qty-a.orderQty)} 只）`
+              : w.empty ? '未填订单数量'
+              : `已发货 ${nf(a.qty)} 只 / 未发货 ${nf(a.remain)} 只 · 交付 ${pct(w.done/100)}`;
+    const lb = w.empty
+      ? `<em class="c1">已发 ${nf(a.qty)}</em> · <em class="c2">订单量未填</em>`
+      : `<em class="c1">已发 ${nf(a.qty)}</em> · <em class="c2">未发 ${nf(a.remain)}</em> · ${pct(w.done/100)}`;
+    return `<tr data-pid="${esc(p.pid)}">
+      <td>${i+1}</td>
+      <td><span class="mono">${esc(p.pid)}</span></td>
+      <td>${esc(p.customer)}</td>
+      <td class="num">${nf(a.orderQty)}</td>
+      <td>${barStHtml(w, ds, tip)}<span class="st-lb">${lb}</span></td>
+      <td class="num">${a.complaints?`<span class="tag ${a.openComplaints?'t-rd':'t-gy'}">${a.complaints}</span>`:'<span style="color:#3d5a7a">—</span>'}</td>
+    </tr>`;
+  }).join('');
+  $('#tbOvOrder').querySelectorAll('tbody tr[data-pid]').forEach(tr=>{
+    tr.onclick = ()=> openDrawer(tr.dataset.pid);
+  });
+  // 合计（仅待交付订单）
+  const orderQty = rows.reduce((a,r)=>a+r.a.orderQty, 0);
+  const sent  = rows.reduce((a,r)=>a+r.a.qty, 0);
+  const remain= rows.reduce((a,r)=>a+r.a.remain, 0);
+  const wt = segWidths(orderQty, sent, remain);
+  $('#tbOvOrder tfoot').innerHTML = `<tr>
+    <td colspan="3">待交付合计（${rows.length} 单）</td>
+    <td class="num">${nf(orderQty)}</td>
+    <td>${barStHtml(wt, 'part', `待交付：已发 ${nf(sent)} 只 / 未发 ${nf(remain)} 只`)}
+        <span class="st-lb"><em class="c1">已发 ${nf(sent)}</em> · <em class="c2">未发 ${nf(remain)}</em> · ${pct(orderQty? sent/orderQty : 0)}</span></td>
+    <td class="num">${rows.reduce((a,r)=>a+r.a.complaints, 0)}</td>
+  </tr>`;
+}
+
+/* 已发完订单单独汇总 */
+let SUM_OPEN = false;
+function renderCompleted(sc){
+  const s = sc || scoped();
+  const rows = doneProjects(s);
+  const t = totals(s);
+  const orderQty = rows.reduce((a,r)=>a+r.a.orderQty, 0);
+  const sent  = rows.reduce((a,r)=>a+r.a.qty, 0);
+  const okQty = rows.reduce((a,r)=>a+r.a.ok, 0);
+  const overs = rows.filter(r=>r.ds==='over');
+  const overQty = overs.reduce((a,r)=>a+(r.a.qty - r.a.orderQty), 0);
+  const nDone = rows.length - overs.length;
+  const tg = $('#sumToggle'); if(tg) tg.textContent = SUM_OPEN ? '收起明细' : '展开明细';
+  const meta = $('#sumMeta');
+  if(meta) meta.textContent = rows.length
+    ? `${rows.length} 单已发完 · 占订单条目 ${pct(t.nOrder? rows.length/t.nOrder : 0)}`
+    : '当前筛选条件下无已发完订单';
+  $('#sumCounts').innerHTML = `
+    <div class="sum-cell"><div class="l">已发完订单</div><div class="v">${nf(rows.length)}<small>单</small></div></div>
+    <div class="sum-cell"><div class="l">订单量合计</div><div class="v">${nf(orderQty)}<small>只</small></div></div>
+    <div class="sum-cell"><div class="l">已发货合计</div><div class="v" style="color:#7ff0cd">${nf(sent)}<small>只</small></div></div>
+    <div class="sum-cell"><div class="l">已合格合计</div><div class="v" style="color:#7ff0cd">${nf(okQty)}<small>只</small></div></div>
+    <div class="sum-cell"><div class="l">占订单总量</div><div class="v" style="color:#8feeff">${pct(t.orderQty? orderQty/t.orderQty : 0)}</div></div>
+    <div class="sum-cell"><div class="l">其中超发</div><div class="v" style="color:${overs.length?'#ffb3c3':'#8fa9c4'}">${nf(overs.length)}<small>单${overQty?` · ${nf(overQty)} 只`:''}</small></div></div>`;
+  $('#sumBar').innerHTML = `<div style="margin-top:11px">
+    <span class="bar-st big" title="已发完订单：订单量 ${nf(orderQty)} 只 / 已发货 ${nf(sent)} 只">
+      <i class="s-done" style="width:100%"></i>
+    </span>
+    <div class="ovbar-f">
+      <span>${rows.length? `已交付 ${nDone} 单 · 已发货 ${nf(sent)} 只` : '—'}</span>
+      ${overs.length? `<span style="color:#ffb3c3">超发 ${overs.length} 单 · 多交 ${nf(overQty)} 只</span>`:''}
+      <span class="sp2">判定：已发货量 ≥ 订单量</span>
+    </div>
+  </div>`;
+  $('#sumList').innerHTML = (SUM_OPEN && rows.length) ? `
+    <div class="sum-list">
+      <table>
+        <thead><tr><th>项目单号</th><th>客户</th><th class="num">订单量</th><th class="num">已发货</th><th class="num">已合格</th><th style="width:80px">状态</th></tr></thead>
+        <tbody>${rows.map(r=>`<tr data-pid="${esc(r.p.pid)}">
+          <td><span class="mono">${esc(r.p.pid)}</span></td>
+          <td>${esc(r.p.customer)}</td>
+          <td class="num">${nf(r.a.orderQty)}</td>
+          <td class="num" style="color:#7ff0cd">${nf(r.a.qty)}</td>
+          <td class="num">${nf(r.a.ok)}</td>
+          <td><span class="tag ${DELIVER_TAG[r.ds]}">${DELIVER_LABEL[r.ds]}</span></td>
+        </tr>`).join('')}</tbody>
+        <tfoot><tr>
+          <td colspan="2">合计（${rows.length} 单）</td>
+          <td class="num">${nf(orderQty)}</td><td class="num">${nf(sent)}</td><td class="num">${nf(okQty)}</td><td></td>
+        </tr></tfoot>
+      </table>
+    </div>` : '';
+  $('#sumList').querySelectorAll('tr[data-pid]').forEach(tr=>{
+    tr.onclick = ()=> openDrawer(tr.dataset.pid);
+  });
+}
+
+function renderRisk(){
+  const sc = scoped();
+  const items = [];
+  sc.projects.forEach(p=>{
+    const a = projAgg(p.pid, sc.ship);
+    const ds = deliverStateOf(p, a.qty);
+    if(ds==='over')
+      items.push({lv:'rd', t:`超发`, d:`<span class="mono">${esc(p.pid)}</span> 订单 ${nf(a.orderQty)} 只，实发 ${nf(a.qty)} 只，超出 ${nf(a.qty-a.orderQty)} 只。`});
+    if(a.openComplaints>0)
+      items.push({lv:'rd', t:`未关闭客诉`, d:`<span class="mono">${esc(p.pid)}</span> 有 ${a.openComplaints} 条未关闭客诉。`});
+    if(ds==='none' && a.orderQty>=50)
+      items.push({lv:'or', t:`大额未发货`, d:`<span class="mono">${esc(p.pid)}</span> 订单 ${nf(a.orderQty)} 只，尚未发货。`});
+    if(a.qty>0 && a.ok<a.qty)
+      items.push({lv:'or', t:`合格数不足`, d:`<span class="mono">${esc(p.pid)}</span> 发货 ${nf(a.qty)} 只，合格 ${nf(a.ok)} 只。`});
+  });
+  sc.complaints.filter(c=>c.status!=='已关闭').forEach(c=>{
+    items.push({lv:'rd', t:`客诉跟进中`, d:`<span class="mono">${esc(c.pid)}</span> ${esc(c.desc)}（${esc(c.level)}）`});
+  });
+  // 交付率偏低
+  const t = totals(sc);
+  if(t.orderQty > 0 && t.progress < 0.5)
+    items.push({lv:'or', t:`整体交付率偏低`, d:`当前筛选范围内交付率 ${pct(t.progress)}，剩余待发 ${nf(t.remain)} 只。`});
+  if(!items.length) items.push({lv:'gn', t:`无风险项`, d:'当前筛选范围内未发现超发、未关闭客诉或大额欠交。'});
+  const order = {rd:0, or:1, gn:2};
+  items.sort((a,b)=>order[a.lv]-order[b.lv]);
+  const col = {rd:'t-rd', or:'t-or', gn:'t-gn'};
+  const ic  = {rd:'⚠', or:'◎', gn:'✓'};
+  $('#riskList').innerHTML = items.slice(0,14).map(it=>`
+    <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(66,140,208,.1)">
+      <span class="tag ${col[it.lv]}" style="height:20px">${ic[it.lv]} ${it.t}</span>
+      <span style="font-size:12px;color:#b8cde2;flex:1">${it.d}</span>
+    </div>`).join('');
+}
+
+/* 项目订单表 */
+function renderProject(){
+  const q = ($('#qProject').value||'').trim().toLowerCase();
+  const sc = scoped();
+  let rows = sc.projects.map(p=>({p, a:projAgg(p.pid, sc.ship)}));
+  if(q) rows = rows.filter(r=> (r.p.pid+' '+r.p.name+' '+r.p.customer+' '+(r.p.order||'')).toLowerCase().includes(q));
+  rows.sort((x,y)=> y.a.orderQty - x.a.orderQty || x.p.pid.localeCompare(y.p.pid));
+  const tb = $('#tbProject tbody');
+  if(!rows.length){ tb.innerHTML = `<tr><td colspan="13"><div class="empty"><div class="ic">◌</div>没有匹配的订单</div></td></tr>`; $('#tbProject tfoot').innerHTML=''; $('#cntProject').innerHTML=''; return; }
+  tb.innerHTML = rows.map((r,i)=>{
+    const {p,a} = r;
+    const ds = deliverStateOf(p, a.qty);
+    const pw = Math.min(100, a.orderQty? a.qty/a.orderQty*100 : 0);
+    return `<tr data-pid="${esc(p.pid)}" class="${SELECTED===p.pid?'sel':''}">
+      <td>${i+1}</td>
+      <td><span class="mono">${esc(p.pid)}</span></td>
+      <td title="${esc(p.name)}"><span class="ell">${esc(p.name)}</span></td>
+      <td>${p.order?esc(p.order):'<span style="color:#5b7695">—</span>'}</td>
+      <td>${esc(p.customer)}</td>
+      <td class="num">${nf(p.qty)}</td>
+      <td class="num">${nf(a.qty)}</td>
+      <td class="num">${nf(a.ok)}</td>
+      <td class="num" style="color:${a.remain>0?'#ffd79a':'#8fa9c4'}">${nf(a.remain)}</td>
+      <td><span class="bar-tr"><span class="bar-fl ${ds==='done'?'gn':ds==='over'?'rd':ds==='part'?'or':''}" style="width:${Math.max(1.5,pw)}%"></span></span>
+          <span class="mono" style="font-size:10.5px;color:#8fa9c4">${pct(pw/100)}</span></td>
+      <td class="num">${a.n}</td>
+      <td class="num">${a.complaints?`<span class="tag ${a.openComplaints?'t-rd':'t-gy'}">${a.complaints}</span>`:'<span style="color:#3d5a7a">—</span>'}</td>
+      <td><span class="tag t-cy" data-act="edit" data-pid="${esc(p.pid)}" style="cursor:pointer">编辑</span>
+          <span class="tag t-rd" data-act="del" data-pid="${esc(p.pid)}" style="cursor:pointer">删除</span></td>
+    </tr>`;
+  }).join('');
+  const t = totals(sc);
+  const cnt = rows.length;
+  $('#tbProject tfoot').innerHTML = `<tr>
+    <td colspan="5">合计（${cnt} 条 / 筛选后）</td>
+    <td class="num">${nf(rows.reduce((a,r)=>a+r.p.qty,0))}</td>
+    <td class="num">${nf(rows.reduce((a,r)=>a+r.a.qty,0))}</td>
+    <td class="num">${nf(rows.reduce((a,r)=>a+r.a.ok,0))}</td>
+    <td class="num">${nf(rows.reduce((a,r)=>a+r.a.remain,0))}</td>
+    <td></td>
+    <td class="num">${rows.reduce((a,r)=>a+r.a.n,0)}</td>
+    <td class="num">${rows.reduce((a,r)=>a+r.a.complaints,0)}</td>
+    <td></td>
+  </tr>`;
+  $('#cntProject').innerHTML = `共 <b>${cnt}</b> 条 · 订单量 <b>${nf(t.orderQty)}</b> 只 · 已发 <b>${nf(t.sent)}</b> 只`;
+  tb.querySelectorAll('tr[data-pid]').forEach(tr=>{
+    tr.onclick = e=>{
+      const act = e.target.dataset && e.target.dataset.act;
+      if(act==='edit'){ e.stopPropagation(); openEdit('project', tr.dataset.pid); return; }
+      if(act==='del'){ e.stopPropagation(); delRow('project', tr.dataset.pid); return; }
+      SELECTED = tr.dataset.pid; openDrawer(tr.dataset.pid);
+    };
+  });
+}
+
+/* 发货明细表 */
+function renderShip(){
+  const q = ($('#qShip').value||'').trim().toLowerCase();
+  const sc = scoped();
+  let rows = sc.ship.map(s=>{
+    const p = DB.project.find(x=>x.pid===s.pid);
+    return {s, p};
+  });
+  if(q) rows = rows.filter(r=> ((r.s.pid||'')+' '+(r.p?r.p.name:'')+' '+(r.p?r.p.customer:'')+' '+(r.s.note||'')).toLowerCase().includes(q));
+  rows.sort((a,b)=> (b.s.date||'').localeCompare(a.s.date||'') || a.s.pid.localeCompare(b.s.pid));
+  const tb = $('#tbShip tbody');
+  if(!rows.length){ tb.innerHTML=`<tr><td colspan="12"><div class="empty"><div class="ic">◌</div>没有匹配的发货记录</div></td></tr>`; $('#tbShip tfoot').innerHTML=''; $('#cntShip').innerHTML=''; return; }
+  tb.innerHTML = rows.map((r,i)=>{
+    const {s,p} = r;
+    const rate = (+s.qty) ? (+s.ok)/(+s.qty) : 0;
+    const stCls = s.status==='已签收'?'t-gn':'t-cy';
+    return `<tr data-sid="${esc(s.id)}" data-pid="${esc(s.pid)}">
+      <td>${i+1}</td>
+      <td><span class="mono">${esc(s.date)}</span></td>
+      <td><span class="mono">${esc(s.pid)}</span></td>
+      <td title="${esc(p?p.name:'')}"><span class="ell">${esc(p?p.name:'—')}</span></td>
+      <td>${esc(p?p.customer:'—')}</td>
+      <td class="num">${nf(s.qty)}</td>
+      <td class="num">${nf(s.ok)}</td>
+      <td class="num" style="color:${rate>=1?'#7ff0cd':rate>=0.9?'#ffd79a':'#ffb3c3'}">${pct(rate)}</td>
+      <td><span class="tag ${stCls}">${esc(s.status)}</span></td>
+      <td>${s.type==='正常'?'<span class="tag t-gy">正常</span>':'<span class="tag t-or">'+esc(s.type)+'</span>'}</td>
+      <td title="${esc(s.note||'')}"><span class="ell" style="max-width:170px;color:#8fa9c4">${esc(s.note||'—')}</span></td>
+      <td><span class="tag t-cy" data-act="edit" data-sid="${esc(s.id)}" style="cursor:pointer">编辑</span>
+          <span class="tag t-rd" data-act="del" data-sid="${esc(s.id)}" style="cursor:pointer">删除</span></td>
+    </tr>`;
+  }).join('');
+  const tq = rows.reduce((a,r)=>a+(+r.s.qty||0),0), tk = rows.reduce((a,r)=>a+(+r.s.ok||0),0);
+  $('#tbShip tfoot').innerHTML = `<tr>
+    <td colspan="5">合计（${rows.length} 笔 / 筛选后）</td>
+    <td class="num">${nf(tq)}</td><td class="num">${nf(tk)}</td>
+    <td class="num">${pct(tq?tk/tq:0)}</td><td colspan="4"></td>
+  </tr>`;
+  $('#cntShip').innerHTML = `共 <b>${rows.length}</b> 笔 · 发货量 <b>${nf(tq)}</b> 只 · 合格 <b>${nf(tk)}</b> 只`;
+  tb.querySelectorAll('tr[data-sid]').forEach(tr=>{
+    tr.onclick = e=>{
+      const act = e.target.dataset && e.target.dataset.act;
+      if(act==='edit'){ e.stopPropagation(); openEdit('ship', tr.dataset.sid); return; }
+      if(act==='del'){ e.stopPropagation(); delRow('ship', tr.dataset.sid); return; }
+      openDrawer(tr.dataset.pid);
+    };
+  });
+}
+
+/* 客诉表 */
+function renderComplaint(){
+  const q = ($('#qComplaint').value||'').trim().toLowerCase();
+  const sc = scoped();
+  let rows = sc.complaints.map(c=>({c, p: DB.project.find(x=>x.pid===c.pid)}));
+  if(q) rows = rows.filter(r=> ((r.c.pid||'')+' '+(r.c.name||'')+' '+(r.c.desc||'')+' '+(r.c.owner||'')).toLowerCase().includes(q));
+  rows.sort((a,b)=> (b.c.date||'').localeCompare(a.c.date||''));
+  // 统计卡
+  const byLv = {}, bySt = {};
+  sc.complaints.forEach(c=>{ byLv[c.level]=(byLv[c.level]||0)+1; bySt[c.status]=(bySt[c.status]||0)+1; });
+  const mkBars = (obj, colorMap)=>{
+    const arr = Object.entries(obj).sort((a,b)=>b[1]-a[1]);
+    const max = Math.max(1, ...arr.map(a=>a[1]));
+    if(!arr.length) return '<div style="color:#5b7695;font-size:12px;padding:6px 0">暂无数据</div>';
+    return arr.map(([k,v])=>`<div class="bar-row" style="grid-template-columns:82px 1fr 44px">
+      <span class="nm" style="cursor:default">${esc(k)}</span>
+      <span class="bar-tr"><span class="bar-fl ${colorMap[k]||''}" style="width:${Math.max(2,v/max*100)}%"></span></span>
+      <span class="vv">${v}</span></div>`).join('');
+  };
+  $('#complaintStats').innerHTML = `
+    <div class="card">
+      <div class="card-h"><span class="dot or"></span><h3>按严重度分布</h3><span class="r">${sc.complaints.length} 条</span></div>
+      ${mkBars(byLv, {'严重':'rd','一般':'or','轻微':'gn','致命':'rd'})}
+    </div>
+    <div class="card">
+      <div class="card-h"><span class="dot gn"></span><h3>按处理状态分布</h3><span class="r">未关闭 ${sc.complaints.filter(c=>c.status!=='已关闭').length} 条</span></div>
+      ${mkBars(bySt, {'已关闭':'gn','处理中':'or','待处理':'rd','已回复':'pu'})}
+    </div>`;
+  const tb = $('#tbComplaint tbody');
+  if(!rows.length){ tb.innerHTML=`<tr><td colspan="10"><div class="empty"><div class="ic">◌</div>没有匹配的客诉记录</div></td></tr>`; $('#tbComplaint tfoot').innerHTML=''; $('#cntComplaint').innerHTML=''; return; }
+  const lvCls = {'致命':'t-rd','严重':'t-rd','一般':'t-or','轻微':'t-gy'};
+  const stCls = {'已关闭':'t-gn','处理中':'t-or','待处理':'t-rd','已回复':'t-pu'};
+  tb.innerHTML = rows.map((r,i)=>{
+    const {c,p} = r;
+    return `<tr data-cid="${esc(c.id)}" data-pid="${esc(c.pid)}">
+      <td>${i+1}</td>
+      <td><span class="mono">${esc(c.date)}</span></td>
+      <td><span class="mono">${esc(c.pid)}</span></td>
+      <td title="${esc(p?p.name:'')}"><span class="ell" style="max-width:170px">${esc(p?p.name:'—')}</span></td>
+      <td title="${esc(c.desc)}"><span class="ell" style="max-width:230px">${esc(c.desc)}</span></td>
+      <td><span class="tag ${lvCls[c.level]||'t-gy'}">${esc(c.level)}</span></td>
+      <td><span class="tag ${stCls[c.status]||'t-gy'}">${esc(c.status)}</span></td>
+      <td>${c.owner?esc(c.owner):'<span style="color:#5b7695">—</span>'}</td>
+      <td title="${esc(c.note||'')}"><span class="ell" style="max-width:150px;color:#8fa9c4">${esc(c.note||'—')}</span></td>
+      <td><span class="tag t-cy" data-act="edit" data-cid="${esc(c.id)}" style="cursor:pointer">编辑</span>
+          <span class="tag t-rd" data-act="del" data-cid="${esc(c.id)}" style="cursor:pointer">删除</span></td>
+    </tr>`;
+  }).join('');
+  $('#tbComplaint tfoot').innerHTML = `<tr><td colspan="9">合计（${rows.length} 条 / 筛选后）</td><td></td></tr>`;
+  $('#cntComplaint').innerHTML = `共 <b>${rows.length}</b> 条 · 未关闭 <b>${sc.complaints.filter(c=>c.status!=='已关闭').length}</b> 条`;
+  tb.querySelectorAll('tr[data-cid]').forEach(tr=>{
+    tr.onclick = e=>{
+      const act = e.target.dataset && e.target.dataset.act;
+      if(act==='edit'){ e.stopPropagation(); openEdit('complaint', tr.dataset.cid); return; }
+      if(act==='del'){ e.stopPropagation(); delRow('complaint', tr.dataset.cid); return; }
+      openDrawer(tr.dataset.pid);
+    };
+  });
+}
+
+/* 顶部计数 */
+function renderCounts(){
+  const sc = scoped();
+  $('#cOv').textContent = isFiltering()? `${sc.projects.length}单` : '总览';
+  $('#cPr').textContent = sc.projects.length;
+  $('#cSh').textContent = sc.ship.length;
+  $('#cCo').textContent = sc.complaints.length;
+}
+
+function renderAll(){
+  renderCounts(); renderKpis(); renderOverviewTable(); renderCompleted(scoped());
+  drawMonthly(); drawDonut(); drawBarCust(); drawWeekly();
+  renderRisk(); renderProject(); renderShip(); renderComplaint();
+}
+
+/* ---------- 7. 详情抽屉 ---------- */
+function openDrawer(pid){
+  const p = DB.project.find(x=>x.pid===pid);
+  if(!p) return;
+  SELECTED = pid;
+  const ships = DB.ship.filter(s=>s.pid===pid).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  const comps = DB.complaint.filter(c=>c.pid===pid);
+  const a = projAgg(pid);
+  const ds = deliverStateOf(p, a.qty);
+  $('#dwTitle').textContent = p.name;
+  $('#dwMeta').innerHTML = `
+    <span class="mono">${esc(p.pid)}</span>
+    ${p.order?`<span>订单号：${esc(p.order)}</span>`:''}
+    <span class="tag ${DELIVER_TAG[ds]}">${DELIVER_LABEL[ds]}</span>
+    <span>客户：${esc(p.customer)}</span>`;
+  const rate = a.qty? a.ok/a.qty : 0;
+  $('#dwBody').innerHTML = `
+    <div class="mini-kpis">
+      <div class="mini"><div class="l">订单数量</div><div class="v">${nf(a.orderQty)}</div></div>
+      <div class="mini"><div class="l">已合格数量</div><div class="v" style="color:#7ff0cd">${nf(a.ok)}</div></div>
+      <div class="mini"><div class="l">剩余待发</div><div class="v" style="color:${a.remain>0?'#ffd79a':'#8fa9c4'}">${nf(a.remain)}</div></div>
+      <div class="mini"><div class="l">合格率</div><div class="v">${pct(rate)}</div></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#8fa9c4;margin-bottom:5px">
+        <span>交付进度</span><span>${nf(a.qty)} / ${nf(a.orderQty)} 只 · ${pct(a.orderQty?a.qty/a.orderQty:0)}</span>
+      </div>
+      <span class="bar-tr" style="height:11px"><span class="bar-fl ${ds==='done'?'gn':ds==='over'?'rd':ds==='part'?'or':''}" style="width:${Math.min(100,a.orderQty?a.qty/a.orderQty*100:0)}%"></span></span>
+    </div>
+    <div class="sec-t">发货流水（${ships.length} 笔）</div>
+    ${ ships.length ? `<div class="timeline">${ships.map(s=>{
+        const r2 = (+s.qty)?(+s.ok)/(+s.qty):0;
+        return `<div class="tl"><span class="pt"></span><div class="bd">
+          <div class="d1"><span class="mono">${esc(s.date)}</span>
+            <span style="color:#eaf6ff;font-weight:600">${nf(s.qty)} 只</span>
+            <span style="color:#7ff0cd">合格 ${nf(s.ok)}</span>
+            <span class="tag ${s.status==='已签收'?'t-gn':'t-cy'}">${esc(s.status)}</span>
+            ${r2<1?`<span class="tag t-or">合格率 ${pct(r2)}</span>`:''}
+          </div>
+          ${s.note?`<div class="d2">备注：${esc(s.note)}</div>`:''}
+        </div></div>`;
+      }).join('')}</div>`
+      : '<div style="color:#5b7695;font-size:12px;padding:10px 0">该订单尚无发货记录</div>' }
+    <div class="sec-t">客诉记录（${comps.length} 条）</div>
+    ${ comps.length ? comps.map(c=>`
+        <div style="padding:9px 0;border-bottom:1px solid rgba(66,140,208,.1)">
+          <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;font-size:12px">
+            <span class="mono">${esc(c.date)}</span>
+            <span class="tag ${{'致命':'t-rd','严重':'t-rd','一般':'t-or','轻微':'t-gy'}[c.level]||'t-gy'}">${esc(c.level)}</span>
+            <span class="tag ${{'已关闭':'t-gn','处理中':'t-or','待处理':'t-rd','已回复':'t-pu'}[c.status]||'t-gy'}">${esc(c.status)}</span>
+            ${c.owner?`<span style="color:#8fa9c4">负责人：${esc(c.owner)}</span>`:''}
+          </div>
+          <div style="font-size:12px;color:#cfe4f5;margin-top:4px">${esc(c.desc)}</div>
+          ${c.note?`<div style="font-size:11px;color:#5b7695;margin-top:2px">${esc(c.note)}</div>`:''}
+        </div>`).join('')
+      : '<div style="color:#5b7695;font-size:12px;padding:10px 0">该订单无客诉记录</div>' }
+    <div style="display:flex;gap:9px;margin-top:16px">
+      <button class="btn solid" id="dwAddShip" style="flex:1;justify-content:center">＋ 为该订单新增发货</button>
+      <button class="btn ghost" id="dwEdit">编辑订单</button>
+    </div>`;
+  $('#dwAddShip').onclick = ()=> openEdit('ship', null, pid);
+  $('#dwEdit').onclick = ()=> openEdit('project', pid);
+  $('#drawer').classList.add('on');
+  $('#maskDrawer').classList.add('on');
+  if(VIEW==='project') renderProject();
+}
+function closeDrawer(){
+  $('#drawer').classList.remove('on');
+  $('#maskDrawer').classList.remove('on');
+  SELECTED = null;
+  if(VIEW==='project') renderProject();
+}
+
+/* ---------- 8. 编辑表单 ---------- */
+let EDIT = {table:null, key:null};
+
+const FORM_DEF = {
+  project:{
+    title:'项目订单',
+    fields:[
+      {k:'pid', t:'项目单号', req:1, hint:'唯一标识；修改会同步到该订单下所有发货/客诉记录'},
+      {k:'name', t:'项目名称', req:1},
+      {k:'order', t:'订单号', hint:'如「第1单」，可留空'},
+      {k:'customer', t:'客户', type:'text', hint:'默认按项目名前缀自动识别'},
+      {k:'qty', t:'订单数量', num:1, req:1}
+    ],
+    def:{order:'', customer:'', qty:0}
+  },
+  ship:{
+    title:'发货明细',
+    fields:[
+      {k:'pid', t:'项目单号', req:1, type:'projectSel', hint:'选择已有订单，或直接输入新单号'},
+      {k:'date', t:'发货日期', req:1, type:'date'},
+      {k:'qty', t:'发货数量', num:1, req:1},
+      {k:'ok', t:'合格数量', num:1, hint:'留空则默认等于发货数量'},
+      {k:'status', t:'发货状态', type:'select', opts:['已发货','已签收','待发货','运输中','已退回']},
+      {k:'type', t:'类型', type:'select', opts:['正常','返修','补发','试用']},
+      {k:'note', t:'备注', type:'textarea', full:1}
+    ],
+    def:{date:new Date().toISOString().slice(0,10), qty:0, ok:0, status:'已发货', type:'正常', note:''}
+  },
+  complaint:{
+    title:'客诉记录',
+    fields:[
+      {k:'pid', t:'项目单号', req:1, type:'projectSel'},
+      {k:'date', t:'日期', req:1, type:'date'},
+      {k:'desc', t:'问题描述', req:1, full:1},
+      {k:'level', t:'严重度', type:'select', opts:['致命','严重','一般','轻微']},
+      {k:'status', t:'状态', type:'select', opts:['待处理','处理中','已回复','已关闭']},
+      {k:'owner', t:'负责人'},
+      {k:'note', t:'备注', type:'textarea', full:1}
+    ],
+    def:{date:new Date().toISOString().slice(0,10), desc:'', level:'一般', status:'待处理', owner:'', note:''}
+  }
+};
+
+function openEdit(table, keyOrId, presetPid){
+  const D = FORM_DEF[table];
+  let row = null;
+  if(keyOrId!=null){
+    if(table==='project') row = DB.project.find(r=>r.pid===keyOrId);
+    else if(table==='ship') row = DB.ship.find(r=>r.id===keyOrId);
+    else row = DB.complaint.find(r=>r.id===keyOrId);
+  }
+  EDIT = {table, key: row ? (table==='project'? row.pid : row.id) : null};
+  $('#edTitle').textContent = (row? '编辑' : '新增') + D.title + (table==='project'&&row? ' · ' + row.pid : '');
+  const html = D.fields.map(f=>{
+    const isKeyRow = row!=null;
+    let v = row ? (row[f.k] ?? '') : (D.def && f.k in D.def ? D.def[f.k] : '');
+    if(table==='ship' && f.k==='pid' && !row && presetPid) v = presetPid;
+    let ctrl='';
+    if(f.type==='select'){
+      ctrl = `<select data-k="${f.k}">${(f.opts||[]).map(o=>`<option value="${esc(o)}" ${String(v)===o?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+    }else if(f.type==='textarea'){
+      ctrl = `<textarea data-k="${f.k}" placeholder="${esc(f.hint||'')}">${esc(v)}</textarea>`;
+    }else if(f.type==='projectSel'){
+      const pids = DB.project.map(p=>p.pid);
+      ctrl = `<input list="dl_pids" data-k="${f.k}" value="${esc(v)}" placeholder="选择或输入项目单号"/>`
+           + `<datalist id="dl_pids">${pids.map(p=>`<option value="${esc(p)}"></option>`).join('')}</datalist>`;
+    }else{
+      const ro = (f.k==='pid' && isKeyRow) ? 'readonly' : '';
+      ctrl = `<input data-k="${f.k}" type="${f.type==='date'?'date':'text'}" value="${esc(v)}" ${ro} placeholder="${esc(f.hint||'')}"/>`;
+    }
+    return `<div class="fg ${f.full?'full':''}">
+      <label>${esc(f.t)}${f.req?' <span class="req">*</span>':''}</label>
+      ${ctrl}
+      ${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}
+    </div>`;
+  }).join('');
+  $('#edForm').innerHTML = html;
+  if(table==='ship' && !row){
+    const q = $('#edForm [data-k="qty"]'), o = $('#edForm [data-k="ok"]');
+    if(q&&o){ q.addEventListener('input', ()=>{ if(!o.dataset.touched) o.value = q.value; }); o.addEventListener('input', ()=>o.dataset.touched=1); }
+  }
+  $('#maskEdit').classList.add('on');
+  setTimeout(()=>{ const f = $('#edForm input:not([readonly]),#edForm select,#edForm textarea'); if(f) f.focus(); }, 60);
+}
+function closeEdit(){ $('#maskEdit').classList.remove('on'); EDIT={table:null,key:null}; }
+
+function saveEdit(){
+  const {table, key} = EDIT;
+  const D = FORM_DEF[table];
+  const obj = {};
+  for(const f of D.fields){
+    const el = $(`#edForm [data-k="${f.k}"]`);
+    if(!el) continue;
+    let v = el.value;
+    if(f.num) v = v===''?0:Number(v);
+    obj[f.k] = v;
+  }
+  // 校验
+  for(const f of D.fields){
+    if(f.req && (obj[f.k]===''||obj[f.k]==null)){ toast(`「${f.t}」为必填项`, 'err'); el_focus(f.k); return; }
+    if(f.num && (isNaN(obj[f.k])||obj[f.k]<0)){ toast(`「${f.t}」须为不小于 0 的数字`, 'err'); el_focus(f.k); return; }
+  }
+  if(table==='ship'){
+    obj.id = key || UID();
+    const idx = DB.ship.findIndex(r=>r.id===obj.id);
+    // 自动登记：发货单号在订单表不存在 → 自动建项目
+    autoRegisterProject(obj.pid, obj.date);
+    if(idx>=0) DB.ship[idx] = {...DB.ship[idx], ...obj};
+    else DB.ship.push(obj);
+    // 合格数默认
+    if(obj.ok==null || obj.ok==='') DB.ship.find(r=>r.id===obj.id).ok = obj.qty;
+  }
+  else if(table==='complaint'){
+    obj.id = key || UID();
+    const idx = DB.complaint.findIndex(r=>r.id===obj.id);
+    autoRegisterProject(obj.pid, obj.date);
+    if(idx>=0) DB.complaint[idx] = {...DB.complaint[idx], ...obj};
+    else DB.complaint.push(obj);
+  }
+  else { // project
+    const newPid = String(obj.pid||'').trim();
+    if(!newPid){ toast('项目单号不能为空','err'); return; }
+    if(key){ // 编辑
+      const old = DB.project.find(r=>r.pid===key);
+      if(!old) return;
+      if(newPid!==key){
+        if(DB.project.some(r=>r.pid===newPid)){ toast('该项目单号已存在','err'); return; }
+        // 级联改外键
+        DB.ship.forEach(s=>{ if(s.pid===key) s.pid = newPid; });
+        DB.complaint.forEach(c=>{ if(c.pid===key) c.pid = newPid; });
+      }
+      Object.assign(old, {pid:newPid, name:obj.name, order:obj.order, customer:obj.customer, qty:obj.qty});
+      if(SELECTED===key) SELECTED = newPid;
+    }else{
+      if(DB.project.some(r=>r.pid===newPid)){ toast('该项目单号已存在','err'); return; }
+      DB.project.push({pid:newPid, name:obj.name, order:obj.order||'', customer:obj.customer||deriveCustomer(obj.name, newPid), qty:obj.qty});
+    }
+  }
+  saveDB(); closeEdit(); renderFilters(); renderAll();
+  toast(key? '已保存修改' : '已新增记录', 'ok');
+}
+function el_focus(k){ const el=$(`#edForm [data-k="${k}"]`); if(el) el.focus(); }
+function autoRegisterProject(pid, date){
+  pid = String(pid||'').trim();
+  if(!pid) return;
+  if(DB.project.some(p=>p.pid===pid)) return;
+  DB.project.push({pid, name:pid, order:'', customer:deriveCustomer(pid, pid), qty:0});
+  toast(`已自动登记新项目「${pid}」，请在项目订单中补充订单数量`, 'info');
+}
+
+/* 删除 */
+async function delRow(table, key){
+  if(table==='project'){
+    const p = DB.project.find(r=>r.pid===key);
+    const nS = DB.ship.filter(s=>s.pid===key).length;
+    const nC = DB.complaint.filter(c=>c.pid===key).length;
+    if(!await askConfirm(`删除项目「${p?p.name:key}」将同时删除其下 ${nS} 条发货记录、${nC} 条客诉记录。\n此操作不可撤销，确认删除？`)) return;
+    DB.project = DB.project.filter(r=>r.pid!==key);
+    DB.ship = DB.ship.filter(s=>s.pid!==key);
+    DB.complaint = DB.complaint.filter(c=>c.pid!==key);
+    if(SELECTED===key) closeDrawer();
+    toast(`已删除项目及其 ${nS} 条发货、${nC} 条客诉`, 'ok');
+  }else if(table==='ship'){
+    const s = DB.ship.find(r=>r.id===key);
+    if(!s) return;
+    if(!await askConfirm(`确认删除 ${s.date} 发货记录（${s.pid} · ${s.qty} 只）？`)) return;
+    DB.ship = DB.ship.filter(r=>r.id!==key);
+    toast('已删除发货记录', 'ok');
+  }else{
+    const c = DB.complaint.find(r=>r.id===key);
+    if(!c) return;
+    if(!await askConfirm(`确认删除客诉记录（${c.pid} · ${c.desc}）？`)) return;
+    DB.complaint = DB.complaint.filter(r=>r.id!==key);
+    toast('已删除客诉记录', 'ok');
+  }
+  saveDB(); renderFilters(); renderAll();
+  if($('#drawer').classList.contains('on') && SELECTED) openDrawer(SELECTED);
+}
+
+/* ---------- 9. Excel 导入 / 导出 ---------- */
+function pickSheet(wb, keys){
+  for(const nm of wb.SheetNames){
+    const low = nm.toLowerCase();
+    if(keys.some(k=>nm.includes(k))) return nm;
+  }
+  return null;
+}
+function rowsToObjs(rows){
+  if(!rows || !rows.length) return [];
+  let hi = rows.findIndex(r=> r && r.some(c=>c!=null && String(c).trim()!==''));
+  if(hi<0) return [];
+  const head = rows[hi].map(h=>String(h==null?'':h).trim());
+  const out = [];
+  for(let i=hi+1;i<rows.length;i++){
+    const r = rows[i]; if(!r || !r.some(c=>c!=null && String(c).trim()!=='')) continue;
+    const o = {};
+    head.forEach((h,j)=>{ if(h) o[h] = r[j]; });
+    out.push(o);
+  }
+  return out;
+}
+function toDate(v){
+  if(v==null || v==='') return '';
+  if(typeof v === 'number' || /^\d{5}$/.test(String(v).trim())){
+    const n = Number(v);
+    const d = new Date(Date.UTC(1899,11,30) + n*86400000);
+    return d.toISOString().slice(0,10);
+  }
+  const s = String(v).trim();
+  const m = s.match(/(\d{4})\D{1,2}(\d{1,2})\D{1,2}(\d{1,2})/);
+  if(m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  const m2 = s.match(/(\d{4})\D{1,2}(\d{1,2})/);
+  if(m2) return `${m2[1]}-${m2[2].padStart(2,'0')}-01`;
+  return s;
+}
+const numv = v => { const n = Number(String(v==null?'':v).replace(/[^\d.\-]/g,'')); return isNaN(n)?0:n; };
+const g = (o, ...keys) => { for(const k of keys){ for(const kk in o){ if(kk.replace(/\s/g,'')===k.replace(/\s/g,'')) return o[kk]; } } return undefined; };
+
+let IMP = null;  // 待导入数据
+
+function parseWorkbook(wb){
+  const res = {project:[], ship:[], complaint:[], sheets:[]};
+  const byKey = (namelist, keys) => namelist.find(n=>keys.some(k=>n.includes(k)));
+  const sShip = byKey(wb.SheetNames, ['发货','明细','ship']);
+  const sProj = byKey(wb.SheetNames, ['订单','项目','project','order']);
+  const sComp = byKey(wb.SheetNames, ['客诉','投诉','complaint']);
+  // 发货
+  if(sShip){
+    res.sheets.push(sShip);
+    const objs = rowsToObjs(XLSX.utils.sheet_to_json(wb.Sheets[sShip], {header:1, raw:true, defval:''}));
+    objs.forEach(o=>{
+      const pid = String(g(o,'项目单号','项目名称','单号') ?? '').trim();
+      if(!pid) return;
+      const qty = numv(g(o,'发货数量','数量'));
+      let ok = numv(g(o,'合格数量','合格'));
+      res.ship.push({
+        pid, qty, ok: (g(o,'合格数量','合格')===''||g(o,'合格数量','合格')==null)? qty: ok,
+        date: toDate(g(o,'发货日期','日期')),
+        status: String(g(o,'状态','发货状态') ?? '已发货').trim() || '已发货',
+        type: String(g(o,'类型') ?? '正常').trim() || '正常',
+        note: String(g(o,'备注') ?? '').trim()
+      });
+    });
+  }
+  // 订单
+  if(sProj){
+    res.sheets.push(sProj);
+    const objs = rowsToObjs(XLSX.utils.sheet_to_json(wb.Sheets[sProj], {header:1, raw:true, defval:''}));
+    objs.forEach(o=>{
+      const name = String(g(o,'项目名称') ?? '').trim();
+      const order = String(g(o,'订单号') ?? '').trim();
+      let pid = String(g(o,'项目单号') ?? '').trim();
+      if(!pid) pid = order ? `${name}-${order}` : name;
+      if(!pid) return;
+      res.project.push({
+        pid, name: name||pid, order,
+        customer: deriveCustomer(name, pid),
+        qty: numv(g(o,'订单数量','数量')),
+        sent: numv(g(o,'已发数量')), ok: numv(g(o,'合格数量'))
+      });
+    });
+  }
+  // 客诉
+  if(sComp){
+    res.sheets.push(sComp);
+    const objs = rowsToObjs(XLSX.utils.sheet_to_json(wb.Sheets[sComp], {header:1, raw:true, defval:''}));
+    objs.forEach(o=>{
+      const pid = String(g(o,'项目单号') ?? '').trim();
+      const name = String(g(o,'项目名称') ?? '').trim();
+      if(!pid && !name) return;
+      res.complaint.push({
+        date: toDate(g(o,'日期')),
+        pid: pid || name, name: name || pid,
+        desc: String(g(o,'问题描述','描述','问题') ?? '').trim(),
+        level: String(g(o,'严重度') ?? '一般').trim() || '一般',
+        status: String(g(o,'状态') ?? '待处理').trim() || '待处理',
+        owner: String(g(o,'负责人') ?? '').trim(),
+        note: String(g(o,'备注') ?? '').trim()
+      });
+    });
+  }
+  return res;
+}
+
+function doImport(files){
+  let pending = files.length, merged = {project:[], ship:[], complaint:[], sheets:[]}, errs=[];
+  files.forEach(f=>{
+    const fr = new FileReader();
+    fr.onload = e=>{
+      try{
+        const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array', cellDates:false});
+        const r = parseWorkbook(wb);
+        merged.project.push(...r.project);
+        merged.ship.push(...r.ship);
+        merged.complaint.push(...r.complaint);
+        merged.sheets.push(f.name);
+      }catch(err){ errs.push(f.name + '：' + err.message); }
+      if(--pending===0) finishImport(merged, errs);
+    };
+    fr.onerror = ()=>{ errs.push(f.name+' 读取失败'); if(--pending===0) finishImport(merged, errs); };
+    fr.readAsArrayBuffer(f);
+  });
+}
+function finishImport(r, errs){
+  IMP = r;
+  if(errs.length) toast(errs.join('；'), 'err');
+  if(!r.ship.length && !r.project.length && !r.complaint.length){
+    $('#imPreview').innerHTML = `<div class="alert or"><span class="ai">⚠</span><div>未能从所选文件识别出数据。请确认表头包含「项目单号 / 项目名称 / 发货数量 / 订单数量」等字段。</div></div>`;
+    $('#imConfirm').disabled = true; return;
+  }
+  const sum = arr => arr.reduce((a,x)=>a+(+x.qty||0),0);
+  $('#imPreview').innerHTML = `
+    <div class="alert cy"><span class="ai">✓</span><div>已解析：<b>${r.sheets.join('、')}</b></div></div>
+    <div class="grid g-3" style="margin:0">
+      <div class="mini"><div class="l">项目订单</div><div class="v">${r.project.length||DB.project.length}</div></div>
+      <div class="mini"><div class="l">发货明细</div><div class="v">${r.ship.length||DB.ship.length}</div></div>
+      <div class="mini"><div class="l">客诉记录</div><div class="v">${r.complaint.length||DB.complaint.length}</div></div>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:#8fa9c4;line-height:1.8">
+      ${r.project.length?`· 项目订单 ${r.project.length} 条，订单量合计 ${nf(r.project.reduce((a,x)=>a+x.qty,0))} 只<br/>`:''}
+      ${r.ship.length?`· 发货明细 ${r.ship.length} 条，发货量合计 ${nf(sum(r.ship))} 只<br/>`:''}
+      ${r.complaint.length?`· 客诉记录 ${r.complaint.length} 条<br/>`:''}
+      ${!r.project.length?'· <span class="warn">未识别到订单表，将仅覆盖对应模块，其余保持不变</span><br/>':''}
+    </div>`;
+  $('#imConfirm').disabled = false;
+}
+function confirmImport(){
+  if(!IMP) return;
+  if(IMP.project.length){
+    DB.project = IMP.project.map((p,i)=>({...p, id:'pid_i'+i, customer: p.customer||deriveCustomer(p.name, p.pid)}));
+  }
+  if(IMP.ship.length){
+    DB.ship = IMP.ship.map((s,i)=>({...s, id:'sid_i'+i}));
+    // 未在订单表中出现的发货单号 → 自动登记
+    if(IMP.project.length){
+      const has = new Set(DB.project.map(p=>p.pid));
+      IMP.ship.forEach(s=>{
+        if(!has.has(s.pid)){ DB.project.push({pid:s.pid, name:s.pid, order:'', customer:deriveCustomer(s.pid, s.pid), qty:s.qty}); has.add(s.pid); }
+      });
+    }
+  }
+  if(IMP.complaint.length) DB.complaint = IMP.complaint.map((c,i)=>({...c, id:'cid_i'+i}));
+  saveDB();
+  $('#maskImport').classList.remove('on');
+  $('#imFile').value=''; $('#imPreview').innerHTML=''; $('#imConfirm').disabled = true;
+  const r = IMP; IMP=null;
+  FILTER = {customer:null,status:null,month:null,deliver:null};
+  renderFilters(); renderAll();
+  toast(`导入完成：订单 ${r.project.length||'保持'} / 发货 ${r.ship.length||'保持'} / 客诉 ${r.complaint.length||'保持'}`, 'ok');
+}
+
+function doExport(){
+  const wb = XLSX.utils.book_new();
+  // 订单表
+  const proj = DB.project.map((p,i)=>{
+    const q = shipQtyOf(p.pid);
+    return {'序号':i+1,'项目名称':p.name,'订单号':p.order||'','项目单号':p.pid,'客户':p.customer,
+      '订单数量':p.qty,'已发货数量':q,'已合格数量':DB.ship.filter(s=>s.pid===p.pid).reduce((a,s)=>a+(+s.ok||0),0),
+      '剩余待发':Math.max(0,(+p.qty||0)-q),'交付进度':(+p.qty)? +(q/(+p.qty)).toFixed(2) : 0,
+      '未解决客诉':DB.complaint.filter(c=>c.pid===p.pid&&c.status!=='已关闭').length};
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(proj), '项目订单');
+  // 发货表
+  const ship = DB.ship.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map((s,i)=>{
+    const p = DB.project.find(x=>x.pid===s.pid);
+    return {'序号':i+1,'项目名称':p?p.name:s.pid,'项目单号':s.pid,'类型':s.type,'发货数量':s.qty,
+      '合格数量':s.ok,'发货日期':s.date,'状态':s.status,'备注':s.note};
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ship), '发货明细');
+  // 客诉表
+  const comp = DB.complaint.map((c,i)=>({'序号':i+1,'日期':c.date,'项目单号':c.pid,'项目名称':c.name,
+    '问题描述':c.desc,'严重度':c.level,'状态':c.status,'负责人':c.owner,'备注':c.note}));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(comp), '客诉记录');
+  const ts = new Date();
+  const stamp = `${ts.getFullYear()}${String(ts.getMonth()+1).padStart(2,'0')}${String(ts.getDate()).padStart(2,'0')}`;
+  XLSX.writeFile(wb, `磁芯样件_交付看板导出_${stamp}.xlsx`);
+  toast('已导出 xlsx（含 项目订单 / 发货明细 / 客诉记录 三表）', 'ok');
+}
+
+/* ---------- 10. 事件绑定 ---------- */
+function bind(){
+  // 导航
+  $$('#tabs .tab').forEach(t=>{
+    t.onclick = ()=>{ VIEW = t.dataset.v;
+      $$('#tabs .tab').forEach(x=>x.classList.toggle('on', x===t));
+      $$('.view').forEach(v=>v.classList.toggle('on', v.id==='view-'+VIEW));
+      renderAll();
+    };
+  });
+  // 筛选
+  $('#fmonth').onchange = e=>{ FILTER.month = e.target.value||null; renderFilters(); renderAll(); };
+  $('#fdeliver').onchange = e=>{ FILTER.deliver = e.target.value||null; renderFilters(); renderAll(); };
+  $('#btnClear').onclick = clearFilters;
+  // 搜索
+  let tq;
+  const deb = fn => { clearTimeout(tq); tq = setTimeout(fn, 180); };
+  $('#qProject').oninput = ()=>deb(renderProject);
+  $('#qShip').oninput = ()=>deb(renderShip);
+  $('#qComplaint').oninput = ()=>deb(renderComplaint);
+  // 新增
+  $('#addProject').onclick = ()=>openEdit('project', null);
+  $('#addShip').onclick = ()=>openEdit('ship', null);
+  $('#addComplaint').onclick = ()=>openEdit('complaint', null);
+  // 弹窗
+  $('#edClose').onclick = $('#edCancel').onclick = closeEdit;
+  $('#edSave').onclick = saveEdit;
+  $('#maskEdit').onclick = e=>{ if(e.target.id==='maskEdit') closeEdit(); };
+  $('#dwClose').onclick = closeDrawer;
+  $('#maskDrawer').onclick = closeDrawer;
+  // 导入
+  $('#btnImport').onclick = ()=>{ $('#maskImport').classList.add('on'); };
+  $('#imClose').onclick = $('#imCancel').onclick = ()=>{ $('#maskImport').classList.remove('on'); };
+  $('#maskImport').onclick = e=>{ if(e.target.id==='maskImport') $('#maskImport').classList.remove('on'); };
+  $('#imFile').onchange = e=>{ if(e.target.files.length) doImport(Array.from(e.target.files)); };
+  $('#imConfirm').onclick = confirmImport;
+  // 导出 / 重置
+  $('#btnExport').onclick = doExport;
+  $('#btnReset').onclick = ()=>{ $('#maskReset').classList.add('on'); };
+  $('#rsClose').onclick = $('#rsCancel').onclick = ()=>{ $('#maskReset').classList.remove('on'); };
+  $('#maskReset').onclick = e=>{ if(e.target.id==='maskReset') $('#maskReset').classList.remove('on'); };
+  $('#rsOk').onclick = ()=>{
+    DB = buildDB(); saveDB();
+    FILTER = {customer:null,status:null,month:null,deliver:null};
+    $('#maskReset').classList.remove('on');
+    renderFilters(); renderAll();
+    toast('数据已重置为源表初始状态', 'ok');
+  };
+  // 键盘
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape'){ closeEdit(); closeDrawer();
+      $('#maskImport').classList.remove('on'); $('#maskReset').classList.remove('on'); }
+    if(e.key==='Enter' && $('#maskEdit').classList.contains('on') && e.target.tagName!=='TEXTAREA'){ e.preventDefault(); saveEdit(); }
+  });
+  // 一周发货趋势：周 / 日 切换
+  const seg = $('#wkSeg');
+  if(seg) seg.addEventListener('click', e=>{
+    const s = e.target.closest('span[data-m]'); if(!s) return;
+    WK_MODE = s.dataset.m;
+    Array.from(seg.querySelectorAll('span')).forEach(x=> x.classList.toggle('on', x===s));
+    drawWeekly();
+  });
+  // 已发完汇总：展开 / 收起明细
+  const sumT = $('#sumToggle');
+  if(sumT) sumT.addEventListener('click', ()=>{ SUM_OPEN = !SUM_OPEN; renderCompleted(scoped()); });
+  // 窗口尺寸 → 重绘图表
+  let rt; window.addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(()=>{ drawMonthly(); drawDonut(); drawWeekly(); }, 160); });
+}
+
+/* 时钟 */
+function clock(){
+  const d = new Date();
+  const w = ['日','一','二','三','四','五','六'][d.getDay()];
+  $('#clock').textContent = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} 周${w} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+}
+
+/* ---------- 11. 启动 ---------- */
+function boot(){
+  DB = loadDB();
+  bind();
+  renderFilters();
+  renderAll();
+  clock(); setInterval(clock, 1000);
+  window.__MAG = { get DB(){return DB;}, get FILTER(){return FILTER;}, scoped, totals, projAgg,
+                   setFilter(f){ Object.assign(FILTER,f); renderFilters(); renderAll(); },
+                   clearFilters, renderAll, openEdit, saveEdit, delRow, openDrawer, closeDrawer,
+                   deliverState, deliverStateOf, shipQtyOf, deriveCustomer, buildDB, doExport,
+                   parseWorkbook, finishImport, confirmImport, askConfirm,
+                   segWidths, barStHtml, renderIntegrate, weekKeyOf, weekAgg, drawWeekly, drawMonthly, monthOf,
+                   pendingProjects, doneProjects, renderCompleted,
+                   get sumOpen(){ return SUM_OPEN; },
+                   toggleSum(){ SUM_OPEN = !SUM_OPEN; renderCompleted(scoped()); return SUM_OPEN; },
+                   get weekMode(){ return WK_MODE; },
+                   setWeekMode(m){ WK_MODE = m; drawWeekly(); return WK_MODE; } };
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+</script>
+</body>
+</html>
