@@ -272,7 +272,7 @@ var SDK_CDNS = [
   'https://imgcache.qq.com/qcloud/cloudbase-js-sdk/1.7.6/cloudbase.full.js'
 ];
 var COLORS = ['blue','green','amber','purple','teal','gray','coral'];
-var COLOR_HEX = {blue:'#185FA5',green:'#3B6D11',amber:'#BA7517',purple:'#534AB7',teal:'#0F6E56',gray:'#5F5E5A',coral:'#993C1D'};
+var COLOR_HEX = {blue:'#185FA5',green:'#3B6D11',amber:'#BA7517',purple:'#534AB7',teal:'#0F6E56',gray:'#5F5E5A',coral:'#993C1D',rose:'#A32D5E'};
 
 function uid(p){ return p + '_' + Math.random().toString(36).slice(2,9); }
 
@@ -300,9 +300,12 @@ function defaultConfig(){
       ]},
       { id:'g_mag', name:'磁环产品线', collapsed:false, boards:[
         { id:'b_7', name:'磁芯样件交付', url:'magnetic/', locked:false, pwd:'', color:'green', mode:'auto' }
+      ]},
+      { id:'g_pm', name:'项目管理', collapsed:false, boards:[
+        { id:'b_8', name:'APQP', url:'apqp/', locked:true, pwd:'plain:1234', color:'rose', mode:'auto' }
       ]}
     ],
-    homeCards: ['b_1','b_2','b_3','b_4','b_5','b_6','b_7'],
+    homeCards: ['b_1','b_2','b_3','b_4','b_5','b_6','b_7','b_8'],
     adminPwd: 'plain:admin888',
     updatedAt: '',
     updatedBy: ''
