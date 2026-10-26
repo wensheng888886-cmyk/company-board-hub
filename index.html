@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公司运营看板平台</title>
+<style>
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --side:#fafbfc; --line:#e4e7ec; --line-soft:#eef0f3;
+  --text:#1f2733; --text-2:#5a6472; --text-3:#9aa3af;
+  --brand:#185FA5; --brand-soft:#e6f1fb; --brand-line:#b5d4f4;
+  --danger:#c0392b; --danger-soft:#fcecea;
+  --ok:#0f6e56; --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;overflow:hidden;
+}
+button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select{font-family:inherit;font-size:inherit;color:inherit}
+#app{display:flex;flex-direction:column;height:100vh}
+
+/* ---------- 顶栏 ---------- */
+.topbar{
+  height:52px;flex:none;display:flex;align-items:center;gap:14px;
+  padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:9px;flex:none}
+.brand-mark{width:26px;height:26px;border-radius:7px;background:var(--brand);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600}
+.brand-name{font-size:15px;font-weight:600;letter-spacing:.2px}
+.search-wrap{flex:1;max-width:360px;position:relative}
+.search-wrap input{
+  width:100%;height:32px;padding:0 12px 0 32px;border:1px solid var(--line);
+  border-radius:8px;background:var(--bg);outline:none;
+}
+.search-wrap input:focus{border-color:var(--brand-line);background:#fff}
+.search-ico{position:absolute;left:10px;top:9px;color:var(--text-3);pointer-events:none}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex:none}
+.tbtn{
+  height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel);color:var(--text-2);display:flex;align-items:center;gap:6px;
+}
+.tbtn:hover{border-color:#cfd5dd;color:var(--text)}
+.tbtn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.tbtn.primary:hover{background:#144d87}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--text-3);flex:none}
+.sync-dot.ok{background:#1d9e75}.sync-dot.err{background:var(--danger)}
+
+/* ---------- 布局 ---------- */
+.layout{flex:1;display:flex;min-height:0}
+.sidebar{
+  width:236px;flex:none;background:var(--side);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;min-height:0;transition:width .18s ease;
+}
+.sidebar.hidden{width:0;overflow:hidden;border-right:none}
+.side-scroll{flex:1;overflow-y:auto;padding:10px 8px 16px}
+.side-foot{flex:none;border-top:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.side-count{font-size:12px;color:var(--text-3)}
+
+.nav-item{
+  display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;
+  color:var(--text-2);cursor:pointer;user-select:none;
+}
+.nav-item:hover{background:#eef1f5}
+.nav-item.active{background:var(--brand-soft);color:var(--brand);font-weight:600}
+.nav-item.active .avatar{background:var(--brand);color:#fff}
+.avatar{
+  width:24px;height:24px;border-radius:6px;flex:none;display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:600;color:#fff;background:#8895a7;
+}
+.nav-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-lock{flex:none;color:var(--text-3);display:flex}
+.grp-head{
+  display:flex;align-items:center;gap:6px;padding:9px 10px 5px;cursor:pointer;
+  color:var(--text-3);font-size:12px;user-select:none;
+}
+.grp-head:hover{color:var(--text-2)}
+.chevron{transition:transform .15s ease;flex:none}
+.chevron.up{transform:rotate(90deg)}
+.grp-body{display:flex;flex-direction:column;gap:1px;margin-bottom:4px}
+.grp-body.collapsed{display:none}
+
+/* ---------- 内容区 ---------- */
+.content{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--bg)}
+.frame-bar{
+  height:38px;flex:none;display:flex;align-items:center;gap:10px;padding:0 14px;
+  background:var(--panel);border-bottom:1px solid var(--line);
+}
+.frame-title{font-weight:600;font-size:13px}
+.frame-sub{font-size:12px;color:var(--text-3)}
+.frame-age{font-size:12px;color:var(--text-3);padding:1px 7px;border-radius:10px;background:var(--bg);white-space:nowrap}
+.frame-age.fresh{color:#2E7D5B}
+select.mini{height:26px;padding:0 4px;font-family:inherit;cursor:pointer}
+.frame-bar .spacer{flex:1}
+.frame-host{flex:1;position:relative;min-height:0;background:#fff}
+.frame-host iframe{position:absolute;inset:0;width:100%;height:100%;border:none;background:#fff;z-index:1}
+.frame-mask{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:12px;background:var(--panel);text-align:center;padding:24px;z-index:5;
+}
+.spinner{width:22px;height:22px;border:2px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.mask-title{font-size:14px;font-weight:600}
+.mask-desc{font-size:13px;color:var(--text-2);max-width:420px}
+.mask-actions{display:flex;gap:8px;margin-top:4px}
+
+/* ---------- 首页 ---------- */
+.home{padding:22px 24px 28px;overflow-y:auto;flex:1}
+.home-head{display:flex;align-items:baseline;gap:10px;margin-bottom:14px}
+.home-head h2{font-size:15px;font-weight:600}
+.home-head span{font-size:12px;color:var(--text-3)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:12px}
+.board-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:10px;
+  transition:border-color .12s ease,transform .12s ease;
+}
+.board-card:hover{border-color:var(--brand-line);transform:translateY(-1px)}
+.board-card .avatar{width:32px;height:32px;border-radius:8px;font-size:13px}
+.card-name{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-meta{font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:5px}
+.empty{padding:38px 0;text-align:center;color:var(--text-3);font-size:13px}
+
+/* ---------- 弹层 ---------- */
+.overlay{
+  position:absolute;inset:0;background:rgba(20,26,35,.42);display:flex;
+  align-items:center;justify-content:center;z-index:60;
+}
+.modal{
+  background:var(--panel);border-radius:14px;padding:20px;width:400px;max-width:calc(100vw - 32px);
+  box-shadow:0 12px 40px rgba(16,24,40,.18);
+}
+.modal h3{font-size:15px;font-weight:600;margin-bottom:6px}
+.modal p{font-size:13px;color:var(--text-2);margin-bottom:14px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--text-2);margin-bottom:5px}
+.field input,.field select{
+  width:100%;height:34px;padding:0 10px;border:1px solid var(--line);
+  border-radius:8px;outline:none;background:#fff;
+}
+.field input:focus,.field select:focus{border-color:var(--brand-line)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.err-tip{color:var(--danger);font-size:12px;min-height:16px}
+.hint{font-size:12px;color:var(--text-3);line-height:1.6}
+
+/* ---------- 管理抽屉 ---------- */
+.drawer{
+  position:absolute;top:0;right:0;bottom:0;width:520px;max-width:100vw;background:var(--panel);
+  border-left:1px solid var(--line);display:flex;flex-direction:column;z-index:70;
+}
+.drawer-head{
+  flex:none;padding:14px 18px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;
+}
+.drawer-head h3{font-size:15px;font-weight:600}
+.drawer-body{flex:1;overflow-y:auto;padding:14px 18px 20px}
+.drawer-foot{
+  flex:none;padding:12px 18px;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:8px;background:var(--bg);
+}
+.admin-grp{border:1px solid var(--line);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+.admin-grp-head{display:flex;align-items:center;gap:6px;padding:9px 10px;background:var(--bg);border-bottom:1px solid var(--line)}
+.admin-grp-head input{flex:1;height:28px;padding:0 8px;border:1px solid transparent;border-radius:6px;background:transparent;font-weight:600;font-size:13px;outline:none}
+.admin-grp-head input:hover{border-color:var(--line)}
+.admin-grp-head input:focus{border-color:var(--brand-line);background:#fff}
+.admin-board{padding:10px;border-top:1px solid var(--line-soft);display:flex;flex-direction:column;gap:8px}
+.admin-board:first-of-type{border-top:none}
+.row{display:flex;gap:8px;align-items:center}
+.row input[type=text],.row input[type=url],.row input[type=password]{
+  flex:1;min-width:0;height:30px;padding:0 9px;border:1px solid var(--line);border-radius:7px;outline:none;background:#fff;font-size:13px;
+}
+.row input:focus{border-color:var(--brand-line)}
+.row select{height:30px;padding:0 6px;border:1px solid var(--line);border-radius:7px;background:#fff;outline:none;font-size:13px}
+.mini{
+  height:28px;padding:0 9px;border:1px solid var(--line);border-radius:7px;
+  background:var(--panel);color:var(--text-2);font-size:12.5px;display:flex;align-items:center;gap:5px;flex:none;
+}
+.mini:hover{border-color:#cfd5dd}
+.mini.danger{color:var(--danger);border-color:#f2d4d1}
+.mini.danger:hover{background:var(--danger-soft)}
+.chk{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-2);cursor:pointer;user-select:none;flex:none}
+.chk input{width:15px;height:15px;accent-color:var(--brand);cursor:pointer}
+.lock-tip{font-size:11.5px;color:var(--text-3)}
+.lock-tip.warn{color:var(--danger)}
+.block-hint{
+  position:absolute;top:12px;right:12px;z-index:6;background:#fff;border:1px solid var(--line);
+  border-radius:10px;padding:9px 12px;display:flex;align-items:center;gap:8px;
+  font-size:12.5px;color:var(--text-2);max-width:380px;
+}
+.block-hint .mini{flex:none}
+.hint-x{cursor:pointer;color:var(--text-3);padding:0 3px;font-size:14px;flex:none}
+.toast{
+  position:absolute;left:50%;bottom:28px;transform:translateX(-50%);
+  background:#1f2733;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;z-index:90;
+}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" id="brandMark">看</div>
+      <div class="brand-name" id="brandName">公司运营看板平台</div>
+    </div>
+    <div class="search-wrap">
+      <svg class="search-ico" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+        <circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14" stroke-linecap="round"/>
+      </svg>
+      <input id="searchInput" type="text" placeholder="搜索部门或看板…" autocomplete="off">
+    </div>
+    <div class="topbar-right">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-3);cursor:pointer" id="syncBox" title="点击可重新配置云环境">
+        <span class="sync-dot" id="syncDot"></span><span id="syncText">本地模式</span>
+      </div>
+      <button class="tbtn" id="btnToggleSide" title="收起 / 展开边栏">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="2.5" width="12" height="11" rx="2"/><path d="M6.5 2.5v11"/>
+        </svg>
+      </button>
+      <button class="tbtn primary" id="btnAdmin">管理</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="side-scroll" id="sideScroll"></div>
+      <div class="side-foot">
+        <span class="side-count" id="sideCount"></span>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="frame-bar hidden" id="frameBar">
+        <span class="frame-title" id="frameTitle"></span>
+        <span class="frame-sub" id="frameSub"></span>
+        <span class="frame-age" id="frameAge"></span>
+        <span class="spacer"></span>
+        <span class="frame-sub">自动刷新</span>
+        <select class="mini" id="autoRefresh" title="定时重新载入看板，以拉取他人改动后的最新数据">
+          <option value="0">关</option>
+          <option value="2">2 分钟</option>
+          <option value="5">5 分钟</option>
+          <option value="10" selected>10 分钟</option>
+          <option value="30">30 分钟</option>
+        </select>
+        <button class="mini" id="btnReload">刷新</button>
+        <button class="mini" id="btnExternal">在新窗口打开</button>
+        <button class="mini" id="btnReport">打不开？</button>
+      </div>
+      <div class="frame-host" id="frameHost"></div>
+      <div class="home" id="homeView"></div>
+    </main>
+  </div>
+
+  <div id="layer"></div>
+</div>
+
+<script>
+/* ==================== 常量 ==================== */
+var LS_CFG = 'boardhub_cfg_v1';
+var LS_ENV = 'boardhub_env_v1';
+var SS_UNLOCK = 'boardhub_unlocked_v1';
+var COLL = 'board_hub_config';
+var DOC_ID = 'main';
+var DEFAULT_ENV = 'as1532656116-d6g77h3laf139a81d';
+var SDK_CDNS = [
+  'https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js',
+  'https://imgcache.qq.com/qcloud/cloudbase-js-sdk/1.7.6/cloudbase.full.js'
+];
+var COLORS = ['blue','green','amber','purple','teal','gray','coral'];
+var COLOR_HEX = {blue:'#185FA5',green:'#3B6D11',amber:'#BA7517',purple:'#534AB7',teal:'#0F6E56',gray:'#5F5E5A',coral:'#993C1D'};
+
+function uid(p){ return p + '_' + Math.random().toString(36).slice(2,9); }
+
+function defaultConfig(){
+  return {
+    title: '公司运营看板平台',
+    groups: [
+      { id:'g_rd', name:'研发中心', collapsed:false, boards:[
+        { id:'b_1', name:'滤波器项目', url:'https://ops-delivery-board-40171.app.workbuddy.host/', locked:true, pwd:'plain:1234', color:'blue', mode:'auto' }
+      ]},
+      { id:'g_pur', name:'采购交付', collapsed:false, boards:[
+        { id:'b_2', name:'订单监控', url:'https://45fb6911cb7146139a76a42a5295124c.app.workbuddy.link/', locked:true, pwd:'plain:1234', color:'teal', mode:'auto' }
+      ]},
+      { id:'g_adm', name:'行政管理', collapsed:false, boards:[
+        { id:'b_3', name:'出勤管理', url:'https://fulin-dashboard-24804.app.workbuddy.host/', locked:true, pwd:'plain:1234', color:'gray', mode:'auto' }
+      ]},
+      { id:'g_mfg', name:'生产制造', collapsed:false, boards:[
+        { id:'b_4', name:'OTD', url:'https://42651d1744f44790b0a6b3542f559105.app.workbuddy.link/', locked:true, pwd:'plain:1234', color:'amber', mode:'auto' }
+      ]},
+      { id:'g_wh', name:'仓储物流', collapsed:false, boards:[
+        { id:'b_5', name:'仓库管理', url:'wms/', locked:true, pwd:'plain:1234', color:'purple', mode:'auto' }
+      ]},
+      { id:'g_qc', name:'质量管理', collapsed:false, boards:[
+        { id:'b_6', name:'潜在质量问题', url:'nearmiss/', locked:true, pwd:'plain:1234', color:'coral', mode:'auto' }
+      ]}
+    ],
+    homeCards: ['b_1','b_2','b_3','b_4','b_5','b_6'],
+    adminPwd: 'plain:admin888',
+    updatedAt: '',
+    updatedBy: ''
+  };
+}
+
+/* ==================== 工具 ==================== */
+function $(id){ return document.getElementById(id); }
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function loadScript(src){
+  return new Promise(function(resolve, reject){
+    var s = document.createElement('script');
+    s.src = src; s.onload = resolve; s.onerror = function(){ reject(new Error(src)); };
+    document.head.appendChild(s);
+  });
+}
+async function sha256(str){
+  try{
+    if (window.crypto && crypto.subtle){
+      var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+    }
+  }catch(e){}
+  return 'plain:' + str;
+}
+async function verifyPwd(input, stored){
+  if (!stored) return true;
+  if (String(stored).indexOf('plain:') === 0) return input === stored.slice(6);
+  return (await sha256(input)) === stored;
+}
+function findBoard(id){
+  var g = state.config.groups || [];
+  for (var i=0;i<g.length;i++){
+    var bs = g[i].boards || [];
+    for (var j=0;j<bs.length;j++){ if (bs[j].id === id) return { board:bs[j], group:g[i], gi:i, bi:j }; }
+  }
+  return null;
+}
+function allBoards(){
+  var out = [];
+  (state.config.groups || []).forEach(function(g){
+    (g.boards || []).forEach(function(b){ out.push(b); });
+  });
+  return out;
+}
+function toast(msg){
+  var old = document.querySelector('.toast');
+  if (old) old.remove();
+  var t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  $('app').appendChild(t);
+  setTimeout(function(){ t.remove(); }, 2200);
+}
+
+/* ==================== 状态 ==================== */
+var state = {
+  config: defaultConfig(),
+  view: 'home',        // 'home' | board id
+  unlocked: {},        // 本次会话已解锁
+  hintShown: {},       // 每看板白屏提示只弹一次
+  admin: false,
+  search: '',
+  cloud: { ready:false, reason:'未连接', db:null }
+};
+try{
+  var saved = JSON.parse(sessionStorage.getItem(SS_UNLOCK) || '{}');
+  state.unlocked = saved && typeof saved === 'object' ? saved : {};
+}catch(e){}
+
+/* ==================== 云端 ==================== */
+async function initCloud(silent){
+  var env = localStorage.getItem(LS_ENV) || DEFAULT_ENV || '';
+  if (!env){
+    state.cloud = { ready:false, reason:'未配置云环境', db:null };
+    renderSync(); return false;
+  }
+  var CB = window.cloudbase || window.tcb;
+  if (!CB){
+    for (var i=0;i<SDK_CDNS.length;i++){
+      try{ await loadScript(SDK_CDNS[i]); CB = window.cloudbase || window.tcb; if (CB) break; }catch(e){}
+    }
+  }
+  if (!CB){
+    state.cloud = { ready:false, reason:'云开发 SDK 加载失败', db:null };
+    renderSync(); return false;
+  }
+  try{
+    var app = CB.init({ env: env });
+    var auth = app.auth({ persistence: 'local' });
+    if (!auth.getLoginState || !auth.getLoginState()){
+      await auth.signInAnonymously();
+    }
+    var db = app.database();
+    state.cloud = { ready:true, reason:'云端已同步', db:db, collError:'' };
+    try{
+      await db.collection(COLL).limit(1).get();
+    }catch(e){
+      state.cloud.collError = (e && e.message) ? e.message : '集合不可访问';
+      state.cloud.reason = '云端已连接，但集合 ' + COLL + ' 不可访问（需在控制台新建并设为「所有用户可读写」）';
+    }
+    renderSync(); return true;
+  }catch(e){
+    state.cloud = { ready:false, reason:'云端不可用：' + (e && e.message ? e.message : '未知错误'), db:null };
+    if (!silent) console.warn('[boardhub] cloud init failed', e);
+    renderSync(); return false;
+  }
+}
+async function pullFromCloud(){
+  if (!state.cloud.ready) return false;
+  try{
+    var res = await state.cloud.db.collection(COLL).doc(DOC_ID).get();
+    var doc = res && res.data;
+    if (doc && doc.length) doc = doc[0];
+    if (doc && doc.groups){
+      state.config = normalize(doc);
+      localStorage.setItem(LS_CFG, JSON.stringify(state.config));
+      renderAll();
+      return true;
+    }
+    return false;
+  }catch(e){
+    console.warn('[boardhub] pull failed', e);
+    return false;
+  }
+}
+/* ---- 配置实时同步：别人在别处改了部门清单，这边自动跟上 ---- */
+var cfgTimer = null;
+function boardMap(){
+  var m = {};
+  (state.config.groups || []).forEach(function(g){
+    (g.boards || []).forEach(function(b){ m[b.id] = { url:b.url, locked:b.locked, mode:b.mode, name:b.name }; });
+  });
+  return m;
+}
+async function syncConfigOnce(){
+  if (!state.cloud.ready || layerOpen()) return false;
+  try{
+    var res = await state.cloud.db.collection(COLL).doc(DOC_ID).get();
+    var doc = res && res.data;
+    if (doc && doc.length) doc = doc[0];
+    if (!doc || !doc.groups) return false;
+    if (doc.updatedAt && state.config.updatedAt){
+      if (String(doc.updatedAt) === String(state.config.updatedAt)) return false;
+      if (new Date(doc.updatedAt) <= new Date(state.config.updatedAt)) return false;
+    }
+    var before = boardMap();
+    var incoming = normalize(doc);
+    state.config = incoming;
+    localStorage.setItem(LS_CFG, JSON.stringify(state.config));
+
+    // 网址变了 / 被删了 / 新加锁了，都要让旧 iframe 失效
+    var after = boardMap();
+    Object.keys(before).forEach(function(id){
+      var a = after[id];
+      if (!a || a.url !== before[id].url) dropFrame(id);
+      if (a && a.locked && !before[id].locked) delete state.unlocked[id];
+    });
+    if (state.view !== 'home' && !findBoard(state.view)){
+      showHome(); toast('有人移除了当前看板，已返回总览');
+    }else{
+      if (state.view === 'home'){ renderHome(); }
+      else if (isStale()){ reloadCurrent(); }
+      renderSidebar();
+    }
+    toast('部门清单已更新');
+    return true;
+  }catch(e){ return false; }
+}
+function startConfigSync(){
+  clearInterval(cfgTimer);
+  cfgTimer = setInterval(syncConfigOnce, 20000);
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden){
+      syncConfigOnce();
+      if (state.view !== 'home' && isStale()) reloadCurrent();
+    }
+  });
+}
+
+function cleanConfig(cfg){
+  var c = JSON.parse(JSON.stringify(cfg));
+  (c.groups || []).forEach(function(g){
+    (g.boards || []).forEach(function(b){ delete b._origPwd; });
+  });
+  return c;
+}
+function discardPending(){
+  allBoards().forEach(function(b){
+    if (b.pwd && String(b.pwd).indexOf('pending:') === 0){
+      b.pwd = (b._origPwd !== undefined) ? b._origPwd : '';
+    }
+    delete b._origPwd;
+  });
+}
+async function pushToCloud(){
+  var payload = cleanConfig(state.config);
+  payload.updatedAt = new Date().toISOString();
+  localStorage.setItem(LS_CFG, JSON.stringify(payload));
+  if (!state.cloud.ready) return false;
+  try{
+    await state.cloud.db.collection(COLL).doc(DOC_ID).set(payload);
+    state.config.updatedAt = payload.updatedAt;
+    return true;
+  }catch(e){
+    console.warn('[boardhub] push failed', e);
+    return false;
+  }
+}
+function normalize(cfg){
+  var d = defaultConfig();
+  cfg = cfg || {};
+  cfg.title = cfg.title || d.title;
+  cfg.groups = Array.isArray(cfg.groups) ? cfg.groups : d.groups;
+  cfg.groups.forEach(function(g){
+    if (!g.id) g.id = uid('g');
+    g.name = g.name || '未命名分组';
+    g.collapsed = !!g.collapsed;
+    g.boards = Array.isArray(g.boards) ? g.boards : [];
+    g.boards.forEach(function(b){
+      if (!b.id) b.id = uid('b');
+      b.name = b.name || '未命名看板';
+      b.url = b.url || '';
+      b.locked = !!b.locked;
+      b.pwd = b.pwd || '';
+      b.color = COLOR_HEX[b.color] ? b.color : 'blue';
+      b.mode = (b.mode === 'new' || b.mode === 'auto') ? b.mode : 'auto';
+    });
+  });
+  cfg.homeCards = Array.isArray(cfg.homeCards) ? cfg.homeCards : [];
+  cfg.adminPwd = cfg.adminPwd || d.adminPwd;
+  return cfg;
+}
+function renderSync(){
+  var dot = $('syncDot'), txt = $('syncText');
+  if (state.cloud.ready && !state.cloud.collError){
+    dot.className = 'sync-dot ok'; txt.textContent = '云端已同步';
+  }else if (state.cloud.ready){
+    dot.className = 'sync-dot'; txt.textContent = '云端已连 · 集合未就绪';
+  }else{
+    dot.className = 'sync-dot err'; txt.textContent = '本地模式';
+  }
+  $('syncBox').title = state.cloud.reason + '（点击可重新配置）';
+}
+
+/* ==================== 渲染 ==================== */
+function lockSvg(){
+  return '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5.2a2.5 2.5 0 0 1 5 0V7"/></svg>';
+}
+function avatarHtml(b){
+  var ch = (b.name || '?').trim().charAt(0) || '?';
+  return '<span class="avatar" style="background:' + (COLOR_HEX[b.color] || COLOR_HEX.blue) + '">' + esc(ch) + '</span>';
+}
+
+function renderSidebar(){
+  var kw = state.search.trim().toLowerCase();
+  var groups = state.config.groups || [];
+  var total = 0, shown = 0;
+  var html = '';
+
+  html += '<div class="nav-item' + (state.view === 'home' ? ' active' : '') + '" data-home="1">' +
+    '<span class="avatar" style="background:#5F5E5A">总</span>' +
+    '<span class="nav-label">总览首页</span></div>';
+
+  if (kw){
+    groups.forEach(function(g){
+      (g.boards || []).forEach(function(b){
+        if (b.name.toLowerCase().indexOf(kw) > -1 || (g.name || '').toLowerCase().indexOf(kw) > -1){
+          shown++;
+          html += '<div class="nav-item' + (state.view === b.id ? ' active' : '') + '" data-board="' + b.id + '">' +
+            avatarHtml(b) + '<span class="nav-label">' + esc(b.name) + '</span>' +
+            (b.locked ? '<span class="nav-lock" title="需要密码">' + lockSvg() + '</span>' : '') + '</div>';
+        }
+      });
+    });
+    if (!shown) html += '<div style="padding:14px 10px;font-size:12.5px;color:var(--text-3)">没有匹配的看板</div>';
+  }else{
+    groups.forEach(function(g){
+      var bs = g.boards || [];
+      if (!bs.length && !state.admin) return;
+      total += bs.length;
+      html += '<div class="grp-head" data-grp="' + g.id + '">' +
+        '<svg class="chevron' + (g.collapsed ? '' : ' up') + '" width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        '<span style="flex:1">' + esc(g.name) + '</span><span style="font-size:11px">' + bs.length + '</span></div>';
+      html += '<div class="grp-body' + (g.collapsed ? ' collapsed' : '') + '">';
+      bs.forEach(function(b){
+        html += '<div class="nav-item' + (state.view === b.id ? ' active' : '') + '" data-board="' + b.id + '">' +
+          avatarHtml(b) + '<span class="nav-label">' + esc(b.name) + '</span>' +
+          (b.locked ? '<span class="nav-lock" title="需要密码">' + lockSvg() + '</span>' : '') + '</div>';
+      });
+      if (!bs.length) html += '<div style="padding:6px 10px;font-size:12px;color:var(--text-3)">暂无看板</div>';
+      html += '</div>';
+    });
+  }
+  $('sideScroll').innerHTML = html;
+  $('sideCount').textContent = '共 ' + allBoards().length + ' 个看板';
+}
+
+function renderHome(){
+  var cards = (state.config.homeCards || []).map(function(id){ return findBoard(id); }).filter(Boolean);
+  var html = '<div class="home-head"><h2>常用看板</h2><span>点击卡片直接打开，可在「管理」中调整</span></div>';
+  if (!cards.length){
+    html += '<div class="empty">还没有常用卡片，进入「管理」勾选要放在首页的看板。</div>';
+  }else{
+    html += '<div class="card-grid">';
+    cards.forEach(function(f){
+      var b = f.board;
+      html += '<div class="board-card" data-card="' + b.id + '">' + avatarHtml(b) +
+        '<div><div class="card-name">' + esc(b.name) + '</div>' +
+        '<div class="card-meta">' + esc(f.group.name) + (b.locked ? ' · ' + lockSvg() + ' 需密码' : '') + '</div></div></div>';
+    });
+    html += '</div>';
+  }
+  $('homeView').innerHTML = html;
+}
+
+var frameCache = {};
+var frameTimers = {};
+
+function clearMask(){
+  var m = $('frameHost').querySelector('.frame-mask');
+  if (m) m.remove();
+}
+function hideAllFrames(){
+  Object.keys(frameCache).forEach(function(k){ frameCache[k].style.display = 'none'; });
+}
+function showLoadingMask(b){
+  clearMask();
+  var host = $('frameHost');
+  var d = document.createElement('div');
+  d.className = 'frame-mask';
+  d.innerHTML = '<div class="spinner"></div><div class="mask-desc">正在载入 ' + esc(b.name) + '…</div>' +
+    '<div class="mask-actions"><button class="mini" data-act="external">在新窗口打开</button></div>';
+  d.querySelector('[data-act=external]').onclick = function(){ window.open(b.url, '_blank', 'noopener'); };
+  host.appendChild(d);
+  clearTimeout(frameTimers[b.id]);
+  frameTimers[b.id] = setTimeout(function(){
+    if (state.view !== b.id) return;
+    var live = host.querySelector('.frame-mask');
+    if (!live) return;
+    live.innerHTML = '<div class="mask-title">载入时间偏长</div>' +
+      '<div class="mask-desc">可能是看板本身较慢，或该站点禁止被嵌入页面。你可以继续等待，或直接在新窗口打开。</div>' +
+      '<div class="mask-actions"><button class="mini" data-act="wait">继续等待</button>' +
+      '<button class="mini" data-act="external">在新窗口打开</button></div>';
+    live.querySelector('[data-act=external]').onclick = function(){ window.open(b.url, '_blank', 'noopener'); };
+    live.querySelector('[data-act=wait]').onclick = function(){ live.remove(); };
+  }, 6000);
+}
+var LS_REFRESH = 'boardhub_autorefresh_v1';
+var STALE_MS = 4 * 60 * 1000;   // 切回某看板时，超过这个时长自动重新载入
+var autoTimer = null, ageTimer = null;
+
+function autoMinutes(){
+  var v = localStorage.getItem(LS_REFRESH);
+  if (v === null) return 10;
+  return parseInt(v, 10) || 0;
+}
+function setFrameSrc(f, url){
+  // 赋相同 src 不会触发重载，先置空确保真正重新导航
+  if (f.getAttribute('src') === url) f.setAttribute('src', 'about:blank');
+  f.dataset.loadedAt = Date.now();
+  f.setAttribute('src', url);
+}
+function isStale(){
+  var s = Number(frameCache[state.view] && frameCache[state.view].dataset.loadedAt || 0);
+  return s && (Date.now() - s > STALE_MS);
+}
+function ensureFrame(b, force){
+  var host = $('frameHost');
+  var f = frameCache[b.id];
+  if (!f){
+    f = document.createElement('iframe');
+    f.setAttribute('referrerpolicy', 'no-referrer');
+    f.dataset.bid = b.id;
+    f.dataset.loaded = '0';
+    f.onload = function(){
+      f.dataset.loaded = '1';
+      f.dataset.loadedAt = Date.now();
+      clearTimeout(frameTimers[b.id]);
+      if (state.view === b.id){ clearMask(); showBlockHint(b); renderAge(); }
+    };
+    host.appendChild(f);
+    frameCache[b.id] = f;
+  }
+  var srcNow = f.getAttribute('src');
+  var stale = force || (srcNow && f.dataset.loadedAt && (Date.now() - Number(f.dataset.loadedAt) > STALE_MS));
+  if (srcNow !== b.url || stale){
+    f.dataset.loaded = '0';
+    setFrameSrc(f, b.url);
+  }
+  f.style.display = 'block';
+  if (f.dataset.loaded !== '1') showLoadingMask(b); else clearMask();
+}
+function reloadFrame(b){
+  var f = frameCache[b.id];
+  if (!f){ ensureFrame(b); return; }
+  f.dataset.loaded = '0';
+  setFrameSrc(f, b.url);
+  showLoadingMask(b);
+  toast('正在拉取最新数据…');
+}
+function reloadCurrent(){          // 切回已加载过的看板时的后台刷新
+  var f = findBoard(state.view);
+  if (!f || f.board.mode === 'new') return;
+  if (f.board.locked && !state.unlocked[f.board.id]) return;
+  if (!f.board.url) return;
+  reloadFrame(f.board);
+}
+function fmtAge(ts){
+  if (!ts) return '未载入';
+  var s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 45) return '刚刚更新';
+  if (s < 3600) return Math.floor(s / 60) + ' 分钟前更新';
+  var h = Math.floor(s / 3600);
+  if (h < 24) return h + ' 小时前更新';
+  return Math.floor(h / 24) + ' 天前更新';
+}
+function renderAge(){
+  var el = $('frameAge'); if (!el) return;
+  var f = frameCache[state.view];
+  if (!f || f.dataset.loaded !== '1'){ el.textContent = ''; return; }
+  el.textContent = fmtAge(Number(f.dataset.loadedAt));
+  el.className = 'frame-age' + ((Date.now() - Number(f.dataset.loadedAt)) < 5 * 60 * 1000 ? ' fresh' : '');
+}
+function startAutoRefresh(b){
+  clearInterval(autoTimer); clearInterval(ageTimer);
+  ageTimer = setInterval(renderAge, 30000);
+  var m = autoMinutes();
+  if (!m || !b.url || b.mode === 'new') return;
+  autoTimer = setInterval(function(){
+    if (state.view !== b.id) return;
+    if (document.hidden) return;          // 不在前台就不打断
+    if (layerOpen()) return;              // 开着管理面板时不打扰
+    reloadFrame(b);
+  }, m * 60 * 1000);
+}
+function layerOpen(){ var l = $('layer'); return l && l.innerHTML.trim() !== ''; }
+function dropFrame(id){
+  var f = frameCache[id];
+  if (f && f.parentNode) f.parentNode.removeChild(f);
+  delete frameCache[id];
+  clearTimeout(frameTimers[id]);
+}
+function showBlockHint(b){
+  if (!b.url || state.hintShown[b.id]) return;
+  state.hintShown[b.id] = true;
+  var host = $('frameHost');
+  if (host.querySelector('.block-hint')) return;
+  var d = document.createElement('div');
+  d.className = 'block-hint';
+  d.innerHTML = '<span>若看板区域空白，说明当前浏览器限制了内嵌</span>' +
+    '<button class="mini" id="hintNew">新窗口打开</button>' +
+    '<button class="mini" id="hintAlways">始终用新窗口</button>' +
+    '<span class="hint-x" id="hintX">&#215;</span>';
+  host.appendChild(d);
+  var t = setTimeout(function(){ if (d.parentNode) d.remove(); }, 10000);
+  $('hintX').onclick = function(){ clearTimeout(t); d.remove(); };
+  $('hintNew').onclick = function(){ clearTimeout(t); window.open(b.url, '_blank', 'noopener'); };
+  $('hintAlways').onclick = async function(){
+    clearTimeout(t); d.remove();
+    b.mode = 'new';
+    await pushToCloud();
+    renderFrame();
+    toast('已设为始终用新窗口打开');
+  };
+}
+
+function renderFrame(){
+  clearInterval(autoTimer); clearInterval(ageTimer);
+  var f = findBoard(state.view);
+  if (!f){ showHome(); return; }
+  var b = f.board;
+  hideAllFrames();
+  clearMask();
+  $('homeView').classList.add('hidden');
+  $('frameHost').classList.remove('hidden');
+  $('frameBar').classList.remove('hidden');
+  $('frameTitle').textContent = b.name;
+  $('frameSub').textContent = f.group.name;
+  $('btnExternal').onclick = function(){ window.open(b.url, '_blank', 'noopener'); };
+  $('btnReload').onclick = function(){ reloadFrame(b); };
+  var sel = $('autoRefresh');
+  if (sel){
+    sel.value = String(autoMinutes());
+    sel.onchange = function(){
+      localStorage.setItem(LS_REFRESH, sel.value);
+      startAutoRefresh(b);
+      toast(sel.value === '0' ? '已关闭自动刷新' : '每 ' + sel.value + ' 分钟自动拉取最新数据');
+    };
+  }
+
+  if (b.mode === 'new'){
+    renderMask('此看板设置为「新窗口打开」', '为避免内嵌被目标站点拒绝，这个看板默认不嵌在页面里。', b, false);
+    return;
+  }
+  if (b.locked && !state.unlocked[b.id]){
+    renderMask('此看板需要密码', '请输入管理员为该看板设置的访问密码。', b, true);
+    return;
+  }
+  if (!b.url){
+    renderMask('尚未配置网址', '进入「管理」为「' + b.name + '」填写看板网址。', b, false);
+    return;
+  }
+  ensureFrame(b);
+  startAutoRefresh(b);
+  renderAge();
+}
+function renderMask(title, desc, b, needPwd){
+  var host = $('frameHost');
+  clearMask();
+  var d = document.createElement('div');
+  d.className = 'frame-mask';
+  var inner = '<div class="mask-title">' + esc(title) + '</div>' +
+    '<div class="mask-desc">' + esc(desc) + '</div><div class="mask-actions">';
+  if (needPwd){
+    inner += '<input type="password" id="pwdInput" placeholder="访问密码" style="height:32px;padding:0 10px;border:1px solid var(--line);border-radius:8px;outline:none;width:180px">' +
+      '<button class="mini" id="pwdOk" style="background:var(--brand);color:#fff;border-color:var(--brand)">解锁</button>';
+  }
+  if (b.url) inner += '<button class="mini" id="maskExt">在新窗口打开</button>';
+  inner += '</div><div class="err-tip" id="pwdErr"></div>';
+  d.innerHTML = inner;
+  host.appendChild(d);
+  var ext = $('maskExt');
+  if (ext) ext.onclick = function(){ window.open(b.url, '_blank', 'noopener'); };
+  var ok = $('pwdOk');
+  if (ok){
+    var input = $('pwdInput');
+    input.onkeydown = function(e){ if (e.key === 'Enter') ok.click(); };
+    setTimeout(function(){ input.focus(); }, 50);
+    ok.onclick = async function(){
+      var passed = await verifyPwd(input.value, b.pwd);
+      if (passed){
+        state.unlocked[b.id] = true;
+        try{ sessionStorage.setItem(SS_UNLOCK, JSON.stringify(state.unlocked)); }catch(e){}
+        openBoard(b.id, true);
+      }else{
+        $('pwdErr').textContent = '密码不正确';
+      }
+    };
+  }
+}
+
+function showHome(){
+  state.view = 'home';
+  hideAllFrames();
+  clearMask();
+  $('frameBar').classList.add('hidden');
+  $('frameHost').classList.add('hidden');
+  $('homeView').classList.remove('hidden');
+  renderHome(); renderSidebar();
+}
+function openBoard(id, force){
+  if (!force && state.view === id) return;
+  state.view = id;
+  $('homeView').classList.add('hidden');
+  renderFrame(); renderSidebar();
+}
+function renderAll(){
+  $('brandName').textContent = state.config.title || '公司运营看板平台';
+  $('brandMark').textContent = (state.config.title || '看').trim().charAt(0);
+  document.title = state.config.title || '公司运营看板平台';
+  if (state.view !== 'home' && !findBoard(state.view)) state.view = 'home';
+  if (state.view === 'home'){
+    hideAllFrames();
+    clearMask();
+    $('frameBar').classList.add('hidden');
+    $('frameHost').classList.add('hidden');
+    $('homeView').classList.remove('hidden');
+    renderHome();
+  }else{
+    renderFrame();
+  }
+  renderSidebar();
+}
+
+/* ==================== 弹层 ==================== */
+function closeLayer(){ $('layer').innerHTML = ''; }
+function overlay(inner, onBg){
+  var html = '<div class="overlay" id="ov">' + inner + '</div>';
+  $('layer').innerHTML = html;
+  var ov = $('ov');
+  ov.addEventListener('mousedown', function(e){ if (e.target === ov && onBg) onBg(); });
+  return ov;
+}
+
+function askAdminPassword(){
+  overlay(
+    '<div class="modal"><h3>进入管理模式</h3><p>管理模式可增删部门、修改网址与密码、排布首页卡片。</p>' +
+    '<div class="field"><label>管理员密码</label><input type="password" id="apInput" autocomplete="off"></div>' +
+    '<div class="err-tip" id="apErr"></div>' +
+    '<div class="modal-actions"><button class="mini" id="apCancel">取消</button>' +
+    '<button class="mini primary" id="apOk" style="background:var(--brand);color:#fff;border-color:var(--brand)">进入</button></div>' +
+    '<div class="hint" style="margin-top:12px">忘记密码：在部署的 HTML 源码里搜索 <code>admin888</code> 可查看初始默认值。</div></div>',
+    closeLayer
+  );
+  var input = $('apInput');
+  setTimeout(function(){ input.focus(); }, 50);
+  $('apCancel').onclick = closeLayer;
+  $('apOk').onclick = async function(){
+    var ok = await verifyPwd(input.value, state.config.adminPwd);
+    if (ok){ state.admin = true; closeLayer(); openAdmin(); }
+    else { $('apErr').textContent = '密码不正确'; }
+  };
+  input.onkeydown = function(e){ if (e.key === 'Enter') $('apOk').click(); };
+}
+
+function cloudSetupGuide(){
+  overlay(
+    '<div class="modal"><h3>连接云开发环境</h3><p>填写云开发环境 ID 后，部门清单会存到云端，你在线改动即刻对所有人生效。也可以先跳过，用本地模式（配置只保存在本机浏览器）。</p>' +
+    '<div class="field"><label>环境 ID</label><input type="text" id="envInput" value="' + esc(localStorage.getItem(LS_ENV) || DEFAULT_ENV) + '" placeholder="例如 cloud1-1gxxxxxxxx" autocomplete="off"></div>' +
+    '<div class="err-tip" id="envErr"></div>' +
+    '<div class="modal-actions"><button class="mini" id="envSkip">先用本地模式</button>' +
+    '<button class="mini primary" id="envOk" style="background:var(--brand);color:#fff;border-color:var(--brand)">连接</button></div>' +
+    '<div class="hint" style="margin-top:12px">在腾讯云开发控制台「环境 → 环境 ID」可查看。还需在「登录授权」里开启匿名登录，并把集合 <code>' + COLL + '</code> 的权限设为「所有用户可读写」。</div></div>',
+    function(){}
+  );
+  $('envSkip').onclick = function(){ closeLayer(); };
+  var input = $('envInput');
+  setTimeout(function(){ input.focus(); }, 50);
+  $('envOk').onclick = async function(){
+    var v = input.value.trim();
+    if (!v){ $('envErr').textContent = '请填写环境 ID'; return; }
+    $('envErr').textContent = '正在连接…';
+    localStorage.setItem(LS_ENV, v);
+    var okCloud = await initCloud(true);
+    if (okCloud){
+      await pullFromCloud();
+      closeLayer(); renderAll();
+      toast('云端已连接');
+    }else{
+      $('envErr').textContent = state.cloud.reason + '（已切回本地模式）';
+    }
+  };
+  input.onkeydown = function(e){ if (e.key === 'Enter') $('envOk').click(); };
+}
+
+/* ==================== 管理抽屉 ==================== */
+function openAdmin(){
+  var html = '<div class="drawer" id="drawer">' +
+    '<div class="drawer-head"><h3>管理模式</h3><span class="spacer" style="flex:1"></span>' +
+    '<button class="mini" id="adLogout">退出</button><button class="mini" id="adClose">关闭</button></div>' +
+    '<div class="drawer-body" id="adBody"></div>' +
+    '<div class="drawer-foot">' +
+    '<button class="mini" id="adSave" style="background:var(--brand);color:#fff;border-color:var(--brand)">保存并同步</button>' +
+    '<button class="mini" id="adAddGrp">添加分组</button>' +
+    '<span class="spacer" style="flex:1"></span>' +
+    '<button class="mini" id="adExport">导出</button>' +
+    '<button class="mini" id="adImport">导入</button>' +
+    '<button class="mini" id="adPwd">改管理员密码</button>' +
+    '</div></div>';
+  $('layer').innerHTML = html;
+  $('adClose').onclick = function(){ discardPending(); closeLayer(); renderAll(); };
+  $('adLogout').onclick = function(){ discardPending(); state.admin = false; closeLayer(); renderAll(); };
+  $('adSave').onclick = saveAdmin;
+  $('adAddGrp').onclick = function(){
+    state.config.groups.push({ id: uid('g'), name:'新分组', collapsed:false, boards:[] });
+    renderAdminBody();
+  };
+  $('adExport').onclick = function(){
+    var blob = new Blob([JSON.stringify(cleanConfig(state.config), null, 2)], {type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'board-hub-config.json';
+    a.click();
+  };
+  $('adImport').onclick = function(){
+    var inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.json,application/json';
+    inp.onchange = function(){
+      var f = inp.files[0]; if (!f) return;
+      var r = new FileReader();
+      r.onload = async function(){
+        try{
+          var cfg = normalize(cleanConfig(JSON.parse(r.result)));
+          if (!confirm('导入将覆盖当前全部配置，确定继续？')) return;
+          state.config = cfg;
+          await pushToCloud();
+          renderAdminBody(); renderAll();
+          toast('已导入');
+        }catch(e){ alert('文件格式不正确'); }
+      };
+      r.readAsText(f);
+    };
+    inp.click();
+  };
+  $('adPwd').onclick = changeAdminPwd;
+  renderAdminBody();
+}
+
+function renderAdminBody(){
+  var groups = state.config.groups || [];
+  var html = '';
+  html += '<div class="field"><label>平台标题</label><input type="text" id="adTitle" value="' + esc(state.config.title) + '"></div>';
+
+  groups.forEach(function(g, gi){
+    html += '<div class="admin-grp"><div class="admin-grp-head">' +
+      '<input type="text" data-gname="' + g.id + '" value="' + esc(g.name) + '">' +
+      '<button class="mini" data-gup="' + gi + '" title="上移">↑</button>' +
+      '<button class="mini" data-gdown="' + gi + '" title="下移">↓</button>' +
+      '<button class="mini" data-gadd="' + g.id + '">加看板</button>' +
+      '<button class="mini danger" data-gdel="' + g.id + '">删分组</button></div>';
+
+    (g.boards || []).forEach(function(b, bi){
+      html += '<div class="admin-board">' +
+        '<div class="row"><input type="text" data-bname="' + b.id + '" value="' + esc(b.name) + '" placeholder="看板名称">' +
+        '<select data-bcolor="' + b.id + '">' +
+        COLORS.map(function(c){ return '<option value="' + c + '"' + (b.color === c ? ' selected' : '') + '>' + c + '</option>'; }).join('') +
+        '</select>' +
+        '<button class="mini" data-bup="' + b.id + '">↑</button>' +
+        '<button class="mini" data-bdown="' + b.id + '">↓</button>' +
+        '<button class="mini danger" data-bdel="' + b.id + '">删除</button></div>' +
+        '<div class="row"><input type="url" data-burl="' + b.id + '" value="' + esc(b.url) + '" placeholder="https://…"></div>' +
+        '<div class="row">' +
+        '<label class="chk"><input type="checkbox" data-bhome="' + b.id + '"' + ((state.config.homeCards || []).indexOf(b.id) > -1 ? ' checked' : '') + '>首页卡片</label>' +
+        '<label class="chk"><input type="checkbox" data-block="' + b.id + '"' + (b.locked ? ' checked' : '') + '>需要密码</label>' +
+        '<input type="password" data-bpwd="' + b.id + '" placeholder="' + (b.pwd ? '留空则不改密码' : '设置访问密码') + '" style="flex:1;min-width:0;height:30px;padding:0 9px;border:1px solid var(--line);border-radius:7px;outline:none">' +
+        '<select data-bmode="' + b.id + '">' +
+        '<option value="auto"' + (b.mode === 'auto' ? ' selected' : '') + '>自动内嵌</option>' +
+        '<option value="new"' + (b.mode === 'new' ? ' selected' : '') + '>新窗口打开</option>' +
+        '</select></div>' +
+        '<div class="lock-tip' + (b.locked && !b.pwd ? ' warn' : '') + '" data-btip="' + b.id + '">' +
+        (b.locked && !b.pwd ? '已勾选需要密码，但还没有设置密码 —— 任何人都能直接打开' : (b.locked ? '已设置密码' : '无需密码，所有人可直接查看')) +
+        '</div></div>';
+    });
+    if (!(g.boards || []).length) html += '<div style="padding:10px;font-size:12.5px;color:var(--text-3)">该分组下还没有看板</div>';
+    html += '</div>';
+  });
+
+  $('adBody').innerHTML = html;
+  bindAdminInputs();
+}
+
+function bindAdminInputs(){
+  var body = $('adBody');
+  var title = body.querySelector('#adTitle');
+  title.oninput = function(){ state.config.title = title.value; };
+
+  body.querySelectorAll('[data-gname]').forEach(function(el){
+    el.oninput = function(){
+      var g = state.config.groups.filter(function(x){ return x.id === el.getAttribute('data-gname'); })[0];
+      if (g) g.name = el.value;
+      renderSidebar();
+    };
+  });
+  body.querySelectorAll('[data-bname]').forEach(function(el){
+    el.oninput = function(){
+      var f = findBoard(el.getAttribute('data-bname'));
+      if (f){ f.board.name = el.value; renderSidebar(); }
+    };
+  });
+  body.querySelectorAll('[data-burl]').forEach(function(el){
+    el.oninput = function(){
+      var f = findBoard(el.getAttribute('data-burl'));
+      if (f) f.board.url = el.value.trim();
+    };
+  });
+  body.querySelectorAll('[data-bcolor]').forEach(function(el){
+    el.onchange = function(){
+      var f = findBoard(el.getAttribute('data-bcolor'));
+      if (f){ f.board.color = el.value; renderSidebar(); }
+    };
+  });
+  body.querySelectorAll('[data-bmode]').forEach(function(el){
+    el.onchange = function(){
+      var f = findBoard(el.getAttribute('data-bmode'));
+      if (f) f.board.mode = el.value;
+    };
+  });
+  body.querySelectorAll('[data-bhome]').forEach(function(el){
+    el.onchange = function(){
+      var id = el.getAttribute('data-bhome');
+      var list = state.config.homeCards || (state.config.homeCards = []);
+      if (el.checked){ if (list.indexOf(id) < 0) list.push(id); }
+      else { state.config.homeCards = list.filter(function(x){ return x !== id; }); }
+      renderHome();
+    };
+  });
+  body.querySelectorAll('[data-block]').forEach(function(el){
+    el.onchange = function(){
+      var f = findBoard(el.getAttribute('data-block'));
+      if (!f) return;
+      f.board.locked = el.checked;
+      var tip = body.querySelector('[data-btip="' + f.board.id + '"]');
+      if (tip){
+        tip.textContent = f.board.locked
+          ? (f.board.pwd ? '已设置密码' : '已勾选需要密码，但还没有设置密码 —— 任何人都能直接打开')
+          : '无需密码，所有人可直接查看';
+        tip.className = 'lock-tip' + (f.board.locked && !f.board.pwd ? ' warn' : '');
+      }
+      renderSidebar();
+    };
+  });
+  body.querySelectorAll('[data-bpwd]').forEach(function(el){
+    el.onchange = function(){
+      var f = findBoard(el.getAttribute('data-bpwd'));
+      if (!f || !el.value) return;
+      if (f.board._origPwd === undefined) f.board._origPwd = f.board.pwd;
+      f.board.pwd = 'pending:' + el.value;
+      var tip = body.querySelector('[data-btip="' + f.board.id + '"]');
+      if (tip){ tip.textContent = '新密码将在点「保存并同步」后生效'; tip.className = 'lock-tip'; }
+    };
+  });
+
+  body.querySelectorAll('[data-gadd]').forEach(function(el){
+    el.onclick = function(){
+      var g = state.config.groups.filter(function(x){ return x.id === el.getAttribute('data-gadd'); })[0];
+      if (!g) return;
+      g.boards.push({ id: uid('b'), name:'新看板', url:'', locked:false, pwd:'', color:'blue', mode:'auto' });
+      renderAdminBody();
+    };
+  });
+  body.querySelectorAll('[data-gdel]').forEach(function(el){
+    el.onclick = function(){
+      var id = el.getAttribute('data-gdel');
+      var g = state.config.groups.filter(function(x){ return x.id === id; })[0];
+      if (!g) return;
+      if ((g.boards || []).length && !confirm('删除分组「' + g.name + '」会同时删除其下 ' + g.boards.length + ' 个看板，确定？')) return;
+      (g.boards || []).forEach(function(b){ dropFrame(b.id); delete state.unlocked[b.id]; });
+      state.config.groups = state.config.groups.filter(function(x){ return x.id !== id; });
+      renderAdminBody(); renderSidebar();
+    };
+  });
+  body.querySelectorAll('[data-bdel]').forEach(function(el){
+    el.onclick = function(){
+      var id = el.getAttribute('data-bdel');
+      var f = findBoard(id); if (!f) return;
+      if (!confirm('删除看板「' + f.board.name + '」？')) return;
+      f.group.boards.splice(f.bi, 1);
+      dropFrame(id);
+      delete state.unlocked[id];
+      state.config.homeCards = (state.config.homeCards || []).filter(function(x){ return x !== id; });
+      if (state.view === id) showHome(); else { renderAdminBody(); renderSidebar(); }
+    };
+  });
+  body.querySelectorAll('[data-gup]').forEach(function(el){
+    el.onclick = function(){ moveGroup(parseInt(el.getAttribute('data-gup'),10), -1); };
+  });
+  body.querySelectorAll('[data-gdown]').forEach(function(el){
+    el.onclick = function(){ moveGroup(parseInt(el.getAttribute('data-gdown'),10), 1); };
+  });
+  body.querySelectorAll('[data-bup]').forEach(function(el){
+    el.onclick = function(){ moveBoard(el.getAttribute('data-bup'), -1); };
+  });
+  body.querySelectorAll('[data-bdown]').forEach(function(el){
+    el.onclick = function(){ moveBoard(el.getAttribute('data-bdown'), 1); };
+  });
+}
+function moveGroup(i, d){
+  var gs = state.config.groups, j = i + d;
+  if (j < 0 || j >= gs.length) return;
+  var tmp = gs[i]; gs[i] = gs[j]; gs[j] = tmp;
+  renderAdminBody(); renderSidebar();
+}
+function moveBoard(id, d){
+  var f = findBoard(id); if (!f) return;
+  if (d < 0 && f.bi === 0){
+    if (f.gi === 0) return;
+    var prev = state.config.groups[f.gi - 1];
+    f.group.boards.splice(f.bi, 1);
+    prev.boards.push(f.board);
+  }else if (d > 0 && f.bi === f.group.boards.length - 1){
+    if (f.gi === state.config.groups.length - 1) return;
+    var next = state.config.groups[f.gi + 1];
+    f.group.boards.splice(f.bi, 1);
+    next.boards.unshift(f.board);
+  }else{
+    var j = f.bi + d;
+    var tmp = f.group.boards[f.bi]; f.group.boards[f.bi] = f.group.boards[j]; f.group.boards[j] = tmp;
+  }
+  renderAdminBody(); renderSidebar();
+}
+
+async function saveAdmin(){
+  var titleEl = $('adTitle');
+  if (titleEl) state.config.title = titleEl.value.trim() || '公司运营看板平台';
+  var boards = allBoards();
+  for (var i=0;i<boards.length;i++){
+    var b = boards[i];
+    if (b.pwd && String(b.pwd).indexOf('pending:') === 0){
+      var raw = b.pwd.slice(8);
+      b.pwd = raw ? await sha256(raw) : '';
+    }
+    delete b._origPwd;
+  }
+  var ok = await pushToCloud();
+  renderAdminBody();
+  renderAll();
+  toast(ok ? '已保存并同步到云端' : '已保存到本机，云端未连接（右上角显示本地模式）');
+}
+
+function changeAdminPwd(){
+  overlay(
+    '<div class="modal"><h3>修改管理员密码</h3><p>新密码立即生效，旧密码同时失效。</p>' +
+    '<div class="field"><label>新密码</label><input type="password" id="np1" autocomplete="off"></div>' +
+    '<div class="field"><label>再输入一次</label><input type="password" id="np2" autocomplete="off"></div>' +
+    '<div class="err-tip" id="npErr"></div>' +
+    '<div class="modal-actions"><button class="mini" id="npCancel">取消</button>' +
+    '<button class="mini primary" id="npOk" style="background:var(--brand);color:#fff;border-color:var(--brand)">确定</button></div></div>',
+    closeLayer
+  );
+  $('npCancel').onclick = closeLayer;
+  $('npOk').onclick = async function(){
+    var a = $('np1').value, b = $('np2').value;
+    if (!a){ $('npErr').textContent = '密码不能为空'; return; }
+    if (a !== b){ $('npErr').textContent = '两次输入不一致'; return; }
+    state.config.adminPwd = await sha256(a);
+    await pushToCloud();
+    closeLayer();
+    toast('管理员密码已更新');
+  };
+}
+
+/* ==================== 事件 ==================== */
+$('sideScroll').addEventListener('click', function(e){
+  var home = e.target.closest('[data-home]');
+  if (home){ showHome(); return; }
+  var grp = e.target.closest('[data-grp]');
+  if (grp){
+    var g = state.config.groups.filter(function(x){ return x.id === grp.getAttribute('data-grp'); })[0];
+    if (g){ g.collapsed = !g.collapsed; renderSidebar(); }
+    return;
+  }
+  var item = e.target.closest('[data-board]');
+  if (item){ openBoard(item.getAttribute('data-board')); }
+});
+$('homeView').addEventListener('click', function(e){
+  var card = e.target.closest('[data-card]');
+  if (card) openBoard(card.getAttribute('data-card'));
+});
+$('searchInput').addEventListener('input', function(e){
+  state.search = e.target.value;
+  renderSidebar();
+});
+$('btnToggleSide').onclick = function(){ $('sidebar').classList.toggle('hidden'); };
+$('syncBox').onclick = function(){ cloudSetupGuide(); };
+$('btnAdmin').onclick = function(){ askAdminPassword(); };
+$('btnReport').onclick = function(){
+  var f = findBoard(state.view);
+  overlay(
+    '<div class="modal"><h3>看板打不开或白屏？</h3>' +
+    '<p><b>10 秒定位：</b>点下方「在新窗口打开」——如果新窗口里显示正常，说明是当前浏览器限制了内嵌（常见于企业微信/微信内置浏览器、360、或开启了"阻止第三方 Cookie"的浏览器）。</p>' +
+    '<p>若新窗口也打不开，则是看板本身或网络的问题，与嵌入无关。</p>' +
+    '<div class="modal-actions"><button class="mini" id="rpClose">知道了</button>' +
+    (f && f.board.url ? '<button class="mini" id="rpExt">在新窗口打开</button>' : '') +
+    '<button class="mini" id="rpMode">以后都用新窗口打开</button></div></div>',
+    closeLayer
+  );
+  $('rpClose').onclick = closeLayer;
+  var ext = $('rpExt');
+  if (ext) ext.onclick = function(){ window.open(f.board.url, '_blank', 'noopener'); };
+  $('rpMode').onclick = async function(){
+    if (f){ f.board.mode = 'new'; await pushToCloud(); }
+    closeLayer(); renderFrame(); toast('已设为新窗口打开');
+  };
+};
+
+/* ==================== 启动 ==================== */
+(async function boot(){
+  try{
+    var q = new URLSearchParams(location.search || '');
+    if (q.get('resetcfg') === '1'){
+      localStorage.removeItem(LS_CFG);
+      console.warn('[boardhub] 已清除本机缓存的部门清单，恢复为内置默认清单');
+      setTimeout(function(){ toast('已重置为最新内置清单'); }, 900);
+    }
+  }catch(e){}
+  var local = null;
+  try{ local = JSON.parse(localStorage.getItem(LS_CFG) || 'null'); }catch(e){}
+  if (local && local.groups) state.config = normalize(local);
+  renderAll();
+  var okCloud = await initCloud(true);
+  if (okCloud){
+    var pulled = await pullFromCloud();
+    if (pulled) renderAll();
+    startConfigSync();
+  }else if (localStorage.getItem(LS_ENV)){
+    console.warn('[boardhub]', state.cloud.reason);
+  }
+  // 已内置环境 ID，不再强制弹引导；连接失败时点右上角状态可重新配置
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Near Miss 潜在质量问题系统看板（多人云同步）</title>
+<style>
+  :root{
+    --bg:#f4f6f9; --card:#ffffff; --border:#e3e8ef; --text:#1f2937;
+    --muted:#6b7280; --primary:#1e5eff; --primary-weak:#e8efff;
+    --danger:#e5484d; --warn:#f5a524; --ok:#18a058; --purple:#7c5cff;
+    --radius:10px; --shadow:0 1px 3px rgba(16,24,40,.08),0 1px 2px rgba(16,24,40,.04);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Microsoft YaHei","PingFang SC","Segoe UI",sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+  .wrap{max-width:1500px;margin:0 auto;padding:20px 24px 40px}
+
+  /* header */
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+  .title-box h1{font-size:21px;font-weight:700;letter-spacing:.5px}
+  .title-box .sub{color:var(--muted);font-size:12.5px;margin-top:4px}
+  .header-actions{display:flex;gap:10px;flex-wrap:wrap}
+  button{cursor:pointer;border:none;border-radius:8px;font-size:13px;padding:8px 16px;font-family:inherit;transition:.15s}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:#1749cc}
+  .btn-ghost{background:#fff;color:var(--text);border:1px solid var(--border)}
+  .btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+  .btn-danger{background:var(--danger);color:#fff}
+
+  /* KPI */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:16px}
+  .kpi{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px;border-top:3px solid transparent}
+  .kpi .num{font-size:26px;font-weight:700;margin-top:6px}
+  .kpi .lbl{color:var(--muted);font-size:12.5px}
+  .kpi.blue{border-top-color:var(--primary)} .kpi.blue .num{color:var(--primary)}
+  .kpi.red{border-top-color:var(--danger)} .kpi.red .num{color:var(--danger)}
+  .kpi.orange{border-top-color:var(--warn)} .kpi.orange .num{color:var(--warn)}
+  .kpi.green{border-top-color:var(--ok)} .kpi.green .num{color:var(--ok)}
+  .kpi.purple{border-top-color:var(--purple)} .kpi.purple .num{color:var(--purple)}
+
+  /* charts + kanban */
+  .row-charts{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:14px;margin-bottom:16px}
+  @media(max-width:1100px){.row-charts{grid-template-columns:1fr}}
+  .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px}
+  .panel h3{font-size:14.5px;font-weight:600;margin-bottom:12px}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:10px;font-size:12px;color:var(--muted)}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+  /* pipeline */
+  .pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .stage{border-radius:8px;padding:10px 12px;background:#f8fafc;border:1px solid var(--border)}
+  .stage .s-num{font-size:22px;font-weight:700}
+  .stage .s-lbl{font-size:12px;color:var(--muted);margin-top:2px}
+  .stage.s1 .s-num{color:var(--danger)} .stage.s2 .s-num{color:var(--warn)}
+  .stage.s3 .s-num{color:var(--primary)} .stage.s4 .s-num{color:var(--ok)}
+
+  /* filters */
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+  .filters input,.filters select{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff;font-family:inherit;outline:none}
+  .filters input:focus,.filters select:focus{border-color:var(--primary)}
+  .filters input[type=text]{flex:1;min-width:220px}
+
+  /* table */
+  .table-panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{background:#f8fafc;text-align:left;padding:11px 12px;font-weight:600;color:#374151;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2}
+  tbody td{padding:11px 12px;border-bottom:1px solid #eef1f5;vertical-align:top}
+  tbody tr:hover{background:#f7faff}
+  tbody tr.detail-row:hover{background:#f0f4ff}
+  .desc-cell{max-width:340px}
+  .desc-cell .d-id{font-weight:600;color:var(--primary);white-space:nowrap}
+  .desc-cell .d-txt{color:var(--text);margin-top:3px;line-height:1.5}
+  .nowrap{white-space:nowrap}
+  .table-scroll{max-height:620px;overflow:auto}
+
+  .tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap}
+  .tag.man{background:#fde8e8;color:#c0392b} .tag.machine{background:#fff3e0;color:#b9770e}
+  .tag.material{background:#e8f4fd;color:#1a6fb5} .tag.method{background:#f3e8fd;color:#6c3fc5}
+  .tag.env{background:#e6f7ef;color:#0e7c55}
+  .st-contain{background:#fdecec;color:#c0392b} .st-root{background:#fff4e0;color:#b9770e}
+  .st-action{background:#e8efff;color:#1e5eff} .st-closed{background:#e6f7ef;color:#0e7c55}
+
+  .doc-badges{display:flex;gap:4px;flex-wrap:nowrap}
+  .doc{display:inline-block;width:34px;text-align:center;padding:3px 0;border-radius:6px;font-size:11px;font-weight:600}
+  .doc.need{background:#fdecec;color:#c0392b}
+  .doc.updated{background:#e6f7ef;color:#0e7c55}
+  .doc.na{background:#f0f1f4;color:#9aa1ad}
+
+  .owner-cell b{display:block}
+  .owner-cell span{color:var(--muted);font-size:12px}
+  .due{font-size:12.5px}
+  .due.overdue{color:var(--danger);font-weight:700}
+  .due.soon{color:var(--warn);font-weight:700}
+
+  .row-toggle{cursor:pointer;color:var(--primary);font-size:12px;user-select:none}
+  .detail-row td{background:#f8fbff;padding:0}
+  .detail-inner{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:14px 16px}
+  @media(max-width:900px){.detail-inner{grid-template-columns:1fr}}
+  .detail-inner .blk h4{font-size:12.5px;color:var(--primary);margin-bottom:6px;font-weight:600}
+  .detail-inner .blk p{font-size:12.5px;line-height:1.65;color:#374151;white-space:pre-wrap}
+  .detail-inner .blk.doc-blk{grid-column:span 3}
+  .doc-judge{display:flex;gap:20px;flex-wrap:wrap;font-size:12.5px}
+  .doc-judge .item{display:flex;align-items:center;gap:8px}
+
+  .actions-cell{white-space:nowrap}
+  .actions-cell button{padding:4px 10px;font-size:12px;margin-right:4px}
+  .link-btn{background:none;color:var(--primary);font-size:12px;padding:0}
+  .link-btn:hover{text-decoration:underline}
+
+  .empty{text-align:center;padding:50px 0;color:var(--muted)}
+
+  /* modal */
+  .modal-mask{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:flex-start;justify-content:center;z-index:100;padding:30px 16px;overflow:auto}
+  .modal-mask.show{display:flex}
+  .modal{background:#fff;border-radius:12px;width:820px;max-width:100%;padding:24px 28px;box-shadow:0 20px 50px rgba(0,0,0,.2)}
+  .modal h2{font-size:17px;margin-bottom:18px}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form-grid .full{grid-column:span 2}
+  @media(max-width:700px){.form-grid{grid-template-columns:1fr}.form-grid .full{grid-column:span 1}}
+  .field label{display:block;font-size:12.5px;color:#374151;font-weight:600;margin-bottom:5px}
+  .field label .req{color:var(--danger)}
+  .field input,.field select,.field textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff}
+  .field textarea{resize:vertical;min-height:64px;line-height:1.5}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary)}
+  .docs-field{display:flex;gap:12px}
+  .docs-field .field{flex:1}
+  .modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+
+  .toast{position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-80px);background:#1f2937;color:#fff;padding:10px 22px;border-radius:8px;font-size:13px;z-index:200;transition:.3s;opacity:0;max-width:80vw}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  footer{margin-top:18px;color:var(--muted);font-size:12px;text-align:center}
+  .sync-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 12px;border-radius:20px;background:#eef1f5;color:#6b7280}
+  .sync-badge .dot{width:8px;height:8px;border-radius:50%;background:#9aa1ad;flex:none}
+  .sync-badge.ok{background:#e6f7ef;color:#0e7c55}.sync-badge.ok .dot{background:#18a058}
+  .sync-badge.warn{background:#fff4e0;color:#b9770e}.sync-badge.warn .dot{background:#f5a524}
+  .sync-badge.err{background:#fdecec;color:#c0392b}.sync-badge.err .dot{background:#e5484d}
+  .sync-badge.loading .dot{animation:blink 1s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+  .diag{white-space:pre-wrap;text-align:left;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;line-height:1.7;background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:12px;max-height:50vh;overflow:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title-box">
+      <h1>Near Miss 潜在质量问题系统看板</h1>
+      <div class="sub">湖州工厂 · 4M1E 分类 · 围堵/根因/长期方案闭环 · PFMEA / CP / SOP 更新追踪 · 数据自动统计</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap">
+        <span class="sync-badge loading" id="syncBadge"><span class="dot"></span><span id="syncText">正在连接云端…</span></span>
+        <button class="btn-ghost" style="padding:3px 10px;font-size:12px" onclick="pullCloud(true)">↻ 立即刷新</button>
+        <button class="btn-ghost" style="padding:3px 10px;font-size:12px" onclick="runDiagnose()">云端自检</button>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-ghost" onclick="exportCSV()">导出 CSV</button>
+      <button class="btn-ghost" onclick="exportJSON()">备份 JSON</button>
+      <label class="btn-ghost" style="display:inline-flex;align-items:center" for="importFile">导入 JSON</label>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+      <button class="btn-ghost" onclick="clearAll()">清空全部</button>
+      <button class="btn-primary" onclick="openModal()">+ 登记 Near Miss</button>
+    </div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="row-charts">
+    <div class="panel">
+      <h3>4M1E 问题类型分布</h3>
+      <div id="chart4m1e"></div>
+      <div class="legend" id="legend4m1e"></div>
+    </div>
+    <div class="panel">
+      <h3>PFMEA / CP / SOP 文件更新状态</h3>
+      <div id="chartDocs"></div>
+      <div class="legend" id="legendDocs"></div>
+    </div>
+    <div class="panel">
+      <h3>问题闭环阶段</h3>
+      <div class="pipeline" id="pipeline"></div>
+      <div style="margin-top:14px;font-size:12px;color:var(--muted)" id="closureRate"></div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <input type="text" id="fSearch" placeholder="搜索：问题描述 / 汇报人 / 责任人 / 编号…" oninput="render()">
+    <select id="fType" onchange="render()">
+      <option value="">全部类型 (4M1E)</option><option value="Man">人 Man</option><option value="Machine">机 Machine</option>
+      <option value="Material">料 Material</option><option value="Method">法 Method</option><option value="Environment">环 Environment</option>
+    </select>
+    <select id="fStatus" onchange="render()">
+      <option value="">全部状态</option><option>围堵中</option><option>根因分析</option><option>方案实施</option><option>已关闭</option>
+    </select>
+    <select id="fDoc" onchange="render()">
+      <option value="">文件更新（全部）</option><option value="need">存在待更新文件</option><option value="done">需更新且已全部更新</option><option value="na">均不需更新</option>
+    </select>
+    <select id="fOwner" onchange="render()"><option value="">全部责任人</option></select>
+  </div>
+
+  <div class="table-panel">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30px"></th>
+            <th>问题描述</th><th>类型</th><th>区域</th><th>汇报人</th><th>责任人</th>
+            <th>文件更新判定</th><th>状态</th><th>截止日期</th><th style="width:110px">操作</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="emptyMsg" style="display:none">正在从云端加载…</div>
+  </div>
+
+  <footer>数据全部保存在云端数据库，不写入本机浏览器：任何人打开本页看到的是同一份数据，刷新即可获取最新内容。新增 / 编辑 / 删除 / 导入需编辑密码（同一浏览器会话内验证一次）。页面每 8 秒自动刷新，也可用「立即刷新」。</footer>
+</div>
+
+<!-- modal -->
+<div class="modal-mask" id="modalMask">
+  <div class="modal">
+    <h2 id="modalTitle">登记 Near Miss</h2>
+    <div class="form-grid">
+      <div class="field full"><label>问题描述 <span class="req">*</span></label>
+        <textarea id="mDesc" placeholder="客观描述潜在质量风险：发生了什么、可能导致的后果（未流出/未造成损失）"></textarea></div>
+      <div class="field"><label>问题类型 (4M1E) <span class="req">*</span></label>
+        <select id="mType">
+          <option value="Man">人 Man — 操作/技能/意识</option>
+          <option value="Machine">机 Machine — 设备/工装/刀具</option>
+          <option value="Material">料 Material — 来料/批次</option>
+          <option value="Method">法 Method — 工艺/方法/SOP缺陷</option>
+          <option value="Environment">环 Environment — 环境/温湿度/异物</option>
+        </select></div>
+      <div class="field"><label>区域 / 产线 <span class="req">*</span></label><input id="mArea" placeholder="如：注塑车间 A线"></div>
+      <div class="field"><label>汇报人 <span class="req">*</span></label><input id="mReporter" placeholder="发现人姓名"></div>
+      <div class="field"><label>发现日期</label><input type="date" id="mDate"></div>
+      <div class="field"><label>围堵方案（临时措施）</label>
+        <textarea id="mContainment" placeholder="如何隔离/排查/100%检查，防止潜在不良流出"></textarea></div>
+      <div class="field"><label>根因分析（5Why / 鱼骨图结论）</label>
+        <textarea id="mRootCause" placeholder="技术根因 + 系统根因"></textarea></div>
+      <div class="field"><label>长期方案（预防再发）</label>
+        <textarea id="mLongTerm" placeholder="防错、工艺参数固化、系统化措施"></textarea></div>
+      <div class="field"><label>责任人 <span class="req">*</span></label><input id="mOwner" placeholder="措施负责人"></div>
+      <div class="field"><label>当前状态</label>
+        <select id="mStatus"><option>围堵中</option><option>根因分析</option><option>方案实施</option><option>已关闭</option></select></div>
+      <div class="field"><label>截止日期</label><input type="date" id="mDue"></div>
+      <div class="field full"><label>文件更新判定：PFMEA / CP（控制计划）/ SOP 是否需要更正</label>
+        <div class="docs-field">
+          <div class="field"><label>PFMEA</label><select id="mPfmea"><option value="na">不需更新</option><option value="need">需更新</option><option value="updated">已更新</option></select></div>
+          <div class="field"><label>CP 控制计划</label><select id="mCp"><option value="na">不需更新</option><option value="need">需更新</option><option value="updated">已更新</option></select></div>
+          <div class="field"><label>SOP</label><select id="mSop"><option value="na">不需更新</option><option value="need">需更新</option><option value="updated">已更新</option></select></div>
+        </div></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeModal()">取消</button>
+      <button class="btn-primary" onclick="saveRecord()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 诊断弹窗 -->
+<div class="modal-mask" id="diagMask">
+  <div class="modal" style="width:640px">
+    <h2>云端连接自检</h2>
+    <div class="diag" id="diagBody">检查中…</div>
+    <div class="modal-foot"><button class="btn-primary" onclick="document.getElementById('diagMask').classList.remove('show')">关闭</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= 配置 ================= */
+const CONFIG = {
+  // 云端同步接口（云函数 nearmissSync，数据存于云开发 PostgreSQL）
+  API_URL: "https://as1532656116-d6g77h3laf139a81d.service.tcloudbase.com/nearmissSync",
+  // 写接口共享口令（防误操作，非高安全场景）
+  WRITE_TOKEN: "nm-shared-2026",
+  // 编辑密码的 SHA-256 哈希。默认密码：HZnm@2026
+  EDIT_PASSWORD_HASH: "fc01da062efb176c36014ce7203c75ca308aa70da9c82b04f6bbe28d550bcedf",
+  SYNC_INTERVAL: 8000,          // 自动刷新间隔（毫秒）
+  LEGACY_LOCAL_KEY: "nearmiss_board_v2"  // 旧版本地缓存键，仅用于一次性迁移
+};
+
+const TYPES = {Man:"人 Man",Machine:"机 Machine",Material:"料 Material",Method:"法 Method",Environment:"环 Environment"};
+const TYPE_COLORS = {Man:"#e5484d",Machine:"#f5a524",Material:"#1a6fb5",Method:"#7c5cff",Environment:"#18a058"};
+const STATUSES = ["围堵中","根因分析","方案实施","已关闭"];
+const DOC_LABEL = {pfmea:"PFMEA",cp:"CP 控制计划",sop:"SOP"};
+const DOC_STATE = {na:"不需更新",need:"需更新",updated:"已更新"};
+
+/* 数据只驻留在内存 + 云端，不再写 localStorage */
+let records = [];
+let cloudRev = null;          // 当前已知的云端版本号（用于并发冲突检测）
+let lastSyncAt = 0;
+let cloud = null, cloudReady = false, cloudErr = "";
+let sessionAuthed = false;
+let submitting = false;
+let expanded = {};
+let editingId = null;
+
+/* ================= 基础工具 ================= */
+function toast(msg, ms){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("show"), ms||2600);
+}
+function setSyncBadge(mode, text){
+  const b = document.getElementById("syncBadge");
+  b.className = "sync-badge" + (mode ? " " + mode : "");
+  document.getElementById("syncText").textContent = text;
+}
+function esc(s){ return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+async function sha256Hex(s){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function fmtTime(ts){ return new Date(ts).toLocaleString("zh-CN",{hour12:false}); }
+
+/* ================= 云端同步（云函数 + PostgreSQL） ================= */
+function modalOpen(){ return document.getElementById("modalMask").classList.contains("show"); }
+function setEmpty(text, show){
+  const em = document.getElementById("emptyMsg");
+  em.textContent = text; em.style.display = show ? "block" : "none";
+}
+
+async function apiGet(){
+  const r = await fetch(CONFIG.API_URL, { method: "GET", cache: "no-store" });
+  let j = null;
+  try{ j = await r.json(); }catch(e){ throw new Error("接口返回非 JSON（HTTP " + r.status + "）"); }
+  if(!j || !j.ok) throw new Error((j && j.error) || "接口返回异常");
+  return j.data || null;
+}
+async function apiPost(list, version){
+  const r = await fetch(CONFIG.API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Nm-Token": CONFIG.WRITE_TOKEN },
+    body: JSON.stringify({ records: list, syncVersion: version })
+  });
+  let j = null;
+  try{ j = await r.json(); }catch(e){ throw new Error("接口返回非 JSON（HTTP " + r.status + "）"); }
+  if(!j || !j.ok) throw new Error((j && j.error) || "保存失败");
+  return j;
+}
+
+async function initSync(){
+  setSyncBadge("loading","正在连接云端…");
+  await pullCloud(false);
+  setInterval(()=>{ if(!submitting && !modalOpen()) pullCloud(false); }, CONFIG.SYNC_INTERVAL);
+  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && !submitting && !modalOpen()) pullCloud(false); });
+  window.addEventListener("focus", ()=>{ if(!submitting && !modalOpen()) pullCloud(false); });
+}
+
+/* 拉取云端数据（云端是唯一数据源，本机不保存业务数据） */
+async function pullCloud(showToast){
+  try{
+    let data = await apiGet();
+    if(!data || !data.records || !data.records.length){
+      const legacy = localStorage.getItem(CONFIG.LEGACY_LOCAL_KEY);
+      let seed = [];
+      if(legacy){ try{ seed = JSON.parse(legacy) || []; }catch(_){ seed = []; } }
+      if(seed.length){
+        await apiPost(seed, 0);
+        data = await apiGet();
+        localStorage.removeItem(CONFIG.LEGACY_LOCAL_KEY);
+        toast("已将本机旧数据 " + seed.length + " 条迁移到云端（本浏览器不再保存数据）", 4000);
+      }
+    }
+    records = (data && data.records) ? data.records : [];
+    cloudRev = (data && data.syncVersion) || 0;
+    lastSyncAt = Date.now();
+    cloudReady = true;
+    render();
+    setSyncBadge("ok","云端已同步 · 共 " + records.length + " 条 · " + new Date().toLocaleTimeString("zh-CN",{hour12:false}));
+    if(showToast) toast("已刷新：共 " + records.length + " 条记录");
+  }catch(e){
+    cloudReady = false;
+    const msg = (e && e.message) || String(e);
+    setSyncBadge("err","读取云端失败：" + msg);
+    setEmpty("读取云端失败：" + msg + "\n请检查网络后刷新页面，或点右上角「云端自检」。", true);
+    if(showToast) toast("读取云端失败：" + msg, 4000);
+  }
+}
+
+/* 提交修改：先取云端版本号做冲突检测，再整份写回 */
+async function commit(mutate, successMsg){
+  submitting = true;
+  setSyncBadge("loading","正在保存到云端…");
+  try{
+    const cur = await apiGet();
+    const curV = cur ? Number(cur.syncVersion || 0) : 0;
+    if(cloudRev !== null && curV !== cloudRev){
+      const when = (cur && cur.updatedAt) ? fmtTime(cur.updatedAt) : "刚刚";
+      if(!confirm("注意：云端数据在 " + when + " 已被其他人更新过。\n\n继续保存会覆盖对方的修改；点「取消」将放弃本次改动并加载最新数据。\n\n是否继续保存？")){
+        await pullCloud(false);
+        toast("已放弃本次改动，并加载最新数据", 3500);
+        submitting = false;
+        return false;
+      }
+    }
+    const next = records.slice();
+    mutate(next);
+    const res = await apiPost(next, curV);
+    if(res && res.conflict){
+      await pullCloud(false);
+      toast("云端已有更新版本，已为你加载最新数据，请重新修改", 4000);
+      submitting = false;
+      return false;
+    }
+    records = next;
+    cloudRev = (res && res.data && res.data.syncVersion) || (curV + 1);
+    lastSyncAt = Date.now();
+    render();
+    setSyncBadge("ok","云端已同步 · 共 " + records.length + " 条 · " + new Date().toLocaleTimeString("zh-CN",{hour12:false}));
+    if(successMsg) toast(successMsg);
+    submitting = false;
+    return true;
+  }catch(e){
+    submitting = false;
+    const msg = (e && e.message) || String(e);
+    toast("保存到云端失败：" + msg, 4500);
+    setSyncBadge("err","保存失败：" + msg);
+    try{ await pullCloud(false); }catch(_){}
+    return false;
+  }
+}
+
+/* ================= 编辑密码 ================= */
+async function checkAuth(){
+  if(sessionAuthed) return true;
+  const pwd = prompt("请输入编辑密码：");
+  if(pwd === null || pwd === "") return false;
+  if(await sha256Hex(pwd) === CONFIG.EDIT_PASSWORD_HASH){ sessionAuthed = true; return true; }
+  toast("密码错误，请联系管理员");
+  return false;
+}
+
+/* ================= KPI & 图表 ================= */
+const today = new Date(); today.setHours(0,0,0,0);
+function dueClass(due,status){
+  if(!due||status==="已关闭") return "due";
+  const d = new Date(due+"T00:00:00"), diff = Math.round((d-today)/86400000);
+  if(diff<0) return "due overdue";
+  if(diff<=3) return "due soon";
+  return "due";
+}
+function docSummary(d){
+  const v=[d.pfmea,d.cp,d.sop];
+  if(v.includes("need")) return "need";
+  if(v.includes("updated")) return "done";
+  return "na";
+}
+function renderKPIs(list){
+  const open = list.filter(r=>r.status!=="已关闭");
+  const overdue = open.filter(r=>r.due && new Date(r.due+"T00:00:00")<today);
+  const docNeed = list.reduce((n,r)=>n+["pfmea","cp","sop"].filter(k=>r.docs[k]==="need").length,0);
+  const closed = list.filter(r=>r.status==="已关闭").length;
+  const kpis = [
+    {cls:"blue",lbl:"累计 Near Miss（件）",num:list.length},
+    {cls:"orange",lbl:"未闭环（件）",num:open.length},
+    {cls:"red",lbl:"已逾期（件）",num:overdue.length},
+    {cls:"purple",lbl:"待更新文件（PFMEA/CP/SOP）",num:docNeed},
+    {cls:"green",lbl:"已关闭 / 关闭率",num:closed+" / "+(list.length?Math.round(closed/list.length*100)+"%":"—")}
+  ];
+  document.getElementById("kpis").innerHTML = kpis.map(k=>
+    `<div class="kpi ${k.cls}"><div class="lbl">${k.lbl}</div><div class="num">${k.num}</div></div>`).join("");
+}
+function donutSVG(data,colors,size){
+  const totalRaw = data.reduce((s,d)=>s+d.value,0);
+  const total = totalRaw||1;
+  const R=size/2-6, r=R-16, cx=size/2, cy=size/2;
+  let a0=-Math.PI/2, arcs="";
+  data.forEach(d=>{
+    if(!d.value) return;
+    const a1=a0+d.value/total*Math.PI*2;
+    const large=(a1-a0)>Math.PI?1:0;
+    const x0=cx+R*Math.cos(a0),y0=cy+R*Math.sin(a0),x1=cx+R*Math.cos(a1),y1=cy+R*Math.sin(a1);
+    const xi=cx+r*Math.cos(a1),yi=cy+r*Math.sin(a1),xj=cx+r*Math.cos(a0),yj=cy+r*Math.sin(a0);
+    arcs+=`<path d="M${x0} ${y0} A${R} ${R} 0 ${large} 1 ${x1} ${y1} L${xi} ${yi} A${r} ${r} 0 ${large} 0 ${xj} ${yj} Z" fill="${colors[d.label]}" opacity=".92"/>`;
+    a0=a1;
+  });
+  return `<svg viewBox="0 0 ${size} ${size}" width="100%" height="${size}">${arcs}
+    <text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="22" font-weight="700" fill="#1f2937">${totalRaw}</text>
+    <text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="11" fill="#6b7280">总数</text></svg>`;
+}
+function renderCharts(list){
+  const counts = {};
+  Object.keys(TYPES).forEach(t=>counts[t]=0);
+  list.forEach(r=>counts[r.type]++);
+  const data = Object.keys(TYPES).map(t=>({label:t,value:counts[t]}));
+  document.getElementById("chart4m1e").innerHTML = donutSVG(data,TYPE_COLORS,170);
+  document.getElementById("legend4m1e").innerHTML = data.map(d=>
+    `<span><i style="background:${TYPE_COLORS[d.label]}"></i>${TYPES[d.label]}：${d.value} 件</span>`).join("");
+
+  const docStats = {need:0,updated:0,na:0};
+  list.forEach(r=>["pfmea","cp","sop"].forEach(k=>docStats[r.docs[k]]++));
+  const DOC_COLORS={need:"#e5484d",updated:"#18a058",na:"#c3c9d4"};
+  const ddata=[{label:"need",value:docStats.need},{label:"updated",value:docStats.updated},{label:"na",value:docStats.na}];
+  document.getElementById("chartDocs").innerHTML = donutSVG(ddata,DOC_COLORS,170);
+  document.getElementById("legendDocs").innerHTML =
+    `<span><i style="background:#e5484d"></i>需更新：${docStats.need}</span>
+     <span><i style="background:#18a058"></i>已更新：${docStats.updated}</span>
+     <span><i style="background:#c3c9d4"></i>不需更新：${docStats.na}</span>
+     <div style="width:100%;color:#9aa1ad">统计口径：PFMEA + CP + SOP 三类文件状态合并计数</div>`;
+
+  const st = STATUSES.map(s=>({s,n:list.filter(r=>r.status===s).length}));
+  document.getElementById("pipeline").innerHTML = st.map((x,i)=>
+    `<div class="stage s${i+1}"><div class="s-num">${x.n}</div><div class="s-lbl">${x.s}</div></div>`).join("");
+  const open = list.filter(r=>r.status!=="已闭环"&&r.status!=="已关闭").length;
+  document.getElementById("closureRate").textContent =
+    !list.length ? "暂无数据——登记后自动统计。" :
+    open? `当前未闭环 ${open} 件；建议逾期项在每日晨会优先评审。` : "全部 Near Miss 已闭环。";
+}
+
+/* ================= 表格 ================= */
+function render(){
+  const q = document.getElementById("fSearch").value.trim().toLowerCase();
+  const fType = document.getElementById("fType").value;
+  const fStatus = document.getElementById("fStatus").value;
+  const fDoc = document.getElementById("fDoc").value;
+  const fOwner = document.getElementById("fOwner").value;
+
+  const selOwner = document.getElementById("fOwner");
+  const cur = selOwner.value;
+  const owners=[...new Set(records.map(r=>r.owner))].sort();
+  selOwner.innerHTML = '<option value="">全部责任人</option>'+owners.map(o=>`<option>${esc(o)}</option>`).join("");
+  selOwner.value = owners.includes(cur)?cur:"";
+
+  let list = records.filter(r=>{
+    if(fType && r.type!==fType) return false;
+    if(fStatus && r.status!==fStatus) return false;
+    if(fOwner && r.owner!==fOwner) return false;
+    if(fDoc && docSummary(r.docs)!==fDoc) return false;
+    if(q){
+      const hay=(r.id+r.desc+r.reporter+r.owner+r.area+r.containment+r.rootCause+r.longTerm).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  list.sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+
+  renderKPIs(list);
+  renderCharts(list);
+
+  const tb = document.getElementById("tbody");
+  const empty = document.getElementById("emptyMsg");
+  if(!records.length && !cloudReady){ tb.innerHTML=""; empty.style.display="block"; return; }
+  if(!list.length){
+    tb.innerHTML="";
+    empty.textContent = records.length ? "没有符合筛选条件的记录" : "暂无记录——点击右上角「+ 登记 Near Miss」录入第一条潜在质量问题";
+    empty.style.display="block"; return;
+  }
+  empty.style.display="none";
+
+  tb.innerHTML = list.map(r=>{
+    const isOpen = expanded[r.id];
+    const main = `<tr class="main-row" data-id="${r.id}">
+      <td><span class="row-toggle" onclick="toggleDetail('${r.id}')">${isOpen?"▼":"▶"}</span></td>
+      <td class="desc-cell"><div class="d-id">${esc(r.id)} · ${esc(r.area)} · ${esc(r.date||"")}</div><div class="d-txt">${esc(r.desc)}</div></td>
+      <td class="nowrap"><span class="tag ${r.type.toLowerCase()}">${TYPES[r.type]}</span></td>
+      <td class="nowrap">${esc(r.area)}</td>
+      <td class="nowrap">${esc(r.reporter)}</td>
+      <td class="owner-cell"><b>${esc(r.owner)}</b></td>
+      <td><div class="doc-badges">
+        <span class="doc ${r.docs.pfmea}" title="PFMEA：${DOC_STATE[r.docs.pfmea]}">PF</span>
+        <span class="doc ${r.docs.cp}" title="CP：${DOC_STATE[r.docs.cp]}">CP</span>
+        <span class="doc ${r.docs.sop}" title="SOP：${DOC_STATE[r.docs.sop]}">SOP</span></div></td>
+      <td class="nowrap"><span class="tag st-${{["围堵中"]:"contain",["根因分析"]:"root",["方案实施"]:"action",["已关闭"]:"closed"}[r.status]}">${r.status}</span></td>
+      <td class="${dueClass(r.due,r.status)}">${r.due?esc(r.due):"—"}</td>
+      <td class="actions-cell">
+        <button class="btn-ghost" onclick="editRecord('${r.id}')">编辑</button>
+        <button class="btn-danger" onclick="delRecord('${r.id}')">删除</button></td></tr>`;
+    const detail = isOpen?`<tr class="detail-row"><td colspan="10"><div class="detail-inner">
+      <div class="blk"><h4>围堵方案（临时措施）</h4><p>${esc(r.containment)||"—"}</p></div>
+      <div class="blk"><h4>根因分析</h4><p>${esc(r.rootCause)||"—"}</p></div>
+      <div class="blk"><h4>长期方案（预防再发）</h4><p>${esc(r.longTerm)||"—"}</p></div>
+      <div class="blk doc-blk"><h4>文件更新判定（PFMEA / CP / SOP）</h4><div class="doc-judge">
+        ${["pfmea","cp","sop"].map(k=>`<div class="item"><span class="doc ${r.docs[k]}" style="width:auto;padding:3px 10px">${DOC_LABEL[k]}</span>
+          <span>${DOC_STATE[r.docs[k]]}${r.docs[k]==="need"?" —— 责任人："+esc(r.owner):""}</span></div>`).join("")}
+      </div></div></div></td></tr>`:"";
+    return main+detail;
+  }).join("");
+}
+function toggleDetail(id){ expanded[id]=!expanded[id]; render(); }
+
+/* ================= 增删改 ================= */
+function nextId(){
+  const year = new Date().getFullYear();
+  const nums = records.map(r=>{const m=(r.id||"").match(/NM-(\d{4})-(\d+)/);return m&&m[1]==String(year)?+m[2]:0;});
+  return "NM-"+year+"-"+String(Math.max(0,...nums)+1).padStart(3,"0");
+}
+async function openModal(rec){
+  if(!(await checkAuth())) return;
+  editingId = rec?rec.id:null;
+  document.getElementById("modalTitle").textContent = rec?("编辑 "+rec.id):"登记 Near Miss";
+  document.getElementById("mDesc").value = rec?rec.desc:"";
+  document.getElementById("mType").value = rec?rec.type:"Man";
+  document.getElementById("mArea").value = rec?rec.area:"";
+  document.getElementById("mReporter").value = rec?rec.reporter:"";
+  document.getElementById("mDate").value = rec?(rec.date||""):new Date().toISOString().slice(0,10);
+  document.getElementById("mContainment").value = rec?(rec.containment||""):"";
+  document.getElementById("mRootCause").value = rec?(rec.rootCause||""):"";
+  document.getElementById("mLongTerm").value = rec?(rec.longTerm||""):"";
+  document.getElementById("mOwner").value = rec?rec.owner:"";
+  document.getElementById("mStatus").value = rec?rec.status:"围堵中";
+  document.getElementById("mDue").value = rec?(rec.due||""):"";
+  document.getElementById("mPfmea").value = rec?rec.docs.pfmea:"na";
+  document.getElementById("mCp").value = rec?rec.docs.cp:"na";
+  document.getElementById("mSop").value = rec?rec.docs.sop:"na";
+  document.getElementById("modalMask").classList.add("show");
+}
+function closeModal(){ document.getElementById("modalMask").classList.remove("show"); }
+function editRecord(id){ const r=records.find(x=>x.id===id); if(r) openModal(r); }
+
+async function saveRecord(){
+  const desc=document.getElementById("mDesc").value.trim();
+  const area=document.getElementById("mArea").value.trim();
+  const reporter=document.getElementById("mReporter").value.trim();
+  const owner=document.getElementById("mOwner").value.trim();
+  if(!desc||!area||!reporter||!owner){ toast("请填写：问题描述、区域、汇报人、责任人"); return; }
+  const obj={
+    id: editingId||nextId(),
+    desc, area, reporter, owner,
+    type:document.getElementById("mType").value,
+    date:document.getElementById("mDate").value||new Date().toISOString().slice(0,10),
+    containment:document.getElementById("mContainment").value.trim(),
+    rootCause:document.getElementById("mRootCause").value.trim(),
+    longTerm:document.getElementById("mLongTerm").value.trim(),
+    status:document.getElementById("mStatus").value,
+    due:document.getElementById("mDue").value,
+    docs:{pfmea:document.getElementById("mPfmea").value,cp:document.getElementById("mCp").value,sop:document.getElementById("mSop").value}
+  };
+  const isEdit = !!editingId;
+  const ok = await commit(list=>{
+    if(isEdit){ const i=list.findIndex(r=>r.id===editingId); if(i>=0) list[i]=obj; else list.unshift(obj); }
+    else list.unshift(obj);
+  }, "已保存到云端："+obj.id);
+  if(ok){
+    if(!isEdit) expanded[obj.id]=true;
+    closeModal(); render();
+  }
+}
+async function delRecord(id){
+  if(!(await checkAuth())) return;
+  if(!confirm("确认删除 "+id+"？删除后所有人端都会同步移除，且不可撤销。")) return;
+  await commit(list=>{ const i=list.findIndex(r=>r.id===id); if(i>=0) list.splice(i,1); }, "已删除："+id);
+}
+async function clearAll(){
+  if(!(await checkAuth())) return;
+  if(!records.length){ toast("当前没有记录"); return; }
+  if(!confirm("确认清空全部 "+records.length+" 条记录？所有人的看板都会清空。建议先「备份 JSON」。该操作不可撤销。")) return;
+  await commit(list=>{ list.length = 0; }, "已清空全部云端记录");
+}
+
+/* ================= 导入导出 ================= */
+function dl(name,content,mime){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob(["\ufeff"+content],{type:mime}));
+  a.download=name; a.click(); URL.revokeObjectURL(a.href);
+}
+function exportCSV(){
+  const head=["编号","发现日期","区域","问题描述","类型4M1E","汇报人","围堵方案","根因分析","长期方案","PFMEA","CP","SOP","责任人","状态","截止日期"];
+  const q=s=>'"'+String(s||"").replace(/"/g,'""')+'"';
+  const rows=records.map(r=>[r.id,r.date,r.area,r.desc,TYPES[r.type],r.reporter,r.containment,r.rootCause,r.longTerm,
+    DOC_STATE[r.docs.pfmea],DOC_STATE[r.docs.cp],DOC_STATE[r.docs.sop],r.owner,r.status,r.due].map(q).join(","));
+  dl("near_miss_report.csv", [head.map(q).join(","),...rows].join("\r\n"), "text/csv;charset=utf-8");
+  toast("CSV 已导出");
+}
+function exportJSON(){ dl("near_miss_backup.json", JSON.stringify(records,null,2), "application/json"); toast("JSON 备份已导出"); }
+async function importJSON(ev){
+  const f=ev.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=async e=>{
+    let arr;
+    try{
+      arr=JSON.parse(e.target.result);
+      if(!Array.isArray(arr)||!arr.every(x=>x&&x.id&&x.desc)) throw 0;
+    }catch(_){ toast("文件格式无效"); return; }
+    if(!(await checkAuth())) return;
+    if(!confirm("导入将覆盖云端当前 "+records.length+" 条记录为 "+arr.length+" 条，所有人都会看到新数据。确认继续？")) return;
+    await commit(list=>{ list.length=0; arr.forEach(x=>list.push(x)); }, "已导入 "+arr.length+" 条记录到云端");
+  };
+  rd.readAsText(f); ev.target.value="";
+}
+
+/* ================= 云端自检 ================= */
+async function runDiagnose(){
+  const out = [];
+  const push = (k,v)=>out.push(k + "：" + v);
+  document.getElementById("diagMask").classList.add("show");
+  const body = document.getElementById("diagBody");
+  body.textContent = "检查中…";
+  push("同步接口", CONFIG.API_URL);
+  push("当前页面域名", location.origin);
+  push("浏览器在线", navigator.onLine ? "是" : "否");
+  try{
+    const t0 = Date.now();
+    const data = await apiGet();
+    push("读取(GET)", "成功（耗时 " + (Date.now()-t0) + "ms）");
+    push("云端记录数", data && data.records ? data.records.length : 0);
+    push("云端版本号", data ? data.syncVersion : "-");
+    push("云端更新时间", data && data.updatedAt ? fmtTime(data.updatedAt) : "-");
+  }catch(e){
+    push("读取(GET)", "失败 - " + ((e && e.message) || e));
+  }
+  body.textContent = out.join("\n");
+}
+
+/* ================= 启动 ================= */
+document.getElementById("modalMask").addEventListener("click",e=>{ if(e.target.id==="modalMask") closeModal(); });
+document.getElementById("diagMask").addEventListener("click",e=>{ if(e.target.id==="diagMask") document.getElementById("diagMask").classList.remove("show"); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeModal(); document.getElementById("diagMask").classList.remove("show"); } });
+window.addEventListener("online", ()=>pullCloud(false));
+
+render();
+initSync();
+</script>
+</body>
+</html>
