@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>prewarm test</title>
+<style>body{margin:0;font-family:sans-serif}#hid{width:1px;height:1px;border:0;opacity:0}iframe.v{width:100%;height:80vh;border:0}</style>
+</head>
+<body>
+<div style="padding:8px;font-size:13px">隐藏预热 → 再打开看板（全程不点击）</div>
+<script>
+const HOST = 'https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com';
+// 1) 隐藏加载根目录一次（不点击任何东西）
+setTimeout(function(){
+  const h = document.createElement('iframe');
+  h.id = 'hid';
+  h.src = HOST + '/';
+  document.body.appendChild(h);
+}, 300);
+// 2) 等预热完成后，再打开两个看板
+setTimeout(function(){
+  ['/quote/', '/cis/'].forEach(function(p, i){
+    const f = document.createElement('iframe');
+    f.className = 'v';
+    f.src = HOST + p;
+    f.dataset.p = p;
+    document.body.appendChild(f);
+  });
+}, 3000);
+</script>
+</body></html>
