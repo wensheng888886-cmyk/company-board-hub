@@ -196,6 +196,50 @@ select.mini{height:26px;padding:0 4px;font-family:inherit;cursor:pointer}
   position:absolute;left:50%;bottom:28px;transform:translateX(-50%);
   background:#1f2733;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;z-index:90;
 }
+/* ---------- 幻灯片轮播 ---------- */
+.kiosk{position:fixed;inset:0;z-index:120;background:#0e1319;display:flex;flex-direction:column}
+.kiosk-bar{
+  position:absolute;left:0;right:0;top:0;height:54px;display:flex;align-items:center;gap:10px;
+  padding:0 16px;background:linear-gradient(180deg,rgba(0,0,0,.78),rgba(0,0,0,0));color:#fff;
+  transition:opacity .25s ease;z-index:5;
+}
+.kiosk-bottom{
+  position:absolute;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:10px;
+  padding:0 16px;background:linear-gradient(0deg,rgba(0,0,0,.8),rgba(0,0,0,0));color:#fff;
+  transition:opacity .25s ease;z-index:5;
+}
+.kiosk.idle .kiosk-bar,.kiosk.idle .kiosk-bottom{opacity:0;pointer-events:none}
+.kiosk-title{font-size:15px;font-weight:600;max-width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kiosk-sub{font-size:12.5px;opacity:.78;white-space:nowrap}
+.kiosk-idx{font-size:12.5px;background:rgba(255,255,255,.16);padding:3px 10px;border-radius:20px;flex:none}
+.kbar-btn{
+  height:30px;padding:0 11px;border-radius:8px;border:1px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.10);color:#fff;font-size:12.5px;display:flex;align-items:center;gap:5px;flex:none;
+}
+.kbar-btn:hover{background:rgba(255,255,255,.22)}
+.kbar-btn.primary{background:var(--brand);border-color:var(--brand)}
+.kiosk select{
+  height:30px;padding:0 6px;border-radius:8px;border:1px solid rgba(255,255,255,.28);
+  background:rgba(22,28,36,.92);color:#fff;outline:none;font-size:12.5px;flex:none;
+}
+.kiosk-progress{position:absolute;left:0;top:0;height:3px;background:var(--brand);width:0;z-index:6}
+.kiosk-host{flex:1;position:relative;min-height:0}
+.kiosk-host iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff;display:none}
+.kiosk-host iframe.on{display:block}
+.kiosk-loading{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;
+  color:#b9c4d0;font-size:13px;background:#0e1319;z-index:2;
+}
+.kiosk-dots{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.kdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);flex:none}
+.kdot.on{background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.18)}
+.slide-pick{max-height:50vh;overflow-y:auto;border:1px solid var(--line);border-radius:10px;margin:10px 0 6px}
+.slide-pick .sp-grp{padding:8px 10px;font-size:12px;color:var(--text-3);background:var(--bg);border-bottom:1px solid var(--line-soft)}
+.slide-pick .sp-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.slide-pick .sp-item:last-child{border-bottom:none}
+.slide-pick .sp-item:hover{background:#f7f9fb}
+.sp-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px}
+.sp-badge{font-size:11px;color:var(--text-3);border:1px solid var(--line);border-radius:6px;padding:1px 6px;flex:none}
 .hidden{display:none !important}
 </style>
 </head>
@@ -220,6 +264,10 @@ select.mini{height:26px;padding:0 4px;font-family:inherit;cursor:pointer}
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="2" y="2.5" width="12" height="11" rx="2"/><path d="M6.5 2.5v11"/>
         </svg>
+      </button>
+      <button class="tbtn" id="btnSlide" title="按顺序自动轮播选中的看板，播放时无需密码">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 3.5h10v9H3z" opacity=".28"/><path d="M6.5 6l4 2-4 2z"/></svg>
+        幻灯片
       </button>
       <button class="tbtn primary" id="btnAdmin">管理</button>
     </div>
@@ -256,6 +304,7 @@ select.mini{height:26px;padding:0 4px;font-family:inherit;cursor:pointer}
     </main>
   </div>
 
+  <div id="kiosk" class="kiosk hidden"></div>
   <div id="layer"></div>
 </div>
 
@@ -271,7 +320,7 @@ var SDK_CDNS = [
   'https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js',
   'https://imgcache.qq.com/qcloud/cloudbase-js-sdk/1.7.6/cloudbase.full.js'
 ];
-var COLORS = ['blue','green','amber','purple','teal','gray','coral'];
+var COLORS = ['blue','green','amber','purple','teal','gray','coral','rose','cyan','olive'];
 var COLOR_HEX = {blue:'#185FA5',green:'#3B6D11',amber:'#BA7517',purple:'#534AB7',teal:'#0F6E56',gray:'#5F5E5A',coral:'#993C1D',rose:'#A32D5E',cyan:'#0B6E99',olive:'#634D0C'};
 
 function uid(p){ return p + '_' + Math.random().toString(36).slice(2,9); }
@@ -312,6 +361,7 @@ function defaultConfig(){
       ]}
     ],
     homeCards: ['b_1','b_2','b_3','b_4','b_5','b_6','b_7','b_8','b_9','b_10'],
+    slideCards: ['b_1','b_2','b_3','b_4','b_5','b_6','b_7','b_8','b_9','b_10'],
     adminPwd: 'plain:admin888',
     updatedAt: '',
     updatedBy: ''
@@ -452,6 +502,7 @@ function boardMap(){
 }
 async function syncConfigOnce(){
   if (!state.cloud.ready || layerOpen()) return false;
+  if (slide && slide.on) return false;               // 幻灯片播放中不被打断
   try{
     var res = await state.cloud.db.collection(COLL).doc(DOC_ID).get();
     var doc = res && res.data;
@@ -545,6 +596,7 @@ function normalize(cfg){
     });
   });
   cfg.homeCards = Array.isArray(cfg.homeCards) ? cfg.homeCards : [];
+  cfg.slideCards = Array.isArray(cfg.slideCards) ? cfg.slideCards : [];
   cfg.adminPwd = cfg.adminPwd || d.adminPwd;
   return cfg;
 }
@@ -1029,6 +1081,7 @@ function renderAdminBody(){
         '<div class="row"><input type="url" data-burl="' + b.id + '" value="' + esc(b.url) + '" placeholder="https://…"></div>' +
         '<div class="row">' +
         '<label class="chk"><input type="checkbox" data-bhome="' + b.id + '"' + ((state.config.homeCards || []).indexOf(b.id) > -1 ? ' checked' : '') + '>首页卡片</label>' +
+        '<label class="chk"><input type="checkbox" data-bslide="' + b.id + '"' + ((state.config.slideCards || []).indexOf(b.id) > -1 ? ' checked' : '') + '>幻灯片</label>' +
         '<label class="chk"><input type="checkbox" data-block="' + b.id + '"' + (b.locked ? ' checked' : '') + '>需要密码</label>' +
         '<input type="password" data-bpwd="' + b.id + '" placeholder="' + (b.pwd ? '留空则不改密码' : '设置访问密码') + '" style="flex:1;min-width:0;height:30px;padding:0 9px;border:1px solid var(--line);border-radius:7px;outline:none">' +
         '<select data-bmode="' + b.id + '">' +
@@ -1092,6 +1145,14 @@ function bindAdminInputs(){
       renderHome();
     };
   });
+  body.querySelectorAll('[data-bslide]').forEach(function(el){
+    el.onchange = function(){
+      var id = el.getAttribute('data-bslide');
+      var list = state.config.slideCards || (state.config.slideCards = []);
+      if (el.checked){ if (list.indexOf(id) < 0) list.push(id); }
+      else { state.config.slideCards = list.filter(function(x){ return x !== id; }); }
+    };
+  });
   body.querySelectorAll('[data-block]').forEach(function(el){
     el.onchange = function(){
       var f = findBoard(el.getAttribute('data-block'));
@@ -1122,7 +1183,9 @@ function bindAdminInputs(){
     el.onclick = function(){
       var g = state.config.groups.filter(function(x){ return x.id === el.getAttribute('data-gadd'); })[0];
       if (!g) return;
-      g.boards.push({ id: uid('b'), name:'新看板', url:'', locked:true, pwd:'plain:1234', color:'blue', mode:'auto' });
+      var nb = { id: uid('b'), name:'新看板', url:'', locked:true, pwd:'plain:1234', color:'blue', mode:'auto' };
+      g.boards.push(nb);
+      (state.config.slideCards || (state.config.slideCards = [])).push(nb.id);
       renderAdminBody();
     };
   });
@@ -1146,6 +1209,7 @@ function bindAdminInputs(){
       dropFrame(id);
       delete state.unlocked[id];
       state.config.homeCards = (state.config.homeCards || []).filter(function(x){ return x !== id; });
+      state.config.slideCards = (state.config.slideCards || []).filter(function(x){ return x !== id; });
       if (state.view === id) showHome(); else { renderAdminBody(); renderSidebar(); }
     };
   });
@@ -1227,6 +1291,274 @@ function changeAdminPwd(){
   };
 }
 
+/* ==================== 幻灯片轮播（免密码、自动播放最新数据） ==================== */
+var LS_SLIDE = 'boardhub_slide_sec_v1';
+var SLIDE_SECS = [10, 15, 30, 60, 120];
+var slide = { on:false, ids:[], i:0, sec:30, tick:null, loadWait:null, idleT:null,
+              frames:{}, paused:false, remain:0, startedAt:0, fs:false };
+
+function slideSec(){
+  var v = parseInt(localStorage.getItem(LS_SLIDE) || '', 10);
+  return (v > 0) ? v : 30;
+}
+/* 可播放：有网址、且未设为「新窗口打开」 */
+function slidePlayable(){
+  var out = [];
+  (state.config.groups || []).forEach(function(g){
+    (g.boards || []).forEach(function(b){
+      if (b.url && b.mode !== 'new') out.push(b.id);
+    });
+  });
+  return out;
+}
+function slideDefaultIds(){
+  var ok = slidePlayable();
+  var saved = (state.config.slideCards || []).filter(function(id){ return ok.indexOf(id) > -1; });
+  return saved.length ? saved : ok;
+}
+function openSlideSetup(){
+  var ok = slidePlayable();
+  if (!ok.length){ toast('还没有可播放的看板（需先在「管理」里填网址）'); return; }
+  var def = slideDefaultIds();
+  var sec = slideSec();
+  var secOpts = SLIDE_SECS.map(function(s){
+    return '<option value="' + s + '"' + (s === sec ? ' selected' : '') + '>' + s + ' 秒</option>';
+  }).join('');
+
+  var html = '<div class="modal" style="width:470px"><h3>幻灯片播放</h3>' +
+    '<p>按勾选顺序自动轮播，<b>播放时无需密码</b>，每轮自动重新载入、始终显示最新数据。</p>' +
+    '<div class="row"><label class="chk" style="flex:1">每屏停留</label><select id="slSec">' + secOpts + '</select></div>' +
+    '<div class="slide-pick" id="slPick">';
+  (state.config.groups || []).forEach(function(g){
+    var bs = (g.boards || []).filter(function(b){ return b.url && b.mode !== 'new'; });
+    if (!bs.length) return;
+    html += '<div class="sp-grp">' + esc(g.name) + '</div>';
+    bs.forEach(function(b){
+      html += '<label class="sp-item"><input type="checkbox" data-sl="' + b.id + '"' +
+        (def.indexOf(b.id) > -1 ? ' checked' : '') + '>' + avatarHtml(b) +
+        '<span class="sp-name">' + esc(b.name) + '</span>' +
+        (b.locked ? '<span class="sp-badge">免密码</span>' : '') + '</label>';
+    });
+  });
+  html += '</div>' +
+    '<div class="row" style="margin-top:8px"><button class="mini" id="slAll">全选</button>' +
+    '<button class="mini" id="slNone">全不选</button><span style="flex:1"></span>' +
+    '<span style="font-size:12px;color:var(--text-3)" id="slCount"></span></div>' +
+    '<div class="modal-actions"><button class="mini" id="slCancel">取消</button>' +
+    '<button class="mini primary" id="slGo" style="background:var(--brand);color:#fff;border-color:var(--brand)">开始播放</button></div>' +
+    '<div class="hint" style="margin-top:10px">快捷键：空格 暂停/继续 · ← → 上一个/下一个 · Esc 退出。默认勾选可在「管理」里逐看板设置。</div></div>';
+
+  overlay(html, closeLayer);
+  var pick = $('slPick');
+  function count(){
+    var n = pick.querySelectorAll('input[data-sl]:checked').length;
+    $('slCount').textContent = '已选 ' + n + ' 个';
+  }
+  pick.onchange = count;
+  $('slAll').onclick = function(){ pick.querySelectorAll('input[data-sl]').forEach(function(i){ i.checked = true; }); count(); };
+  $('slNone').onclick = function(){ pick.querySelectorAll('input[data-sl]').forEach(function(i){ i.checked = false; }); count(); };
+  $('slCancel').onclick = closeLayer;
+  count();
+  $('slGo').onclick = function(){
+    var ids = [];
+    pick.querySelectorAll('input[data-sl]').forEach(function(i){ if (i.checked) ids.push(i.getAttribute('data-sl')); });
+    if (!ids.length){ toast('请至少勾选一个看板'); return; }
+    startSlideshow(ids, parseInt($('slSec').value, 10) || 30);
+  };
+}
+
+function startSlideshow(ids, sec){
+  if (!ids.length) return;
+  slide.on = true; slide.ids = ids.slice(); slide.i = 0; slide.sec = sec;
+  slide.frames = {}; slide.paused = false; slide.fs = false;
+  try{ localStorage.setItem(LS_SLIDE, String(sec)); }catch(e){}
+  closeLayer();
+  clearInterval(autoTimer); clearInterval(ageTimer);
+
+  var k = $('kiosk');
+  var secOpts = SLIDE_SECS.map(function(s){
+    return '<option value="' + s + '"' + (s === sec ? ' selected' : '') + '>' + s + ' 秒</option>';
+  }).join('');
+  k.innerHTML =
+    '<div class="kiosk-progress" id="kProg"></div>' +
+    '<div class="kiosk-bar">' +
+      '<span class="kiosk-title" id="kTitle"></span>' +
+      '<span class="kiosk-sub" id="kSub"></span>' +
+      '<span class="kiosk-idx" id="kIdx"></span>' +
+      '<span style="flex:1"></span>' +
+      '<button class="kbar-btn" id="kPrev">← 上一个</button>' +
+      '<button class="kbar-btn" id="kNext">下一个 →</button>' +
+      '<button class="kbar-btn" id="kPause">暂停</button>' +
+      '<button class="kbar-btn" id="kExit">退出 Esc</button>' +
+    '</div>' +
+    '<div class="kiosk-host" id="kHost">' +
+      '<div class="kiosk-loading hidden" id="kLoad">正在载入…</div>' +
+    '</div>' +
+    '<div class="kiosk-bottom">' +
+      '<span class="kiosk-sub" id="kCount"></span>' +
+      '<span class="kiosk-dots" id="kDots"></span>' +
+      '<span style="flex:1"></span>' +
+      '<span class="kiosk-sub">每屏</span><select id="kSec">' + secOpts + '</select>' +
+      '<button class="kbar-btn" id="kReload">刷新当前</button>' +
+      '<button class="kbar-btn" id="kFs">全屏</button>' +
+    '</div>';
+  k.classList.remove('hidden');
+
+  $('kPrev').onclick = function(){ slideGo(slide.i - 1); };
+  $('kNext').onclick = function(){ slideGo(slide.i + 1); };
+  $('kPause').onclick = slideTogglePause;
+  $('kExit').onclick = stopSlideshow;
+  $('kReload').onclick = function(){ slideLoad(true); };
+  $('kFs').onclick = slideToggleFs;
+  $('kSec').onchange = function(){
+    slide.sec = parseInt($('kSec').value, 10) || 30;
+    try{ localStorage.setItem(LS_SLIDE, String(slide.sec)); }catch(e){}
+    slideArm();
+  };
+
+  document.addEventListener('keydown', slideKey);
+  document.addEventListener('mousemove', slideActivity);
+  document.addEventListener('fullscreenchange', slideFsChange);
+  slideActivity();
+
+  try{
+    var p = document.documentElement.requestFullscreen();
+    slide.fs = true;
+    if (p && p.catch) p.catch(function(){ slide.fs = false; });
+  }catch(e){ slide.fs = false; }
+
+  slideGo(0);
+}
+
+function slideLoad(force){
+  var b = findBoard(slide.ids[slide.i]);
+  if (!b) return;
+  b = b.board;
+  var host = $('kHost');
+  var fr = slide.frames[b.id];
+  var fresh = false;
+  if (!fr){
+    fr = document.createElement('iframe');
+    fr.setAttribute('referrerpolicy', 'no-referrer');
+    fr.dataset.bid = b.id;
+    host.appendChild(fr);
+    slide.frames[b.id] = fr;
+    fresh = true;
+  }
+  // 只有当前看板的 iframe 可见（新建的也要在这里补上，否则会黑屏）
+  Object.keys(slide.frames).forEach(function(id){
+    slide.frames[id].classList.toggle('on', id === b.id);
+  });
+  var loadedAt = Number(fr.dataset.loadedAt || 0);
+  // 超过 90 秒或手动刷新 → 重新载入，保证看到的是最新数据
+  if (fresh || force || !fr.getAttribute('src') || (Date.now() - loadedAt > 90000)){
+    fr.dataset.loaded = '0';
+    fr.dataset.loadedAt = Date.now();
+    $('kLoad').classList.remove('hidden');
+    fr.onload = function(){
+      fr.dataset.loaded = '1';
+      fr.dataset.loadedAt = Date.now();
+      $('kLoad').classList.add('hidden');
+      slideArm();
+    };
+    fr.setAttribute('src', b.url);
+  }else{
+    $('kLoad').classList.add('hidden');
+    slideArm();
+  }
+}
+function slideGo(i){
+  if (!slide.on) return;
+  if (!slide.ids.length) return;
+  slide.i = (i + slide.ids.length) % slide.ids.length;
+  var f = findBoard(slide.ids[slide.i]);
+  if (!f){                                   // 看板被删了就跳过
+    slide.ids.splice(slide.i, 1);
+    if (!slide.ids.length){ stopSlideshow(); return; }
+    slideGo(slide.i); return;
+  }
+  var b = f.board;
+  $('kTitle').textContent = b.name;
+  $('kSub').textContent = f.group.name;
+  $('kIdx').textContent = (slide.i + 1) + ' / ' + slide.ids.length;
+  var dots = '';
+  for (var n = 0; n < slide.ids.length; n++) dots += '<span class="kdot' + (n === slide.i ? ' on' : '') + '"></span>';
+  $('kDots').innerHTML = dots;
+  Object.keys(slide.frames).forEach(function(id){ slide.frames[id].classList.remove('on'); });
+  var el = slide.frames[b.id];
+  if (el) el.classList.add('on');
+  slideLoad(false);
+}
+function slideArm(){
+  clearInterval(slide.tick); clearTimeout(slide.loadWait);
+  if (!slide.on) return;
+  slide.remain = slide.sec * 1000;
+  slide.startedAt = Date.now();
+  slide.paused = false;
+  var pb = $('kPause'); if (pb) pb.textContent = '暂停';
+  slide.tick = setInterval(function(){
+    if (!slide.on || slide.paused) return;
+    var used = Date.now() - slide.startedAt;
+    var p = Math.min(1, used / slide.remain);
+    var prog = $('kProg'); if (prog) prog.style.width = (p * 100).toFixed(2) + '%';
+    var cd = $('kCount');
+    if (cd) cd.textContent = '下一屏 ' + Math.max(0, Math.ceil((slide.remain - used) / 1000)) + ' 秒';
+    if (p >= 1){ clearInterval(slide.tick); slideGo(slide.i + 1); }
+  }, 200);
+}
+function slideTogglePause(){
+  if (!slide.on) return;
+  var used = Date.now() - slide.startedAt;
+  if (slide.paused){
+    slide.startedAt = Date.now();                    // 继续：从剩余时间接着走
+    slide.paused = false;
+    $('kPause').textContent = '暂停';
+  }else{
+    slide.remain = Math.max(1000, slide.remain - used);
+    slide.paused = true;
+    $('kPause').textContent = '继续';
+  }
+}
+function slideToggleFs(){
+  try{
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen();
+  }catch(e){}
+}
+function slideFsChange(){
+  if (slide.on && slide.fs && !document.fullscreenElement) stopSlideshow();
+}
+function slideActivity(){
+  var k = $('kiosk');
+  if (!k) return;
+  k.classList.remove('idle');
+  clearTimeout(slide.idleT);
+  slide.idleT = setTimeout(function(){ if (slide.on) k.classList.add('idle'); }, 3500);
+}
+function slideKey(e){
+  if (!slide.on) return;
+  if (e.key === 'Escape'){ e.preventDefault(); stopSlideshow(); }
+  else if (e.key === ' '){ e.preventDefault(); slideTogglePause(); slideActivity(); }
+  else if (e.key === 'ArrowRight'){ e.preventDefault(); slideGo(slide.i + 1); slideActivity(); }
+  else if (e.key === 'ArrowLeft'){ e.preventDefault(); slideGo(slide.i - 1); slideActivity(); }
+}
+function stopSlideshow(){
+  if (!slide.on) return;
+  slide.on = false;
+  clearInterval(slide.tick); clearTimeout(slide.loadWait); clearTimeout(slide.idleT);
+  document.removeEventListener('keydown', slideKey);
+  document.removeEventListener('mousemove', slideActivity);
+  document.removeEventListener('fullscreenchange', slideFsChange);
+  slide.frames = {};
+  var k = $('kiosk');
+  k.innerHTML = '';
+  k.classList.add('hidden');
+  k.classList.remove('idle');
+  try{ if (document.fullscreenElement) document.exitFullscreen(); }catch(e){}
+  slide.fs = false;
+  if (state.view === 'home') renderAll(); else renderFrame();
+}
+
 /* ==================== 事件 ==================== */
 $('sideScroll').addEventListener('click', function(e){
   var home = e.target.closest('[data-home]');
@@ -1250,6 +1582,7 @@ $('searchInput').addEventListener('input', function(e){
 });
 $('btnToggleSide').onclick = function(){ $('sidebar').classList.toggle('hidden'); };
 $('syncBox').onclick = function(){ cloudSetupGuide(); };
+$('btnSlide').onclick = function(){ if (slide.on) stopSlideshow(); else openSlideSetup(); };
 $('btnAdmin').onclick = function(){ askAdminPassword(); };
 $('btnReport').onclick = function(){
   var f = findBoard(state.view);
@@ -1285,6 +1618,14 @@ $('btnReport').onclick = function(){
   try{ local = JSON.parse(localStorage.getItem(LS_CFG) || 'null'); }catch(e){}
   if (local && local.groups) state.config = normalize(local);
   renderAll();
+  // 大屏常开：地址栏加 ?slide=1 直接进入幻灯片播放（可再加 &sec=60 指定秒数）
+  try{
+    var qs = new URLSearchParams(location.search || '');
+    if (qs.get('slide') === '1'){
+      var ssec = parseInt(qs.get('sec') || '', 10) || slideSec();
+      setTimeout(function(){ startSlideshow(slideDefaultIds(), ssec); }, 600);
+    }
+  }catch(e){}
   var okCloud = await initCloud(true);
   if (okCloud){
     var pulled = await pullFromCloud();
