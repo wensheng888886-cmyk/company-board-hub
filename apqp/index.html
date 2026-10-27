@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>APQP 项目管理看板</title>
 <meta property="og:title" content="APQP 项目管理看板">
-<meta property="og:description" content="按 APQP 五阶段组织的项目交付看板 · 每个主题可增删编辑 · 刷新 Excel 不丢失人工修改">
+<meta property="og:description" content="按 APQP 五阶段 + P6 知识经验库组织的项目看板 · 每个主题可增删编辑 · 刷新 Excel 不丢失人工修改">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--pri:#1a56db;--grn:#059669;--red:#dc2626;--amb:#d97706;--neu:#6b7280;--bg:#f1f5f9;--card:#ffffff;--txt:#1e293b;--tlt:#64748b;--bdr:#e2e8f0}
@@ -59,6 +59,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .topic-sub{font-size:12px;color:var(--tlt);margin-top:2px}
 .topic-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .topic-actions .cnt{font-size:12px;color:var(--tlt)}
+/* ---------- P6 知识经验库 ---------- */
+.ll-wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0 0 16px}
+.ll-box{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px}
+.ll-box h5{font-size:12.5px;color:var(--tlt);font-weight:600;margin-bottom:10px}
+.ll-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px}
+.ll-row .k{width:96px;flex:none;text-align:right;color:var(--tlt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ll-row .b{flex:1;height:11px;background:#eef2f7;border-radius:4px;overflow:hidden}
+.ll-row .b>i{display:block;height:100%;border-radius:4px}
+.ll-row .v{width:24px;flex:none;text-align:right;color:var(--tlt);font-variant-numeric:tabular-nums}
+.ll-mx{margin-top:6px;overflow-x:auto}
+.ll-mx table{width:100%;border-collapse:collapse;font-size:12.5px}
+.ll-mx th,.ll-mx td{border-bottom:1px solid var(--bdr);padding:7px 10px;text-align:center;white-space:nowrap}
+.ll-mx th{background:var(--bg);color:var(--tlt);font-weight:600;border-bottom:2px solid var(--bdr)}
+.ll-mx th:first-child,.ll-mx td:first-child{text-align:left}
+.ll-mx td.z{color:#cbd5e1}
+.ll-mx tfoot td{background:#f8fafc;font-weight:700}
+#module-P6 .data-table-wrap td[title]{max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:1100px){.ll-wrap{grid-template-columns:1fr}}
 .data-table-wrap{margin-top:6px;overflow-x:auto}
 .data-table-wrap table{width:100%;border-collapse:collapse;font-size:12.5px}
 .data-table-wrap th{background:var(--bg);padding:8px 12px;text-align:left;font-weight:600;color:var(--tlt);border-bottom:2px solid var(--bdr);white-space:nowrap}
@@ -580,7 +598,16 @@ const APQP_PHASES = [
   { id: "P3", icon: "⚙️", name: "过程设计与开发", en: "Process Design & Development", color: "#0891b2", desc: "产能规划、设备工装、检具量具" },
   { id: "P4", icon: "🏭", name: "产品与过程确认", en: "Product & Process Validation", color: "#059669", desc: "样件交付、排产与产能确认" },
   { id: "P5", icon: "🔁", name: "反馈·评定·纠正", en: "Feedback & Corrective Action", color: "#d97706", desc: "质量问题闭环、待办与持续改进" },
+  { id: "P6", icon: "📚", name: "知识经验库", en: "Lessons Learned Library", color: "#be123c", desc: "把前五阶段发生过的问题复盘沉淀：按 APQP 工具归类、按部门归属、明确横向展开范围" },
 ];
+
+/* ---------------- P6 知识经验库：工具与部门字典 ---------------- */
+const LESSON_TOOLS = [
+  "APQP 时序计划", "过程流程图", "DFMEA", "PFMEA", "控制计划", "MSA 测量系统分析",
+  "SPC 过程能力", "特殊特性 SC/CC", "防错 Poka-Yoke", "PPAP / PSW", "产能与节拍规划",
+  "工装与检具", "供应商管理", "包装与物流", "经验教训(LL)",
+];
+const LESSON_DEPTS = ["生产", "工程", "质量", "研发", "采购", "物流计划", "项目", "供应商", "其他"];
 
 /* ---------------- 主题定义 ---------------- */
 const TOPICS = [
@@ -676,6 +703,87 @@ const TOPICS = [
     ],
     blank: () => ({ project: "", content: "", status: "进行中" }),
   },
+  {
+    id: "lessons", phase: "P6", kind: "lesson", icon: "📚", title: "经验教训库",
+    sub: "把 P1–P5 发生过的问题复盘沉淀：按 APQP 工具归类、按部门归属、明确横向展开范围与固化措施",
+    cols: [
+      { k: "no", label: "编号", type: "text" },
+      { k: "phase", label: "发生阶段", type: "select", options: ["P1 策划与定义", "P2 产品设计", "P3 过程设计", "P4 产品过程确认", "P5 反馈与纠正", "SOP 量产后"] },
+      { k: "tool", label: "APQP 工具", type: "select", options: LESSON_TOOLS },
+      { k: "dept", label: "责任部门", type: "select", options: LESSON_DEPTS },
+      { k: "problem", label: "问题现象", type: "textarea" },
+      { k: "rootcause", label: "根本原因", type: "textarea" },
+      { k: "action", label: "对策与固化措施", type: "textarea" },
+      { k: "spread", label: "横向展开范围", type: "textarea" },
+      { k: "status", label: "状态", type: "select", options: ["待横展", "横展中", "已横展", "已固化成标准"] },
+    ],
+    blank: () => ({ no: "", phase: "P3 过程设计", tool: "PFMEA", dept: "工程",
+                    problem: "", rootcause: "", action: "", spread: "", status: "待横展" }),
+  },
+];
+
+/* ---------------- P6 内置经验示例库（可编辑/删除，删掉会同步给所有人） ---------------- */
+const LESSON_SEED = [
+  { no: "LL-001", phase: "P3 过程设计", tool: "PFMEA", dept: "工程",
+    problem: "灌封工序 PFMEA 未把「胶量不足」列为失效模式，试产批次出现 3 件空腔不良",
+    rootcause: "做 PFMEA 时直接沿用了旧机型模板，没有按新结构重新做失效分析",
+    action: "补全失效模式并增加胶量称重防错；PFMEA 评审增加「新结构必须重新识别失效模式」检查项",
+    spread: "已横展至同类灌封产品线 4 个项目", status: "已固化成标准" },
+  { no: "LL-002", phase: "P4 产品过程确认", tool: "MSA 测量系统分析", dept: "质量",
+    problem: "新制检具 GRR 32%，远超 10% 要求，导致 PPAP 尺寸报告被判无效，重新提交延误 3 周",
+    rootcause: "检具验收只做了尺寸符合性，没有做重复性与再现性（GRR）分析",
+    action: "检具验收流程增加 GRR 门禁，GRR>10% 不予验收；验收记录随 PPAP 一并提交",
+    spread: "全部新制检具与量具", status: "已固化成标准" },
+  { no: "LL-003", phase: "P3 过程设计", tool: "产能与节拍规划", dept: "生产",
+    problem: "试产实测节拍 48s，与规划的 38s 相差 26%，PPAP 阶段产能不达标",
+    rootcause: "节拍按理论工时测算，未计入换型时间与人工取放动作",
+    action: "改为按实测动素分析估节拍；规划阶段预留 15% 产能缓冲",
+    spread: "全部新项目产能评估", status: "已横展" },
+  { no: "LL-004", phase: "P2 产品设计", tool: "DFMEA", dept: "研发",
+    problem: "磁芯与支架干涉 0.3mm，DV 试验阶段才发现，此时模具已开完毕",
+    rootcause: "DFMEA 未做公差叠加分析（GD&T Stack-up），关键配合尺寸靠经验判断",
+    action: "DFMEA 增加公差叠加必做项；关键配合尺寸强制做 3D 装配仿真",
+    spread: "所有含多零件装配的产品（横展中，已覆盖 6 个在研项目）", status: "横展中" },
+  { no: "LL-005", phase: "P4 产品过程确认", tool: "PPAP / PSW", dept: "质量",
+    problem: "客户以「控制计划未覆盖特殊特性」为由退回 PSW，提交节点延误 2 周",
+    rootcause: "特殊特性清单升版后没有同步更新控制计划，两套文件版本脱节",
+    action: "特殊特性变更强制触发控制计划复核；PPAP 提交前增加「特性—控制计划」对照检查表",
+    spread: "全部客户 PPAP 提交", status: "已固化成标准" },
+  { no: "LL-006", phase: "P3 过程设计", tool: "防错 Poka-Yoke", dept: "工程",
+    problem: "装配工位左右件混装，客户端发现 12 件错装，触发客户投诉",
+    rootcause: "左右件仅靠目视区分，没有物理防错，新人上岗易混",
+    action: "增加定位销防错 + 扫码校验；相似件强制分色标识并隔离存放",
+    spread: "通用装配一线、二线全部工位", status: "已固化成标准" },
+  { no: "LL-007", phase: "P5 反馈与纠正", tool: "SPC 过程能力", dept: "生产",
+    problem: "量产首月关键尺寸 Cpk 仅 0.98，低于客户要求 1.33",
+    rootcause: "试产阶段只做了 30 件样本，样本量不足以评估过程能力",
+    action: "试产样本量提高到 ≥125 件并计算 Ppk；Ppk 不达标不得转入 SOP",
+    spread: "全部新导入项目", status: "已横展" },
+  { no: "LL-008", phase: "P3 过程设计", tool: "工装与检具", dept: "工程",
+    problem: "焊接工装定位面磨损，约 2000 件后焊接尺寸开始漂移",
+    rootcause: "工装材质选型未考虑磨损寿命，且未纳入预防性保养计划",
+    action: "定位面改用硬质合金；工装纳入定期精度校验（每 5000 件）",
+    spread: "同类焊接工装（横展中）", status: "横展中" },
+  { no: "LL-009", phase: "P1 策划与定义", tool: "APQP 时序计划", dept: "项目",
+    problem: "客户要求 8 周交付样件，实际用了 13 周，项目节点整体后移",
+    rootcause: "立项时未做资源与产能可行性评审，直接承诺客户节点",
+    action: "立项增加可行性评审会签，节点承诺须经工艺、采购确认后才回复客户",
+    spread: "全部新项目立项", status: "已横展" },
+  { no: "LL-010", phase: "P4 产品过程确认", tool: "包装与物流", dept: "物流计划",
+    problem: "样件运输途中 5 件变形，客户拒收并重新发运",
+    rootcause: "样品包装沿用旧方案，没有做运输振动与跌落验证",
+    action: "样件包装纳入 ISTA 1A 验证；关键件增加定制内衬与防压标识",
+    spread: "待横展到全部样件发运环节", status: "待横展" },
+  { no: "LL-011", phase: "P3 过程设计", tool: "供应商管理", dept: "采购",
+    problem: "外购件批次硬度不合格，导致停线 2 天",
+    rootcause: "供应商更换热处理分供方未通知我方，合同中也无变更通知条款",
+    action: "与供应商补签变更通知条款；关键物料增加入厂硬度抽检",
+    spread: "全部关键物料供应商（横展中）", status: "横展中" },
+  { no: "LL-012", phase: "P5 反馈与纠正", tool: "控制计划", dept: "质量",
+    problem: "客户投诉尺寸超差，追溯发现现场使用的控制计划仍是旧版本",
+    rootcause: "文件换版后未同步到现场，旧版没有被回收",
+    action: "受控文件「一物一码」扫码确认版本；换版当日必须回收旧版并留痕",
+    spread: "全部受控文件", status: "已固化成标准" },
 ];
 
 /* ---------------- 由基础数据构建主题条目 ---------------- */
@@ -729,6 +837,18 @@ function buildRows(D, t) {
       Object.keys(g).forEach((key) => {
         const v = g[key];
         rows.push({ id: rid("schedule", name + "|" + v.product + "|" + v.item, 0), project: v.product, fields: v, fp: fp(name + v.product + v.item) });
+      });
+    });
+  } else if (t.kind === "lesson") {
+    /* P6 知识经验库：基础数据里若有 lessons 则用之，否则用内置示例库；
+       两者都走 overlay（edits/deletes/adds），所以增删改与云端合并逻辑完全复用。*/
+    const src = Array.isArray(D.lessons) && D.lessons.length ? D.lessons : LESSON_SEED;
+    src.forEach((x, i) => {
+      rows.push({
+        id: rid("lesson", x.no || i, i),
+        project: x.dept || "",
+        fields: Object.assign({}, x),
+        fp: fp((x.no || '') + (x.problem || '')),
       });
     });
   }
@@ -1042,6 +1162,76 @@ function phaseModule(ph) {
   </section>`;
 }
 
+/* ---------------- P6 知识经验库（专用模块：KPI + 分布 + 交叉矩阵 + 明细表） ---------------- */
+function lessonsModule(ph) {
+  const rows = ROWS.lessons || [];
+  const t = TOPICS.find((x) => x.id === "lessons");
+  const cnt = (s) => rows.filter((r) => r.fields.status === s).length;
+  const fixed = cnt("已固化成标准");
+  const spread = cnt("已横展");
+  const doing = cnt("待横展") + cnt("横展中");
+  const tools = new Set(rows.map((r) => r.fields.tool).filter(Boolean));
+  const byDept = cntArr(rows.map((r) => ({ k: r.fields.dept || "未指定" })), "k");
+  const byTool = cntArr(rows.map((r) => ({ k: r.fields.tool || "未指定" })), "k");
+  const byPhase = cntArr(rows.map((r) => ({ k: r.fields.phase || "未指定" })), "k");
+  const bar = (list, color) => {
+    if (!list.length) return '<div class="ll-row"><span class="k">—</span><span class="b"></span><span class="v">0</span></div>';
+    const max = list.reduce((m, x) => Math.max(m, x[1]), 1);
+    return list.map((x) => '<div class="ll-row"><span class="k" title="' + attr(x[0]) + '">' + esc(x[0]) + '</span>' +
+      '<span class="b"><i style="width:' + Math.round((x[1] / max) * 100) + '%;background:' + color + '"></i></span>' +
+      '<span class="v">' + x[1] + '</span></div>').join("");
+  };
+  /* APQP 工具 × 部门 交叉矩阵 */
+  const toolKeys = byTool.map((x) => x[0]);
+  const deptKeys = byDept.map((x) => x[0]);
+  let mx;
+  if (rows.length) {
+    const body = toolKeys.map((tk) => {
+      let sum = 0;
+      const tds = deptKeys.map((dk) => {
+        const n = rows.filter((r) => (r.fields.tool || "未指定") === tk && (r.fields.dept || "未指定") === dk).length;
+        sum += n;
+        return '<td class="' + (n ? "" : "z") + '">' + (n || "—") + "</td>";
+      }).join("");
+      return "<tr><td>" + esc(tk) + "</td>" + tds + "<td><b>" + sum + "</b></td></tr>";
+    }).join("");
+    const foot = deptKeys.map((dk) => "<td>" + rows.filter((r) => (r.fields.dept || "未指定") === dk).length + "</td>").join("");
+    mx = '<div class="ll-mx"><table><thead><tr><th>APQP 工具 \\ 责任部门</th>' +
+      deptKeys.map((d) => "<th>" + esc(d) + "</th>").join("") + "<th>合计</th></tr></thead><tbody>" + body +
+      "</tbody><tfoot><tr><td>合计</td>" + foot + "<td>" + rows.length + "</td></tr></tfoot></table></div>";
+  } else {
+    mx = '<div style="text-align:center;color:#94a3b8;padding:18px;font-size:12.5px">还没有经验条目，点下方「➕ 新增」开始沉淀</div>';
+  }
+  const kpi = (label, value, unit, sub, color) => '<div class="kpi-card ' + (color || "") + '">' +
+    '<div class="kpi-body"><div class="kpi-head"><span class="kpi-label">' + label + '</span></div>' +
+    '<div class="kpi-value">' + value + '<span class="kpi-unit">' + (unit || "") + '</span></div>' +
+    '<div class="kpi-sub">' + (sub || "") + '</div></div></div>';
+  return '<section class="module" id="module-' + ph.id + '">' +
+    '<div class="module-header">' +
+      '<h2><span class="phase-badge" style="background:' + ph.color + '">' + ph.id + '</span> ' + ph.icon + ' ' + esc(ph.name) +
+        ' <span style="font-size:13px;font-weight:400;color:var(--tlt)">' + esc(ph.en) + '</span></h2>' +
+      '<div class="info">' + esc(ph.desc) + ' · 共 ' + rows.length + ' 条经验</div>' +
+    '</div>' +
+    '<div class="kpi-grid">' +
+      kpi("累计经验", rows.length, " 条", "覆盖 " + tools.size + " 类 APQP 工具", "primary") +
+      kpi("已固化成标准", fixed, " 条", "已写进控制计划 / 作业指导书 / 检查表", "green") +
+      kpi("已横展", spread, " 条", "已推广到其他项目与产线", "primary") +
+      kpi("待推进", doing, " 条", "待横展 + 横展中", doing ? "amber" : "green") +
+    '</div>' +
+    '<div class="ll-wrap">' +
+      '<div class="ll-box"><h5>按责任部门</h5>' + bar(byDept, "#1a56db") + '</div>' +
+      '<div class="ll-box"><h5>按 APQP 工具</h5>' + bar(byTool, "#7c3aed") + '</div>' +
+      '<div class="ll-box"><h5>按发生阶段</h5>' + bar(byPhase, "#0891b2") + '</div>' +
+    '</div>' +
+    '<div class="topic-card">' +
+      '<div class="topic-head"><div><h4>🧮 APQP 工具 × 部门 交叉汇总</h4>' +
+        '<p class="topic-sub">看清哪类工具、哪个部门最容易出问题 —— 下一轮 APQP 就把这些点前置成预防措施</p></div></div>' +
+      mx +
+    '</div>' +
+    topicCard(t) +
+  '</section>';
+}
+
 /* ---------------- 总览 ---------------- */
 function overviewModule() {
   const projects = ROWS.project || [];
@@ -1077,7 +1267,7 @@ function overviewModule() {
     </div>
     <div class="insight-box">
       <h4>📌 看板维护状态</h4>
-      <div class="insight-item"><span class="dot info"></span><div>本看板按 <strong>APQP 五阶段</strong> 组织，每个主题均可<strong>新增 / 编辑 / 删除</strong>；修改会标记「已修改 / 手动新增」。</div></div>
+      <div class="insight-item"><span class="dot info"></span><div>本看板按 <strong>APQP 五阶段 + P6 知识经验库</strong> 组织，每个主题均可<strong>新增 / 编辑 / 删除</strong>；修改会标记「已修改 / 手动新增」。</div></div>
       <div class="insight-item"><span class="dot success"></span><div>从 Excel 刷新数据时，你在此处的修改会<strong>自动保留</strong>（当前已保存：编辑 ${s.edits} 条 · 新增 ${s.adds} 条 · 删除 ${s.deletes} 条）。</div></div>
       <div class="insight-item"><span class="dot success"></span><div>本页数据<strong>全部来自云端</strong>，不写入浏览器本地存储；如需留档，可在「修改与数据管理」中<strong>导出修改记录</strong>。</div></div>
     </div>
@@ -1272,7 +1462,7 @@ function renderAll() {
 
   document.getElementById("modules").innerHTML = [
     overviewModule(),
-    APQP_PHASES.map(phaseModule).join(""),
+    APQP_PHASES.map((p) => (p.id === "P6" ? lessonsModule(p) : phaseModule(p))).join(""),
     scheduleModule(),
     qualityModule(),
     manageModule(),
@@ -1461,7 +1651,7 @@ function confirmDelete(topicId, rowId) {
   const rows = ROWS[topicId] || [];
   const r = rows.find((x) => x.id === rowId);
   if (!r) return;
-  const label = r.fields.content || r.fields.name || r.fields.item || r.fields.product || "该条目";
+  const label = r.fields.content || r.fields.name || r.fields.item || r.fields.product || r.fields.problem || r.fields.no || "该条目";
   if (!confirm("确认删除「" + String(label).slice(0, 40) + "」？\n此删除会同步给所有打开看板的人。" )) return;
   deleteRow(rowId);
 }
