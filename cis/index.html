@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工厂全员改善建议管理看板 · CIP Board</title>
+<style>
+:root{
+  --bg:#f4f6f9; --card:#ffffff; --ink:#16202b; --ink2:#4a5a6b; --ink3:#8494a3;
+  --line:#e3e8ef; --line2:#cfd8e3;
+  --brand:#0f4c81; --brand-soft:#e8f0f8; --brand-2:#1a6fb0;
+  --red:#c62828; --red-soft:#fdecec;
+  --amber:#b26a00; --amber-soft:#fff5e0;
+  --green:#1b6b3a; --green-soft:#e6f4ea;
+  --purple:#5b4a9e; --purple-soft:#efecfa;
+  --teal:#0f6e56; --teal-soft:#e3f4ee;
+  --orange:#c8620a; --orange-soft:#fdefe2;
+  --shadow:0 1px 2px rgba(16,32,54,.06),0 4px 14px rgba(16,32,54,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:"Microsoft YaHei","PingFang SC","Segoe UI",system-ui,sans-serif;font-size:13px;line-height:1.6}
+.wrap{max-width:1600px;margin:0 auto;padding:0 20px 60px}
+header.top{background:linear-gradient(100deg,#0f4c81,#155e96 55%,#1a6fb0);color:#fff;padding:18px 0 16px;box-shadow:0 2px 10px rgba(15,76,129,.18)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;border-radius:9px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:17px}
+h1{font-size:18px;font-weight:600;letter-spacing:.3px}
+.sub{font-size:12px;opacity:.85;margin-top:1px}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,.btn{border:1px solid var(--line2);background:#fff;color:var(--ink);padding:7px 13px;border-radius:7px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:.15s}
+button:hover,.btn:hover{border-color:var(--brand);color:var(--brand)}
+.btn-p{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn-p:hover{background:var(--brand-2);border-color:var(--brand-2);color:#fff}
+.btn-ghost{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4);color:#fff}
+.btn-ghost:hover{background:rgba(255,255,255,.22);color:#fff;border-color:#fff}
+.btn-danger{color:var(--red);border-color:#f0c5c5}
+.btn-danger:hover{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+#sync-pill{background:#1b6b3a;color:#fff;font-size:11.5px;padding:4px 11px;border-radius:20px;white-space:nowrap}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:12px;margin:18px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px 15px;box-shadow:var(--shadow);border-left:3px solid var(--brand)}
+.kpi .k-lab{font-size:12px;color:var(--ink2)}
+.kpi .k-val{font-size:25px;font-weight:600;letter-spacing:-.5px;margin-top:2px}
+.kpi .k-hint{font-size:11.5px;color:var(--ink3)}
+.kpi.red{border-left-color:var(--red)} .kpi.red .k-val{color:var(--red)}
+.kpi.amber{border-left-color:var(--amber)} .kpi.amber .k-val{color:var(--amber)}
+.kpi.green{border-left-color:var(--green)} .kpi.green .k-val{color:var(--green)}
+.kpi.purple{border-left-color:var(--purple)} .kpi.purple .k-val{color:var(--purple)}
+.kpi.teal{border-left-color:var(--teal)} .kpi.teal .k-val{color:var(--teal)}
+.kpi.orange{border-left-color:var(--orange)} .kpi.orange .k-val{color:var(--orange)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line2);margin:6px 0 16px;flex-wrap:wrap}
+.tab{padding:9px 16px;font-size:13px;color:var(--ink2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab:hover{color:var(--brand)}
+.tab.on{color:var(--brand);border-bottom-color:var(--brand);font-weight:600}
+.view{display:none} .view.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:16px 18px;margin-bottom:16px}
+.card h2{font-size:14px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card h3{font-size:13px;font-weight:600;margin:16px 0 8px;color:var(--brand)}
+.card>.desc{font-size:12px;color:var(--ink2);margin-bottom:12px}
+.badge{font-size:10.5px;padding:1px 7px;border-radius:10px;background:var(--brand-soft);color:var(--brand);border:1px solid #cfe0f0;font-weight:400}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+th{background:#f7f9fc;color:var(--ink2);font-weight:600;font-size:12px;position:sticky;top:0;z-index:2;white-space:nowrap}
+tbody tr:hover{background:#fafcfe}
+.tbl-wrap{overflow:auto;max-height:660px;border:1px solid var(--line);border-radius:8px}
+td.e[contenteditable="true"]{outline:none;border-bottom:1px dashed transparent}
+td.e[contenteditable="true"]:hover,td.e[contenteditable="true"]:focus{background:#fffbe9;border-bottom-color:var(--amber)}
+select,input,textarea{font-family:inherit;font-size:12.5px;color:var(--ink);border:1px solid var(--line2);border-radius:6px;padding:5px 7px;background:#fff;width:100%}
+textarea{min-height:66px;resize:vertical}
+select:focus,input:focus,textarea:focus{outline:2px solid var(--brand-soft);border-color:var(--brand)}
+.mini{padding:2px 5px;font-size:11.5px;width:auto}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.filters select,.filters input{width:auto;min-width:118px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:1180px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* 漏斗 */
+.fnl{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.fnl .lab{width:104px;font-size:12px;color:var(--ink2);text-align:right;flex:none}
+.fnl .trk{flex:1;height:24px;background:#eef1f6;border-radius:6px;overflow:hidden}
+.fnl .fl{height:100%;background:var(--brand-2);border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:#fff;font-size:11.5px;font-weight:600;min-width:30px}
+.fnl .rat{width:64px;font-size:11.5px;color:var(--ink3);text-align:right;flex:none}
+
+/* 部门卡片 */
+.dept-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:12px}
+.dept{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;box-shadow:var(--shadow);border-top:3px solid var(--brand)}
+.dept .dh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.dept .dn{font-size:14px;font-weight:600}
+.dept .dc{font-size:11.5px;color:var(--ink3)}
+.dept .dst{display:flex;gap:10px;font-size:11.5px;color:var(--ink2);margin-bottom:8px;flex-wrap:wrap}
+.dept .dst b{color:var(--ink);font-size:13px}
+.dept .tag{font-size:10.5px;padding:1px 6px;border-radius:4px;background:var(--green-soft);color:var(--green);border:1px solid #c9e6d4}
+.dept .tag.w{background:var(--amber-soft);color:var(--amber);border-color:#f2dfb8}
+.dept .tag.r{background:var(--red-soft);color:var(--red);border-color:#f3d3d3}
+
+/* 看板列 */
+.board{display:grid;grid-template-columns:repeat(7,minmax(200px,1fr));gap:9px;overflow-x:auto;padding-bottom:6px}
+.col{background:#eef1f6;border-radius:9px;padding:8px;min-height:200px;display:flex;flex-direction:column}
+.col.dragover{outline:2px dashed var(--brand-2);background:var(--brand-soft)}
+.col-h{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;color:var(--ink2);padding:2px 4px 8px}
+.col-h .cnt{background:#fff;border:1px solid var(--line2);border-radius:20px;padding:0 7px;font-size:11px}
+.col-h .sn{font-size:11px;background:var(--brand);color:#fff;border-radius:4px;padding:1px 5px;margin-right:5px}
+.item{background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 10px;margin-bottom:8px;cursor:grab;box-shadow:0 1px 2px rgba(16,32,54,.05);border-top:3px solid var(--brand)}
+.item:hover{border-color:var(--brand-2);box-shadow:0 3px 10px rgba(16,32,54,.12)}
+.item .i-code{font-size:11.5px;font-weight:600;color:var(--brand);font-family:Consolas,monospace}
+.item .i-title{font-size:12.5px;margin:2px 0 6px;line-height:1.45}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+.chip{font-size:10.5px;padding:1px 6px;border-radius:4px;background:#eef1f6;color:var(--ink2);border:1px solid var(--line)}
+.chip.b{background:var(--brand-soft);color:var(--brand);border-color:#cfe0f0}
+.chip.p{background:var(--purple-soft);color:var(--purple);border-color:#ded7f4}
+.chip.r{background:var(--red-soft);color:var(--red);border-color:#f3d3d3}
+.chip.a{background:var(--amber-soft);color:var(--amber);border-color:#f2dfb8}
+.chip.g{background:var(--green-soft);color:var(--green);border-color:#c9e6d4}
+.chip.t{background:var(--teal-soft);color:var(--teal);border-color:#c5e6da}
+.chip.o{background:var(--orange-soft);color:var(--orange);border-color:#f5dcc4}
+.i-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--ink3)}
+.empty{color:var(--ink3);font-size:12px;text-align:center;padding:16px}
+
+/* 热力矩阵 */
+.heat td{text-align:center;font-size:11.5px;padding:5px 4px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);color:#22303f}
+.heat th{text-align:center;font-size:11px;padding:5px 4px}
+.heat td.h0{background:#fbfcfd;color:#c3ccd6}
+.heat td.h1{background:#eaf3ec}
+.heat td.h2{background:#cfe7d7}
+.heat td.h3{background:#a8d4ba}
+.heat td.h4{background:#7cbf9b;color:#fff}
+.heat td.h5{background:#4f9e79;color:#fff}
+.heat tfoot td{background:#f7f9fc;font-weight:600;text-align:center}
+
+/* 流程 */
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+@media(max-width:1100px){.flow{grid-template-columns:repeat(2,1fr)}}
+.fstep{background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:11px}
+.fstep .fs-n{font-size:11px;color:#fff;background:var(--brand);border-radius:4px;padding:1px 6px;display:inline-block;margin-bottom:5px}
+.fstep h4{font-size:12.5px;font-weight:600;margin-bottom:4px}
+.fstep ul{list-style:none;font-size:11.5px;color:var(--ink2)}
+.fstep li{padding-left:11px;position:relative;margin-bottom:2px;line-height:1.5}
+.fstep li:before{content:"";position:absolute;left:2px;top:7px;width:4px;height:4px;border-radius:50%;background:var(--brand-2)}
+.fstep .gate{margin-top:7px;font-size:11px;color:var(--red);background:var(--red-soft);border-radius:5px;padding:5px 7px}
+.fstep .meta{font-size:11px;color:var(--ink3);margin-bottom:5px}
+.fstep .out{font-size:11px;color:var(--teal);background:var(--teal-soft);border-radius:5px;padding:5px 7px;margin-top:5px}
+
+.note{font-size:12px;padding:9px 12px;border-radius:7px;margin:8px 0;line-height:1.7}
+.note.info{background:var(--brand-soft);color:#123a5f;border:1px solid #cfe0f0}
+.note.warn{background:var(--amber-soft);color:#6b4300;border:1px solid #f2dfb8}
+.note.ok{background:var(--green-soft);color:#124a2a;border:1px solid #c9e6d4}
+.note b{font-weight:600}
+
+/* 模板 / 折叠 */
+.acc{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.acc-h{padding:10px 12px;background:#f7f9fc;cursor:pointer;font-size:12.5px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.acc-h:hover{background:#eef3f8}
+.acc-b{display:none;padding:12px;border-top:1px solid var(--line)}
+.acc.open .acc-b{display:block}
+pre.tpl{background:#fbfcfd;border:1px solid var(--line);border-radius:7px;padding:12px;font-family:Consolas,"Courier New",monospace;font-size:11.5px;line-height:1.65;white-space:pre-wrap;word-break:break-word;max-height:340px;overflow:auto;color:#26323f}
+
+/* 弹窗 */
+.modal{position:fixed;inset:0;background:rgba(16,32,54,.45);display:none;align-items:flex-start;justify-content:center;z-index:99;overflow:auto;padding:24px}
+.modal.on{display:flex}
+.mbox{background:#fff;border-radius:12px;width:100%;max-width:980px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.mhead{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.mhead h3{font-size:15px;margin:0;color:var(--ink)}
+.mbody{padding:16px 18px}
+.mfoot{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+.frow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+@media(max-width:900px){.frow{grid-template-columns:1fr}}
+.fld label{display:block;font-size:11.5px;color:var(--ink2);margin-bottom:3px}
+.legend{font-size:11.5px;color:var(--ink2);margin-top:8px;display:flex;gap:14px;flex-wrap:wrap}
+.legend .pill{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.lg{font-size:11.5px;color:var(--ink2);margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;flex-direction:column}
+.stars{color:var(--amber);font-size:12px;letter-spacing:1px}
+#toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(20px);background:#16202b;color:#fff;padding:9px 18px;border-radius:8px;font-size:12.5px;opacity:0;pointer-events:none;transition:.22s;z-index:200}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.sysbox{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+@media(max-width:900px){.sysbox{grid-template-columns:1fr}}
+.sysbox label{display:flex;align-items:center;gap:6px;font-size:12px;background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:5px 8px;cursor:pointer}
+.sysbox label:hover{border-color:var(--brand-2)}
+.sysbox input{width:auto}
+.rank td:first-child{width:34px;text-align:center;color:var(--ink3);font-weight:600}
+.money{font-family:Consolas,monospace;text-align:right}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand">
+    <div class="logo">CIP</div>
+    <div>
+      <h1>工厂全员改善建议管理看板</h1>
+      <div class="sub">Continuous Improvement Proposal · IATF 16949 §10.3 持续改进 · 生产 / 工程 / 质量 / 仓库 / 设备 / 采购 / 财务 / 行政</div>
+    </div>
+  </div>
+  <div class="hbtns">
+    <span id="sync-pill">☁ 连接中…</span>
+    <button class="btn-ghost" onclick="openForm()">+ 我要提提案</button>
+    <button class="btn-ghost" onclick="exportCSV()">导出台账 CSV</button>
+    <button class="btn-ghost" onclick="switchTab('data')">数据管理</button>
+  </div>
+</div></header>
+
+<div class="wrap">
+  <div class="kpis" id="kpis"></div>
+
+  <div class="tabs">
+    <div class="tab on" data-v="dash" onclick="switchTab('dash')">📊 改善总览</div>
+    <div class="tab" data-v="board" onclick="switchTab('board')">🗂️ 提案流转看板</div>
+    <div class="tab" data-v="list" onclick="switchTab('list')">📋 提案台账</div>
+    <div class="tab" data-v="dept" onclick="switchTab('dept')">🏢 部门参与度</div>
+    <div class="tab" data-v="review" onclick="switchTab('review')">⚖️ 评审与激励</div>
+    <div class="tab" data-v="gain" onclick="switchTab('gain')">💰 收益与标准化</div>
+    <div class="tab" data-v="std" onclick="switchTab('std')">📖 制度与流程</div>
+    <div class="tab" data-v="tpl" onclick="switchTab('tpl')">📄 表单模板</div>
+    <div class="tab" data-v="data" onclick="switchTab('data')">🛠️ 数据管理</div>
+  </div>
+
+  <!-- ============ 总览 ============ -->
+  <div class="view on" id="v-dash">
+    <div class="card">
+      <h2>提案转化漏斗 <span class="badge">从「提了」到「固化成标准」</span></h2>
+      <div class="desc">丰田创意提案制度的核心不是提案数量，而是<b>每一条都被认真回应</b>。漏斗宽度骤减的地方，就是管理断点所在。</div>
+      <div id="funnel"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2>部门 × 改善类别 热力矩阵</h2>
+        <div class="desc">颜色越深提案越集中。空格说明该部门在这个方向上还没有人关注——这往往是最大的改善机会。</div>
+        <div class="tbl-wrap" style="max-height:none"><table class="heat" id="heat"></table></div>
+      </div>
+      <div class="card">
+        <h2>提案类别分布</h2>
+        <div id="cateChart" style="display:flex;align-items:center;gap:18px;flex-wrap:wrap"></div>
+        <h3>改善类型分布</h3>
+        <div id="kindChart"></div>
+        <h3>近 6 个月提案 / 采纳 / 结案趋势</h3>
+        <div id="trend"></div>
+        <div class="legend"><span><span class="pill" style="background:#0f4c81"></span>提案</span><span><span class="pill" style="background:#b26a00"></span>采纳</span><span><span class="pill" style="background:#1b6b3a"></span>结案</span></div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2>年化收益 TOP 10 <span class="badge">已验证结案</span></h2>
+        <div class="tbl-wrap" style="max-height:none"><table class="rank" id="topSave"></table></div>
+      </div>
+      <div class="card">
+        <h2>投入产出比 TOP 10 <span class="badge">花小钱办大事</span></h2>
+        <div class="tbl-wrap" style="max-height:none"><table class="rank" id="topRoi"></table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>需重点处理清单</h2>
+      <div id="alerts"></div>
+    </div>
+  </div>
+
+  <!-- ============ 流转看板 ============ -->
+  <div class="view" id="v-board">
+    <div class="card">
+      <h2>提案流转看板 <span class="badge">拖动卡片可推进状态</span></h2>
+      <div class="desc">七步闭环：草稿 → 部门初评 → 委员会评审 → 批准 → 实施 → 验证 → 结案发奖。未采纳的提案在下方单独列示，必须写明理由。</div>
+      <div class="board" id="board"></div>
+      <h3>未采纳提案（须反馈理由）</h3>
+      <div class="tbl-wrap" style="max-height:none"><table id="rejTbl"></table></div>
+    </div>
+  </div>
+
+  <!-- ============ 台账 ============ -->
+  <div class="view" id="v-list">
+    <div class="card">
+      <h2>提案台账 <span class="badge" id="l-cnt"></span></h2>
+      <div class="desc">单元格可直接双击编辑（黄底字段），下拉字段点选即改，改动自动同步给全员。完整字段点「编辑」进入表单。</div>
+      <div class="filters">
+        <select id="f-dept" onchange="renderList()"></select>
+        <select id="f-cate" onchange="renderList()"></select>
+        <select id="f-status" onchange="renderList()"></select>
+        <select id="f-kind" onchange="renderList()"></select>
+        <select id="f-month" onchange="renderList()"></select>
+        <input id="f-kw" placeholder="搜索编号/提案人/区域/内容" oninput="renderList()" style="min-width:200px">
+        <button onclick="resetF()">重置筛选</button>
+        <button class="btn-p" onclick="openForm()">+ 新建提案</button>
+      </div>
+      <div class="tbl-wrap"><table id="tbl"></table></div>
+    </div>
+  </div>
+
+  <!-- ============ 部门参与度 ============ -->
+  <div class="view" id="v-dept">
+    <div class="card">
+      <h2>八部门改善参与度 <span class="badge">在册人数 <span id="peopleN">—</span> 人</span></h2>
+      <div class="desc">参与率比提案数更能反映改善文化的真实水位。长期为 0 的部门，问题通常出在「提了没人回」而不是「员工没想法」。</div>
+      <div class="dept-g" id="deptG"></div>
+    </div>
+    <div class="card">
+      <h2>部门 × 状态 明细</h2>
+      <div class="tbl-wrap" style="max-height:none"><table id="deptTbl"></table></div>
+    </div>
+    <div class="card">
+      <h2>各部门改善主攻方向与职责</h2>
+      <div class="tbl-wrap" style="max-height:none"><table id="dutyTbl"></table></div>
+    </div>
+  </div>
+
+  <!-- ============ 评审与激励 ============ -->
+  <div class="view" id="v-review">
+    <div class="card">
+      <h2>四维评审标准 <span class="badge">满分 20 分</span></h2>
+      <div class="desc">借鉴丰田创意提案的「鼓励优先」原则与华为「小改进大奖励」：不要求提案宏大，但要求<b>问题说得清、收益算得出</b>。</div>
+      <div class="tbl-wrap" style="max-height:none"><table id="scoreTbl"></table></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>奖励办法 <span class="badge">提案奖 + 效益分享奖</span></h2>
+        <div class="tbl-wrap" style="max-height:none"><table id="prizeTbl"></table></div>
+        <div class="note ok"><b>设计要点：</b>「参与奖」保证提了就有回应（哪怕不采纳），这是维持提案量不塌方的关键；「效益分享奖」按年化净收益 2% 追加，让大改善真正有回报，避免大家只提零成本的小改善。</div>
+      </div>
+      <div class="card">
+        <h2>奖励发放统计</h2>
+        <div id="prizeStat"></div>
+        <h3>各部门奖金合计</h3>
+        <div id="prizeDept"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>待评审 / 待处理提案</h2>
+      <div id="pending"></div>
+    </div>
+  </div>
+
+  <!-- ============ 收益与标准化 ============ -->
+  <div class="view" id="v-gain">
+    <div class="grid2">
+      <div class="card">
+        <h2>收益构成</h2>
+        <div id="gainBox"></div>
+      </div>
+      <div class="card">
+        <h2>改善固化率 <span class="badge">改完成 ≠ 改住了</span></h2>
+        <div class="desc">没有写进体系文件的改善，人员一换就回潮。这里盯的是「已结案提案中，有多少同步更新了受控文件、有多少做了横向展开」。</div>
+        <div id="stdBox"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>需更新体系文件清单 <span class="badge">IATF 16949 受控文件</span></h2>
+      <div class="note warn"><b>汽车行业硬要求：</b>改善若涉及过程参数、作业方法、检验方法、设备或工装，必须同步评审并更新 <b>PFMEA / 控制计划 / 作业指导书 / 检验指导书 / 设备点检表</b>；涉及特殊特性（SC/CC）或影响形状、配合、功能的，还须走工程变更 ECR 并按顾客要求提交 PCN 批准，不得先干后报。</div>
+      <div class="tbl-wrap" style="max-height:none"><table id="sysTbl"></table></div>
+    </div>
+    <div class="card">
+      <h2>横向展开清单</h2>
+      <div class="desc">一条改善只在一个工位生效是浪费。这里列出已结案提案中已明确展开范围的，以及尚未填写展开范围的（需补充）。</div>
+      <div class="tbl-wrap" style="max-height:none"><table id="spreadTbl"></table></div>
+    </div>
+  </div>
+
+  <!-- ============ 制度与流程 ============ -->
+  <div class="view" id="v-std">
+    <div class="card">
+      <h2>提案八步闭环流程</h2>
+      <div class="desc">融合丰田 Teian 创意提案制度、博世 BPS/CIP、丹纳赫 DBS 改善周与华为「小改进大奖励」，并结合 IATF 16949 §10.3 持续改进与 §8.5.1 全员参与要求本土化。</div>
+      <div class="flow" id="flow"></div>
+    </div>
+    <div class="card">
+      <h2>行业对标：别人是怎么做的</h2>
+      <div class="tbl-wrap" style="max-height:none"><table id="benchTbl"></table></div>
+    </div>
+    <div class="card">
+      <h2>提案怎么写才算合格 <span class="badge">A3 七步</span></h2>
+      <div id="guide"></div>
+    </div>
+    <div class="card">
+      <h2>常见不合格提案 vs 合格提案</h2>
+      <div class="tbl-wrap" style="max-height:none"><table id="goodBad"></table></div>
+    </div>
+  </div>
+
+  <!-- ============ 模板 ============ -->
+  <div class="view" id="v-tpl">
+    <div class="card">
+      <h2>标准表单模板 <span class="badge">可复制 / 下载 .md</span></h2>
+      <div class="desc">选择一条提案可自动带入该提案信息生成填好的草稿；不选则生成空白模板。</div>
+      <div class="filters">
+        <select id="t-sel" onchange="renderTpl()" style="min-width:300px"></select>
+      </div>
+      <div id="tpls"></div>
+    </div>
+  </div>
+
+  <!-- ============ 数据管理 ============ -->
+  <div class="view" id="v-data">
+    <div class="card">
+      <h2>云端共享</h2>
+      <div class="desc">全部数据只存云端 PostgreSQL，不落浏览器本地。全员打开同一网址即可共同维护，约 8 秒自动刷新一次；同一条记录按最后修改时间合并，不同人改不同提案互不覆盖。</div>
+      <div class="filters">
+        <span style="font-size:12px;color:var(--ink2)">在册人数（用于算参与率）：</span>
+        <input id="cfg-people" type="number" min="1" style="width:110px" onchange="saveCfg()">
+        <button onclick="pullAndRender()">立即刷新</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>导入导出</h2>
+      <div class="filters">
+        <button onclick="exportJSON()">导出 JSON 完整备份</button>
+        <button onclick="exportCSV()">导出台账 CSV</button>
+        <button onclick="document.getElementById('impf').click()">导入 JSON 覆盖</button>
+        <input type="file" id="impf" accept=".json" style="display:none" onchange="importJSON(event)">
+        <button class="btn-danger" onclick="clearAll()">清空全部提案</button>
+      </div>
+      <div class="note warn">导入与「载入示例数据」会<b>整体覆盖</b>云端数据，操作前建议先导出一次 JSON 备份。清空操作不可撤销。</div>
+    </div>
+    <div class="card">
+      <h2>示例数据</h2>
+      <div class="desc">首次使用可载入 15 条覆盖八个部门、各类别与各状态的示例提案，先看清看板逻辑，再逐条替换成真实提案。</div>
+      <div class="filters">
+        <button onclick="loadSeed(true)">载入示例数据（覆盖）</button>
+        <button onclick="pushNow('replace')">强制推送当前数据到云端</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal"><div class="mbox">
+  <div class="mhead"><h3 id="m-title">改善提案</h3><button onclick="closeForm()">关闭 ✕</button></div>
+  <div class="mbody" id="m-body"></div>
+  <div class="mfoot">
+    <button class="btn-danger" id="m-del" onclick="delRec()">删除</button>
+    <button onclick="closeForm()">取消</button>
+    <button class="btn-p" onclick="saveForm()">保存提案</button>
+  </div>
+</div></div>
+<div id="toast"></div>
+
+<script>
+/* ================= 基础字典 ================= */
+var DEPTS=["生产","工程","质量","仓库","设备","采购","财务","行政"];
+var DEPT_COLOR={"生产":"#0f4c81","工程":"#5b4a9e","质量":"#c62828","仓库":"#0f6e56","设备":"#b26a00","采购":"#1a6fb0","财务":"#c8620a","行政":"#7a5cc0"};
+var CATES=["质量","效率","成本","交付","安全","5S与环境","士气与其他"];
+var CATE_COLOR={"质量":"#c62828","效率":"#0f4c81","成本":"#b26a00","交付":"#1a6fb0","安全":"#7a5cc0","5S与环境":"#0f6e56","士气与其他":"#8494a3"};
+var KINDS=["小改善 Kaizen","防错 Poka-Yoke","快速改善 QCC","项目型改善","管理优化","数字化/自动化"];
+var STATUSES=["1.草稿","2.待部门初评","3.待委员会评审","4.已批准待实施","5.实施中","6.已验证待结案","7.已结案","8.未采纳"];
+var APQP=["不适用","P1 策划与定义","P2 产品设计与开发","P3 过程设计与开发","P4 产品与过程确认","P5 反馈评定纠正","P6 知识经验库"];
+var SYSFILES=["PFMEA","控制计划 CP","作业指导书 SOP","检验指导书 SIP","设备点检表","5S/定置标准","包装与物流规范","培训教材","无需更新"];
+var SCORE_DIM=[
+ {k:"sI",n:"创新性",d:"方案是否新颖、是否跳出常规做法",l:["常规做法，行业普遍已有","略有改动，本厂首次","有明确改进思路，需要少量尝试","思路新颖，需跨部门配合验证","首创或行业领先水平"]},
+ {k:"sF",n:"可行性",d:"以现有资源和能力能否落地",l:["需大量投入或长周期，暂不可行","需外部资源支持","部门内可自行实施","本周即可实施，无需额外投入","立即实施，零成本"]},
+ {k:"sB",n:"效益性",d:"年化净收益或风险降低程度",l:["无量化收益","年化净收益 < 1 万元","1 万 ~ 5 万元","5 万 ~ 10 万元","≥ 10 万元，或消除重大安全/质量风险"]},
+ {k:"sS",n:"推广性",d:"改善成果能否复制到其他地方",l:["仅适用于本工位","可推广至本班组/产线","可推广至本车间","可推广至全厂多个车间","可推广至其他工厂或供方"]}
+];
+var PRIZE_RULE=[
+ {l:"特等奖",c:"总分 ≥ 18 且年化净收益 ≥ 50 万元",v:5000,m:"年度改善大会表彰，纳入晋升加分"},
+ {l:"一等奖",c:"总分 17 ~ 20",v:1000,m:"厂级通报表扬"},
+ {l:"二等奖",c:"总分 13 ~ 16",v:500,m:"部门通报表扬"},
+ {l:"三等奖",c:"总分 9 ~ 12",v:200,m:"班组看板展示"},
+ {l:"鼓励奖",c:"总分 5 ~ 8（已实施完成）",v:50,m:"小改善同样值得鼓励"},
+ {l:"参与奖",c:"提交即计（含未采纳）",v:20,m:"保护参与热情，提案必须被回应"},
+ {l:"效益分享奖",c:"已结案且年化净收益 > 0",v:0,rate:"净收益 × 2%，单条封顶 20,000 元",m:"与提案奖可叠加，验证后次月发放"},
+ {l:"团队奖",c:"季度最佳改善部门",v:2000,m:"按参与率 40% + 采纳率 30% + 完成率 30% 评选"}
+];
+var BENCH=[
+ {c:"丰田 Teian 创意提案",k:"参与率导向",d:"1951 年创立，班组级月均提案 3~5 条/人；不追求单条金额，强调「提了必回」，采纳率常年 85% 以上；奖励小额即时发放，公开张贴改善案例。",t:"可借鉴：把「参与率」而不是「收益金额」作为部门第一考核指标。"},
+ {c:"博世 BPS / CIP",k:"CIP 工作坊",d:"Bosch Production System 把持续改善(CIP)列为八大原则之一；跨部门 CIP Workshop 集中 3~5 天攻关；改善成果必须落到标准作业文件。",t:"可借鉴：难点改善不靠个人提案，靠短期集中工作坊。"},
+ {c:"丹纳赫 DBS",k:"Kaizen 改善周",d:"Danaher Business System 以 Kaizen Week 为基本单元，每天站会跟踪，改善前后数据必须上墙，未达目标立即调整对策。",t:"可借鉴：改善期间每日跟踪，不能一提了之。"},
+ {c:"华为 小改进大奖励",k:"激励导向",d:"「小改进，大奖励；大建议，只鼓励」——鼓励立足本职岗位的微改善，防止提空洞的大战略建议；奖励与可量化收益挂钩。",t:"可借鉴：引导员工提自己岗位上的问题，而不是替公司做战略。"},
+ {c:"海尔 人单合一 / 全员创客",k:"组织导向",d:"把改善与经营单元绑定，员工自组织成小微团队认领改善课题，成果与团队收益直接挂钩。",t:"可借鉴：跨部门课题可由员工自发组队认领。"},
+ {c:"通用 GM GMS / BIQ",k:"现场导向",d:"Built-In Quality 强调在工位内发现问题并就地解决，暗灯(Andon)机制保证问题即时升级，改善提案与工位标准化作业强绑定。",t:"可借鉴：问题在发现工位就地闭环，减少层层上报。"},
+ {c:"大众 / 大陆 KVP",k:"持续改进程序",d:"Konzernweiter Verbesserungsvorschlagswesen（集团提案制度），提案分级评审，收益由财务部门独立确认后方可计奖。",t:"可借鉴：收益必须由财务独立确认，避免自报虚高。"},
+ {c:"IATF 16949 体系要求",k:"合规底线",d:"§10.3 持续改进、§6.2 质量目标策划、§7.3 意识与 §7.4 沟通、§8.5.1 全员参与、§9.1 绩效评价、§10.2 不合格与纠正措施。",t:"合规要点：改善成果必须反映到质量目标与体系文件，审核时可追溯。"}
+];
+var FLOW=[
+ {n:1,name:"提案提交",lead:"提案人（全员，含临时工与外包）",cycle:"随时",act:["任何人就本岗位或发现的问题提出，不限金额大小","写清现状（何时/何地/多少）、对策与预期效果","可手写在车间提案卡上，由班组长代为录入系统"],out:["改善提案表（或车间提案卡）"],gate:"现状描述带数据（次数、比例、时间、金额），不是笼统的「建议加强」"},
+ {n:2,name:"部门初评",lead:"班组长 / 部门主管",cycle:"3 个工作日",act:["确认情况属实、数据可信","判断安全性：是否涉及安全、环保、法规","判断是否涉及产品特性或顾客要求","判断是否涉及特殊特性 SC/CC","本部门能解决的直接转实施，跨部门的转委员会"],out:["部门初评意见（含是否涉客/涉特殊特性判定）"],gate:"3 个工作日内必须有回复，不得压件不回"},
+ {n:3,name:"委员会评审",lead:"改善委员会（工艺/质量/生产/设备/财务）",cycle:"每周一次例会",act:["四维评分：创新性 / 可行性 / 效益性 / 推广性，各 1~5 分","估算投入成本与年化收益，财务当场核价","判定是否需走工程变更 ECR / 顾客 PCN","确定实施责任人与目标完成日期"],out:["评审评分表、采纳决议、收益测算"],gate:"评分与收益测算留档；不采纳的必须书面写明理由并反馈提案人"},
+ {n:4,name:"批准与资源落实",lead:"部门经理 / 厂长",cycle:"2 个工作日",act:["按等级批准预算与资源","需外部采购或加工的立项","涉及体系文件变更的同步通知文控 DCC"],out:["批准单、预算编号、资源计划"],gate:"预算与责任人落实到位后方可进入实施"},
+ {n:5,name:"实施",lead:"实施责任人 + 提案人",cycle:"按批准计划",act:["按方案实施，保留改善前后对比照片与数据","提案人全程参与，不得由其部门独立完成","实施过程异常情况及时升级"],out:["实施记录、前后对比照片、异常升级记录"],gate:"实施完成且现场可正常运行"},
+ {n:6,name:"效果验证",lead:"质量 + 财务（共同确认）",cycle:"≥30 天 或 ≥3 批",act:["质量确认质量指标改善（不良率、Cpk、投诉）","财务独立核算实际年化收益，不采信提案人自报","未达预期的退回第 5 步调整对策"],out:["效果验证报告、财务收益确认单"],gate:"质量与财务双签确认，收益数字方可计入奖金基数"},
+ {n:7,name:"标准化与横向展开",lead:"工艺 / 质量 / 文控",cycle:"与第 6 步同步",act:["更新 PFMEA、控制计划、作业指导书、检验指导书、设备点检表","旧版文件回收，岗位重新培训并留记录","识别适用相似工序/产线/产品，制定横向展开计划","涉及顾客要求的按 ECR/PCN 流程报批"],out:["受控文件更新记录、培训记录、横向展开清单"],gate:"文件未更新的改善不得结案"},
+ {n:8,name:"结案与激励",lead:"改善委员会 / 行政",cycle:"次月发放",act:["按总分与收益定级，计算提案奖与效益分享奖","制作改善案例卡在车间看板展示","季度评选最佳改善部门","归档并同步至 P6 知识经验库"],out:["奖励发放记录、改善案例卡、归档记录"],gate:"奖励公开透明，改善案例可查阅"}
+];
+var DUTY=[
+ {d:"生产",f:"节拍与单件工时、换型时间、工位平衡、不良与返工、5S 与定置、标准作业遵守",c:"效率、质量、5S与环境",r:"实施主力 · 提案主力",k:"人均提案数、参与率、产线 OEE、单件工时、返工率"},
+ {d:"工程",f:"工艺参数优化、夹具与检具改进、产线布局、防错装置设计、PFMEA/控制计划维护",c:"效率、质量",r:"技术评审 · 方案设计",k:"PFMEA/CP 更新及时率、改善方案按期完成率、防错装置覆盖率"},
+ {d:"质量",f:"检验方法与抽样效率、防错验证、MSA 与过程能力、追溯与标识、客户投诉 recurrence 防止再发",c:"质量、效率",r:"效果验证 · 收益质量确认",k:"不良率/PPM、Cpk≥1.33 达成率、客户投诉件数、验证按期率"},
+ {d:"仓库",f:"库位布局与动线、配送节拍、先进先出与批次追溯、包装与容器、库存周转与安全库存",c:"交付、成本",r:"参与评审 · 仓储类实施",k:"库存周转天数、配送准时率、错发漏发次数、库位准确率"},
+ {d:"设备",f:"故障停机与 MTTR、SMED 快速换型、OEE 提升、备件管理、点检与预防维护、能耗",c:"效率、成本",r:"技术评审 · 设备类实施",k:"设备综合效率 OEE、故障停机时长、MTTR、换型时间、备件金额"},
+ {d:"采购",f:"供方整合与竞价、年度框架价、来料质量与 PPM、交期与最小批量、包装与运输方式",c:"成本、交付",r:"参与评审 · 商务可行性",k:"采购降本金额、来料 PPM、准时到货率、供方变更及时报备率"},
+ {d:"财务",f:"成本核算颗粒度、能耗与损耗识别、浪费(Waste)地图、收益独立核算、改善 ROI 分析",c:"成本",r:"收益独立确认 · 奖金核算",k:"收益核算准确率、改善 ROI、奖金发放及时率、单位制造成本"},
+ {d:"行政",f:"安全隐患与职业病防护、作业环境、培训与技能矩阵、后勤与士气、提案活动组织与宣传",c:"安全、士气与其他",r:"活动组织 · 安全类实施",k:"安全隐患关闭率、培训完成率、员工满意度、提案活动覆盖率"}
+];
+
+/* ================= 状态 ================= */
+var recs=[], curId=null, deleted={}, cfg={people:120};
+function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function uid(){return "C"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function dayShift(n){var d=new Date(Date.now()+864e5*n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+/* 注：实体用拼接构造，避免源码里的转义序列被工具链改写 */
+var _AMP=String.fromCharCode(38),_LT=String.fromCharCode(60),_GT=String.fromCharCode(62),_QUO=String.fromCharCode(34),_APO=String.fromCharCode(39);
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+  if(c===_AMP)return _AMP+"amp;";
+  if(c===_LT)return _AMP+"lt;";
+  if(c===_GT)return _AMP+"gt;";
+  if(c===_QUO)return _AMP+"quot;";
+  return _AMP+"#39;";});}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},1800);}
+function num(v){var n=parseFloat(String(v==null?"":v).replace(/[,¥\s]/g,""));return isNaN(n)?0:n;}
+function money(n){return "¥"+Number(n||0).toLocaleString("zh-CN",{maximumFractionDigits:0});}
+
+/* ================= 云端同步 ================= */
+var CLOUD={
+  URL:"https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/cisSync",
+  TOKEN:[99,105,115,45,115,104,97,114,101,100,45,50,48,50,54].map(function(c){return String.fromCharCode(c);}).join(""),
+  POLL_MS:8000
+};
+var syncV=0, pushT=null, polling=false;
+function isEditing(){
+  var a=document.activeElement; if(!a)return false;
+  var t=(a.tagName||"").toLowerCase();
+  return !!a.isContentEditable || t==="input" || t==="textarea" || t==="select";
+}
+function setPill(state,msg){
+  var el=document.getElementById("sync-pill"); if(!el)return;
+  var M={ok:["#1b6b3a","☁ 已同步 · 全员共享"],run:["#b26a00","☁ 同步中…"],err:["#c62828","☁ 同步异常"]};
+  var m=M[state]||M.ok;
+  el.style.background=m[0]; el.textContent=msg||m[1];
+}
+function touch(r){if(r)r.updatedAt=new Date().toISOString();}
+function normRec(r){
+  if(!r)return r;
+  if(!r.id)r.id=uid();
+  r.status=+r.status||1;
+  if(!Array.isArray(r.sys))r.sys=[];
+  if(!r.updatedAt)r.updatedAt=new Date(0).toISOString();
+  return r;
+}
+function save(){ setPill("run"); if(pushT)clearTimeout(pushT); pushT=setTimeout(function(){pushNow();},350); }
+function pushNow(mode){
+  pushT=null;
+  var body={items:recs.slice(),deleted:deleted,cfg:cfg};
+  if(mode)body.mode=mode;
+  return fetch(CLOUD.URL,{method:"POST",cache:"no-store",
+      headers:{"Content-Type":"application/json","X-Cis-Token":CLOUD.TOKEN},
+      body:JSON.stringify(body)})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(!j||!j.ok)throw new Error((j&&j.error)||"保存失败");
+      var d=j.data||{};
+      recs=(d.items||[]).map(normRec);
+      deleted=d.deleted||{};
+      cfg=Object.assign({people:120},d.cfg||{});
+      syncV=d.syncVersion||0; setPill("ok");
+      return true;
+    })
+    .catch(function(e){
+      setPill("err"); console.warn("[CIP] 保存失败：",e);
+      toast("保存失败："+((e&&e.message)||e)); return false;
+    });
+}
+function pullCloud(){
+  return fetch(CLOUD.URL,{cache:"no-store"})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(!j||!j.ok)throw new Error((j&&j.error)||"读取失败");
+      var d=j.data||{};
+      recs=(d.items||[]).map(normRec);
+      deleted=d.deleted||{};
+      cfg=Object.assign({people:120},d.cfg||{});
+      syncV=d.syncVersion||0; setPill("ok");
+    })
+    .catch(function(e){ setPill("err"); console.warn("[CIP] 读取失败：",e); });
+}
+function refresh(){ if(isEditing())return; pullCloud().then(function(){render();}); }
+function pullAndRender(){ pullCloud().then(function(){render();toast("已刷新");}); }
+function startPoll(){
+  if(polling)return; polling=true;
+  setInterval(function(){ if(navigator.onLine===false)return; refresh(); },CLOUD.POLL_MS);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)refresh();});
+  window.addEventListener("focus",refresh);
+  window.addEventListener("online",refresh);
+}
+
+/* ================= 评分与奖励 ================= */
+function scoreOf(r){return (+r.sI||0)+(+r.sF||0)+(+r.sB||0)+(+r.sS||0);}
+function netSave(r){return num(r.save)-num(r.cost);}
+function isAdopted(r){var s=+r.status;return s>=4&&s<=7;}
+function isDecided(r){var s=+r.status;return s>=4;}
+function isClosed(r){return +r.status===7;}
+function levelOf(r){
+  if(+r.status===8)return "参与奖";
+  var s=scoreOf(r), n=netSave(r);
+  if(s>=18&&n>=500000)return "特等奖";
+  if(s>=17)return "一等奖";
+  if(s>=13)return "二等奖";
+  if(s>=9)return "三等奖";
+  if(s>=5)return "鼓励奖";
+  return "参与奖";
+}
+function PRIZE(l){var m={"特等奖":5000,"一等奖":1000,"二等奖":500,"三等奖":200,"鼓励奖":50,"参与奖":20};return m[l]||0;}
+function shareOf(r){ if(!isClosed(r))return 0; var n=netSave(r); return n>0?Math.min(Math.round(n*0.02),20000):0; }
+function totalPrize(r){ return (PRIZE(levelOf(r))||0)+shareOf(r); }
+function cycleOf(r){ if(!isClosed(r)||!r.doneDate||!r.date)return null;
+  return Math.round((new Date(r.doneDate)-new Date(r.date))/864e5); }
+function isOverdue(r){ var s=+r.status; return s>=4&&s<=6&&r.planDate&&r.planDate<today(); }
+function stars(n){n=+n||0;return '<span class="stars">'+"★".repeat(n)+"☆".repeat(5-n)+"</span>";}
+function sChip(s){
+  var s=+s, M={1:["chip","草稿"],2:["chip a","待初评"],3:["chip a","待评审"],4:["chip b","已批准"],
+    5:["chip b","实施中"],6:["chip t","待结案"],7:["chip g","已结案"],8:["chip r","未采纳"]};
+  var m=M[s]||M[1];
+  return '<span class="'+m[0]+'">'+m[1]+'</span>';
+}
+
+/* ================= 示例数据 ================= */
+function seed(){
+  function mk(o){
+    o.id=uid(); o.sys=o.sys||[]; o.status=o.status||1;
+    o.updatedAt=new Date().toISOString();
+    return o;
+  }
+  return [
+   mk({code:"CI-2026-001",date:dayShift(-96),name:"刘建国",empno:"P-1042",dept:"生产",cate:"效率",kind:"小改善 Kaizen",
+     area:"装配一线 OP30 卡扣预装",apqp:"不适用",sc:"否",ecr:"否",
+     now:"卡扣需手工对准 3 个孔位，平均 6.8s/件，班产 1,850 件，长期靠熟练工经验。",
+     plan:"制作尼龙定位治具，一次放件即可对齐；治具带防转销，防止方向装反。",
+     benefit:"单件工时 6.8s → 4.1s，班产提升至 2,400 件；装反不良由 12 件/班降至 0。",
+     cost:3000,save:86000,status:7,owner:"刘建国 / 王工（工程）",reviewer:"改善委员会",planDate:dayShift(-70),doneDate:dayShift(-58),
+     sI:3,sF:5,sB:3,sS:4,sys:["作业指导书 SOP","5S/定置标准"],spread:"装配二线 OP30 同工序、装配三线同类卡扣",note:"治具图纸已归档，已培训 18 人；第二副治具已复制至二线"}),
+
+   mk({code:"CI-2026-002",date:dayShift(-88),name:"陈美玲",empno:"P-2077",dept:"生产",cate:"质量",kind:"防错 Poka-Yoke",
+     area:"注塑车间 12# 机嵌件放置",apqp:"P4 产品与过程确认",sc:"是",ecr:"是",
+     now:"人工放置金属嵌件后合模，偶发漏放导致整模报废，近半年 4 次，损失约 2.6 万元。",
+     plan:"模内加装光纤感应 + 计数器联锁，未检测到嵌件则合模禁止；配声光报警。",
+     benefit:"漏放缺陷由 4 次/半年降至 0；避免整模报废损失与停机清理工时。",
+     cost:12000,save:148000,status:7,owner:"陈美玲 / 张工（设备）",reviewer:"改善委员会",planDate:dayShift(-60),doneDate:dayShift(-45),
+     sI:4,sF:4,sB:4,sS:5,sys:["PFMEA","控制计划 CP","作业指导书 SOP","设备点检表"],
+     spread:"注塑车间全部 16 台机的嵌件类工序；已向供方推广同类做法",
+     note:"涉及特殊特性（嵌件存在性为 CC），已走 ECR-2026-014 并完成 PFMEA/CP 更新，RPN 由 96 降至 24"}),
+
+   mk({code:"CI-2026-003",date:dayShift(-72),name:"赵振宇",empno:"E-0311",dept:"工程",cate:"效率",kind:"项目型改善",
+     area:"焊接车间 W-05 工位",apqp:"P3 过程设计与开发",sc:"是",ecr:"是",
+     now:"单工位焊接，节拍 38s，为整线瓶颈，日产能 1,520 件，长期加班才能满足客户 1,800 件/日。",
+     plan:"改为双工位回转夹具，焊接与上下料并行；同步优化焊接参数与送丝速度。",
+     benefit:"节拍 38s → 24s，日产能提升至 2,250 件；年减加班工时约 4,300 h。",
+     cost:165000,save:486000,status:5,owner:"赵振宇 / 焊接车间",reviewer:"改善委员会",planDate:dayShift(-10),doneDate:"",
+     sI:4,sF:3,sB:5,sS:3,sys:["PFMEA","控制计划 CP","作业指导书 SOP"],
+     spread:"焊接车间 W-06/W-07 同类回转结构",note:"已完成样件焊接 300 件，无损检测合格；焊接参数锁定中，待 Cpk 验证后转 ECR 固化",
+     }),
+
+   mk({code:"CI-2026-004",date:dayShift(-64),name:"孙晓芳",empno:"Q-0220",dept:"质量",cate:"质量",kind:"数字化/自动化",
+     area:"终检工位",apqp:"P4 产品与过程确认",sc:"否",ecr:"否",
+     now:"检验结果手写记录在纸质报表，返工录入 ERP，日均耗时 52 min；纸质记录易污损、追溯靠翻本。",
+     plan:"检验工位配平板，检验结果移动端实时录入；异常一键触发暗灯与班组群通知。",
+     benefit:"录入工时节省 52 min/日；追溯查询由平均 25 min 降至 1 min；漏检记录补全率 100%。",
+     cost:28000,save:96000,status:6,owner:"孙晓芳 / IT",reviewer:"改善委员会",planDate:dayShift(-20),doneDate:"",
+     sI:3,sF:4,sB:3,sS:5,sys:["检验指导书 SIP","培训教材"],spread:"来料检、过程检、出货检三个检验工位",
+     note:"试运行 42 天，数据完整率 100%，待财务确认收益后结案发奖"}),
+
+   mk({code:"CI-2026-005",date:dayShift(-58),name:"吴大勇",empno:"W-0088",dept:"仓库",cate:"交付",kind:"小改善 Kaizen",
+     area:"原料库 A 区",apqp:"不适用",sc:"否",ecr:"否",
+     now:"高频物料存放在 A 区最里端，配料员单趟步行 120 m，日均 46 趟，月累计 138 km。",
+     plan:"按 ABC 频次重排库位，前 20 种高频物料移至配料出口侧；地面加导向标线与库位色标。",
+     benefit:"单趟距离 120 m → 45 m，配料工时节省 38 min/日，配送延误由 11 次/月降至 2 次。",
+     cost:1500,save:41000,status:7,owner:"吴大勇",reviewer:"改善委员会",planDate:dayShift(-40),doneDate:dayShift(-36),
+     sI:2,sF:5,sB:3,sS:4,sys:[],
+     spread:"成品库 B 区、线边超市",note:"库位图已更新并纳入 5S 定置标准；季度盘点差异下降"}),
+
+   mk({code:"CI-2026-006",date:dayShift(-110),name:"郑海涛",empno:"M-0155",dept:"设备",cate:"效率",kind:"项目型改善",
+     area:"冲压车间 200T 线",apqp:"P3 过程设计与开发",sc:"否",ecr:"是",
+     now:"换模时间 45 min，其中内换型作业占 31 min，日换模 5 次，有效作业时间损失大。",
+     plan:"导入 SMED：内换型转外换型（预加热、预装夹），改用液压快速夹紧与定位销统一化。",
+     benefit:"换模时间 45 min → 18 min，日增有效产能 135 min；年减少换型损失约 820 h。",
+     cost:88000,save:312000,status:7,owner:"郑海涛 / 冲压车间",reviewer:"改善委员会",planDate:dayShift(-80),doneDate:dayShift(-70),
+     sI:4,sF:4,sB:5,sS:4,sys:["作业指导书 SOP","设备点检表","培训教材"],
+     spread:"冲压车间 160T / 315T 两条线",note:"换型作业指导书已重编，操作员 22 人全部重新培训并考核"}),
+
+   mk({code:"CI-2026-007",date:dayShift(-52),name:"林静",empno:"S-0077",dept:"采购",cate:"成本",kind:"管理优化",
+     area:"标准件采购（紧固件/垫片）",apqp:"不适用",sc:"否",ecr:"否",
+     now:"标准件长期单一供方，无价格竞争，近两年价格只涨不降；年采购额约 680 万元。",
+     plan:"引入 2 家合格供方竞价，签订年度框架价 + 季度调价机制；同步做来料质量爬坡。",
+     benefit:"标准件单价平均下降 6.8%，年节约约 46 万元；供方交期由 15 天缩短至 9 天。",
+     cost:9000,save:462000,status:5,owner:"林静 / SQE",reviewer:"改善委员会",planDate:dayShift(-8),doneDate:"",
+     sI:2,sF:4,sB:5,sS:3,sys:["无需更新"],spread:"包装材料、劳保用品、辅料类采购",
+     note:"第二供方已完成首件与 3 批小批验证，PPM 由 0 升至 320，正在做来料质量爬坡；未达标前不扩大份额"}),
+
+   mk({code:"CI-2026-008",date:dayShift(-18),name:"何丽",empno:"F-0041",dept:"财务",cate:"成本",kind:"数字化/自动化",
+     area:"全厂能耗",apqp:"不适用",sc:"否",ecr:"否",
+     now:"全厂只有一个总电表，无法识别哪条线、哪个时段在浪费；夜班设备空转待机无人管理。",
+     plan:"分线加装 12 块分项电表，采集待机功率；建立分线能耗日报与异常告警。",
+     benefit:"识别夜班待机功率合计 86 kW，规范停机后预计年节电 42 万度，约 33 万元。",
+     cost:56000,save:330000,status:3,owner:"何丽 / 设备",reviewer:"改善委员会",planDate:"",doneDate:"",
+     sI:3,sF:3,sB:4,sS:5,sys:["设备点检表"],spread:"全部车间；后续扩展至水、气分项计量",note:"待委员会评审：需明确分项电表维护责任与数据归属"}),
+
+   mk({code:"CI-2026-009",date:dayShift(-76),name:"马强",empno:"A-0032",dept:"行政",cate:"安全",kind:"小改善 Kaizen",
+     area:"原料库与车间通道转角",apqp:"不适用",sc:"否",ecr:"否",
+     now:"两处直角通道无视线辅助，叉车与行人存在盲区，去年发生 1 起轻微碰撞，多次险肇。",
+     plan:"转角加装凸面广角镜 2 套，地面施划人行/车行分道标线与减速提示，转角设语音提示器。",
+     benefit:"险肇事件由 5 次/年降至 0；通道通行效率提升，无人员伤害记录。",
+     cost:4200,save:0,status:7,owner:"马强 / 行政",reviewer:"改善委员会",planDate:dayShift(-60),doneDate:dayShift(-54),
+     sI:2,sF:5,sB:4,sS:5,sys:["5S/定置标准","培训教材"],spread:"全厂 6 处类似转角、成品库出入口",
+     note:"安全类提案不按金额计奖，按风险消除程度评分；已纳入新员工安全教育教材"}),
+
+   mk({code:"CI-2026-010",date:dayShift(-24),name:"黄志明",empno:"P-1189",dept:"生产",cate:"质量",kind:"防错 Poka-Yoke",
+     area:"装配二线 OP50 螺栓紧固",apqp:"P4 产品与过程确认",sc:"是",ecr:"是",
+     now:"扭枪仅靠扭矩合格灯提示，靠操作者自觉计数，近 3 个月发生 2 起漏拧流出（其中 1 起客户投诉）。",
+     plan:"扭枪增加扭矩-角度双监控与计数联锁，未完成规定数量则工位不放行并报警。",
+     benefit:"漏拧缺陷流出由 2 起/季降至 0；避免客户投诉与召回风险。",
+     cost:46000,save:180000,status:3,owner:"黄志明 / 工程",reviewer:"改善委员会",planDate:"",doneDate:"",
+     sI:4,sF:4,sB:4,sS:5,sys:["PFMEA","控制计划 CP","作业指导书 SOP"],
+     spread:"装配一线、三线全部扭矩工位（共 9 个工位）",note:"涉及 CC 特性，须同步走 ECR 并更新 PFMEA/CP，客户 PPAP 需重新提交等级 3"}),
+
+   mk({code:"CI-2026-011",date:dayShift(-30),name:"周敏",empno:"E-0328",dept:"工程",cate:"成本",kind:"小改善 Kaizen",
+     area:"涂装线清洗工序",apqp:"P3 过程设计与开发",sc:"否",ecr:"是",
+     now:"清洗溶剂单次使用后直排废液桶，单件耗材成本 1.85 元；废液处置费 8,600 元/月。",
+     plan:"增加二级沉淀回收槽 + 滤芯循环装置，溶剂按浓度分级回用，低浓度段用于粗洗。",
+     benefit:"单件耗材成本 1.85 元 → 1.26 元（-32%）；废液量减少 41%，年节约约 21 万元。",
+     cost:34000,save:210000,status:4,owner:"周敏 / 涂装车间",reviewer:"改善委员会",planDate:dayShift(12),doneDate:"",
+     sI:3,sF:4,sB:4,sS:3,sys:["作业指导书 SOP","设备点检表"],spread:"涂装前处理线同类清洗槽",
+     note:"已批准，回收装置到货中；需评估回用溶剂对涂层附着力的影响，做 3 批验证"}),
+
+   mk({code:"CI-2026-012",date:dayShift(-44),name:"杨帆",empno:"W-0034",dept:"仓库",cate:"交付",kind:"管理优化",
+     area:"成品库 C 区",apqp:"不适用",sc:"否",ecr:"否",
+     now:"成品库位靠纸质货位卡管理，先进先出靠人工记忆，近半年发生 3 次发错批次（含 1 次客户端发现）。",
+     plan:"库位条码化，系统按生产批次锁定拣货顺序，非最早批次扫码即告警拦截。",
+     benefit:"错发批次由 3 次/半年降至 0；盘点时间由 2 天缩短至 0.5 天；追溯响应 < 10 min。",
+     cost:38000,save:124000,status:5,owner:"杨帆 / IT",reviewer:"改善委员会",planDate:dayShift(6),doneDate:"",
+     sI:3,sF:3,sB:4,sS:5,sys:["包装与物流规范","培训教材"],spread:"原料库、线边超市、外租仓",
+     note:"条码硬件已到位，系统接口联调中；仓库全员 26 人培训排在下周"}),
+
+   mk({code:"CI-2026-013",date:dayShift(-6),name:"徐磊",empno:"M-0203",dept:"设备",cate:"效率",kind:"小改善 Kaizen",
+     area:"装配线输送带",apqp:"不适用",sc:"否",ecr:"否",
+     now:"输送带全天定速运行，工段间无料时空转，实测空转占比 34%，年耗电约 9.6 万度。",
+     plan:"输送带分段加装光电检测与变频器，无料段自动降速/停歇，来料自动恢复。",
+     benefit:"空转占比 34% → 6%，年节电约 5.8 万度（约 4.6 万元）；设备磨损同步下降。",
+     cost:19000,save:46000,status:2,owner:"徐磊",reviewer:"装配车间主管",planDate:"",doneDate:"",
+     sI:3,sF:4,sB:3,sS:4,sys:["设备点检表"],spread:"包装线、分拣线同类输送段",note:"部门初评中：需确认降速不影响下游节拍"}),
+
+   mk({code:"CI-2026-014",date:dayShift(-38),name:"田蕾",empno:"Q-0218",dept:"质量",cate:"质量",kind:"管理优化",
+     area:"来料检验 IQC",apqp:"P4 产品与过程确认",sc:"是",ecr:"是",
+     now:"全部物料按同一抽样方案检验，IQC 人力紧张，低风险供方物料占用大量检验工时。",
+     plan:"按供方绩效分级（A/B/C）调整抽样方案，A 级供方减量检验并加大过程审核频次。",
+     benefit:"预计释放 IQC 工时 26%，约 1.8 人天/周。",
+     cost:0,save:0,status:8,owner:"—",reviewer:"改善委员会",planDate:"",doneDate:"",
+     sI:3,sF:2,sB:2,sS:3,sys:["无需更新"],spread:"",
+     note:"未采纳理由：该変更涉及顾客批准的检验计划与特殊特性控制方式，须先取得顾客书面同意并重新提交 PPAP，当前不具备条件。建议先以「增加供方过程审核」形式立项，待顾客批准后再调整抽样方案。已反馈提案人并转为 P6 知识经验库条目。"}),
+
+   mk({code:"CI-2026-015",date:dayShift(-66),name:"罗秀英",empno:"P-1310",dept:"生产",cate:"5S与环境",kind:"小改善 Kaizen",
+     area:"包装工位",apqp:"不适用",sc:"否",ecr:"否",
+     now:"包装废料混装，纸箱与缠绕膜直接报废，月产生混合废料 4.2 吨，处置费 5,800 元/月。",
+     plan:"工位设置三分类回收箱，完好纸箱折叠复用，缠绕膜单独回收；定置标识上墙。",
+     benefit:"混合废料降至 1.6 吨/月，处置费降至 2,100 元/月；纸箱复用月省 1,300 元。",
+     cost:800,save:24000,status:7,owner:"罗秀英 / 行政",reviewer:"改善委员会",planDate:dayShift(-48),doneDate:dayShift(-42),
+     sI:2,sF:5,sB:3,sS:5,sys:["5S/定置标准"],spread:"全厂 8 个包装/装配工位",
+     note:"已被行政纳入全厂 5S 标准；季度最佳改善部门候选案例"})
+  ];
+}
+function loadSeed(f){
+  if(!f&&recs.length&&!confirm("载入示例数据将覆盖云端当前全部数据，是否继续？"))return;
+  recs=seed(); deleted={};
+  pushNow("replace").then(function(){render();toast("已载入 15 条示例提案");});
+}
+function clearAll(){
+  if(!confirm("确认清空全部提案？此操作会覆盖云端数据且不可撤销。"))return;
+  recs=[]; deleted={};
+  pushNow("replace").then(function(){render();toast("已清空");});
+}
+
+/* ================= 计算 ================= */
+function stat(){
+  var s={n:recs.length,adopted:0,closed:0,decided:0,rejected:0,
+    cost:0,costClosed:0,save:0,net:0,people:{},byDept:{},byCate:{},byKind:{},byStatus:{},
+    prize:0,cycles:[],stdClosed:0,spreadClosed:0,overdue:0,pending:0};
+  recs.forEach(function(r){
+    s.cost+=num(r.cost); 
+    if(isClosed(r)){ s.save+=num(r.save); s.net+=netSave(r); s.costClosed+=num(r.cost); }
+    s.byStatus[+r.status]=(s.byStatus[+r.status]||0)+1;
+    if(r.name)s.people[r.name+r.dept]=1;
+    var d=r.dept||"其他";
+    s.byDept[d]=s.byDept[d]||{n:0,adopted:0,closed:0,net:0,cost:0,rejected:0};
+    s.byDept[d].n++;
+    if(isAdopted(r)){s.adopted++;s.byDept[d].adopted++;}
+    if(isClosed(r)){s.closed++;s.byDept[d].closed++;s.byDept[d].net+=netSave(r);}
+    s.byDept[d].cost+=num(r.cost);
+    if(+r.status===8){s.rejected++;s.byDept[d].rejected++;}
+    if(isDecided(r))s.decided++;
+    s.byCate[r.cate||"其他"]=(s.byCate[r.cate||"其他"]||0)+1;
+    s.byKind[r.kind||"其他"]=(s.byKind[r.kind||"其他"]||0)+1;
+    s.prize+=totalPrize(r);
+    var c=cycleOf(r); if(c!==null)s.cycles.push(c);
+    if(isClosed(r)){
+      if((r.sys||[]).length&&r.sys.indexOf("无需更新")<0)s.stdClosed++;
+      if((r.spread||"").trim())s.spreadClosed++;
+    }
+    if(isOverdue(r))s.overdue++;
+    if([2,3,4,6].indexOf(+r.status)>=0)s.pending++;
+  });
+  s.peopleN=Object.keys(s.people).length;
+  s.adoptRate=s.decided?Math.round(s.adopted/s.decided*100):0;
+  s.closeRate=s.adopted?Math.round(s.closed/s.adopted*100):0;
+  s.partRate=cfg.people?Math.round(s.peopleN/cfg.people*100):0;
+  s.perCap=cfg.people?+(s.n/cfg.people).toFixed(2):0;
+  s.roi=s.costClosed>0?(s.net/s.costClosed):0;
+  s.avgCycle=s.cycles.length?Math.round(s.cycles.reduce(function(a,b){return a+b;},0)/s.cycles.length):0;
+  s.stdRate=s.closed?Math.round(s.stdClosed/s.closed*100):0;
+  s.spreadRate=s.closed?Math.round(s.spreadClosed/s.closed*100):0;
+  return s;
+}
+
+/* ================= 渲染：KPI ================= */
+function renderKPI(){
+  var s=stat();
+  document.getElementById("kpis").innerHTML=
+   kpi("累计提案",s.n,"来自 "+s.peopleN+" 位同事","")+
+   kpi("员工参与率",s.partRate+"%","在册 "+cfg.people+" 人 / 提案人 "+s.peopleN+" 人",s.partRate>=60?"green":(s.partRate>=30?"amber":"red"))+
+   kpi("人均提案",s.perCap+" 条","提案数 ÷ 在册人数 · 优良 ≥ 2 条/人·年","purple")+
+   kpi("采纳率",s.adoptRate+"%","已决策 "+(s.adopted+s.rejected)+" 条中采纳 "+s.adopted+" 条",s.adoptRate>=80?"green":(s.adoptRate>=60?"amber":"red"))+
+   kpi("实施完成率",s.closeRate+"%","已采纳 "+s.adopted+" 条中已结案 "+s.closed+" 条",s.closeRate>=85?"green":(s.closeRate>=60?"amber":"red"))+
+   kpi("年化净收益",money(s.net),"已结案提案收益 − 投入","green")+
+   kpi("投入产出比",(s.costClosed>0?Math.round(s.net/s.costClosed*10)/10+"×":"—"),"已结案投入 "+money(s.costClosed),"teal")+
+   kpi("平均闭环周期",s.avgCycle+" 天","目标 ≤ 60 天",s.avgCycle&&s.avgCycle<=60?"green":"amber")+
+   kpi("改善固化率",s.stdRate+"%","已结案中已更新体系文件 "+s.stdClosed+"/"+s.closed,s.stdRate>=90?"green":"amber")+
+   kpi("横向展开率",s.spreadRate+"%","已结案中已明确展开范围 "+s.spreadClosed+"/"+s.closed,"orange")+
+   kpi("逾期未推进",s.overdue+" 条","已过目标完成日期仍未结案",s.overdue?"red":"green")+
+   kpi("待处理",s.pending+" 条","待初评 / 待评审 / 待批准 / 待结案","purple");
+}
+function kpi(l,v,h,c){return '<div class="kpi '+(c||"")+'"><div class="k-lab">'+l+'</div><div class="k-val">'+v+'</div><div class="k-hint">'+esc(h)+'</div></div>';}
+
+/* ================= 渲染：漏斗 / 图表 ================= */
+function renderFunnel(){
+  var s=stat(), tot=Math.max(1,s.n);
+  var steps=[
+    {l:"提交提案",v:s.n,c:"#0f4c81"},
+    {l:"完成评审决策",v:s.decided,c:"#1a6fb0"},
+    {l:"采纳",v:s.adopted,c:"#0f6e56"},
+    {l:"实施完成",v:s.closed,c:"#1b6b3a"},
+    {l:"已固化标准",v:s.stdClosed,c:"#b26a00"}
+  ];
+  var prev=null,h="";
+  steps.forEach(function(st){
+    var w=Math.max(st.v/tot*100,1.5);
+    var rate=prev?Math.round(st.v/prev*100)+"%":"—";
+    h+='<div class="fnl"><div class="lab">'+st.l+'</div>'+
+       '<div class="trk"><div class="fl" style="width:'+w.toFixed(1)+'%;background:'+st.c+'">'+st.v+'</div></div>'+
+       '<div class="rat">'+(prev?("转化 "+rate):"占比 100%")+'</div></div>';
+    prev=st.v;
+  });
+  h+='<div class="note '+(s.closeRate>=85?"ok":"warn")+'">当前<b>提案件数 '+s.n+' → 采纳 '+s.adopted+' → 结案 '+s.closed+' → 固化 '+s.stdClosed+'</b>。'+
+     '若「采纳」之后骤降，是资源落实不到位；若「实施完成」到「固化标准」有缺口，说明改善做了但没写进文件，人一换就会回潮。'+
+     '另：未采纳 '+s.rejected+' 条，每一条都必须有书面理由反馈给提案人。</div>';
+  document.getElementById("funnel").innerHTML=h;
+}
+function donut(data){
+  var total=data.reduce(function(a,d){return a+d.v;},0)||1;
+  var off=0,r=52,c=2*Math.PI*r;
+  var segs=data.filter(function(d){return d.v>0;}).map(function(d){
+    var len=c*d.v/total;
+    var s='<circle r="'+r+'" cx="70" cy="70" fill="none" stroke="'+d.c+'" stroke-width="24" stroke-dasharray="'+len.toFixed(2)+' '+(c-len).toFixed(2)+'" stroke-dashoffset="'+(-off).toFixed(2)+'" transform="rotate(-90 70 70)"/>';
+    off+=len;return s;}).join("");
+  return '<svg viewBox="0 0 140 140" width="140" height="140" role="img"><title>分布</title>'+
+    '<circle r="'+r+'" cx="70" cy="70" fill="none" stroke="#eef1f6" stroke-width="24"/>'+segs+
+    '<text x="70" y="66" text-anchor="middle" font-size="20" font-weight="600" fill="#16202b">'+total+'</text>'+
+    '<text x="70" y="82" text-anchor="middle" font-size="10" fill="#8494a3">总计</text></svg>';
+}
+function lgV(data){
+  return '<div class="lg">'+data.slice().sort(function(a,b){return b.v-a.v;}).map(function(d){
+    return '<div><span class="pill" style="background:'+d.c+'"></span>'+d.l+'：'+d.v+' 条</div>';}).join("")+'</div>';
+}
+function renderCharts(){
+  var s=stat();
+  var cd=CATES.map(function(k){return {l:k,v:s.byCate[k]||0,c:CATE_COLOR[k]};}).filter(function(d){return d.v>0;});
+  document.getElementById("cateChart").innerHTML=(cd.length?donut(cd):"")+lgV(cd);
+  var kd=KINDS.map(function(k,i){return {l:k,v:s.byKind[k]||0,c:["#0f4c81","#c62828","#5b4a9e","#b26a00","#0f6e56","#1a6fb0"][i%6]};}).filter(function(d){return d.v>0;});
+  var mx=Math.max(1,Math.max.apply(null,kd.map(function(d){return d.v;})));
+  document.getElementById("kindChart").innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+
+    kd.map(function(d){return '<div style="display:flex;align-items:center;gap:8px"><div style="width:132px;font-size:11.5px;color:var(--ink2);text-align:right">'+d.l+'</div>'+
+      '<div style="flex:1;height:16px;background:#eef1f6;border-radius:4px;overflow:hidden"><div style="height:100%;width:'+(d.v/mx*100)+'%;background:'+d.c+';border-radius:4px"></div></div>'+
+      '<div style="width:34px;font-size:11.5px">'+d.v+'</div></div>';}).join("")+'</div>';
+
+  var months=[];for(var i=5;i>=0;i--){var d=new Date();d.setMonth(d.getMonth()-i);months.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));}
+  var mo=months.map(function(m){return {m:m,
+    a:recs.filter(function(r){return (r.date||"").slice(0,7)===m;}).length,
+    b:recs.filter(function(r){return isAdopted(r)&&(r.date||"").slice(0,7)===m;}).length,
+    c:recs.filter(function(r){return isClosed(r)&&(r.doneDate||"").slice(0,7)===m;}).length};});
+  var mxm=Math.max(1,Math.max.apply(null,mo.map(function(x){return Math.max(x.a,x.b,x.c);})));
+  document.getElementById("trend").innerHTML='<div style="display:flex;gap:22px;flex-wrap:wrap;margin-top:6px">'+
+    mo.map(function(x){return '<div style="text-align:center"><div style="display:flex;align-items:flex-end;gap:4px;height:110px">'+
+      '<div title="提案 '+x.a+'" style="width:16px;height:'+Math.round(x.a/mxm*100)+'px;background:#0f4c81;border-radius:3px 3px 0 0"></div>'+
+      '<div title="采纳 '+x.b+'" style="width:16px;height:'+Math.round(x.b/mxm*100)+'px;background:#b26a00;border-radius:3px 3px 0 0"></div>'+
+      '<div title="结案 '+x.c+'" style="width:16px;height:'+Math.round(x.c/mxm*100)+'px;background:#1b6b3a;border-radius:3px 3px 0 0"></div>'+
+      '</div><div style="font-size:11px;color:var(--ink2);margin-top:4px">'+x.m.slice(2)+'</div>'+
+      '<div style="font-size:10.5px;color:var(--ink3)">'+x.a+'/'+x.b+'/'+x.c+'</div></div>';}).join("")+'</div>';
+}
+function renderHeat(){
+  var s=stat(),h="<thead><tr><th>部门 \\ 类别</th>";
+  CATES.forEach(function(c){h+="<th>"+c+"</th>";});
+  h+="<th>合计</th></tr></thead><tbody>";
+  var mx=0,cell={};
+  DEPTS.forEach(function(d){
+    CATES.forEach(function(c){
+      var v=recs.filter(function(r){return r.dept===d&&r.cate===c;}).length;
+      cell[d+"|"+c]=v; if(v>mx)mx=v;
+    });
+  });
+  DEPTS.forEach(function(d){
+    var rowTotal=CATES.reduce(function(a,c){return a+cell[d+"|"+c];},0);
+    h+="<tr><td><b>"+d+"</b></td>";
+    CATES.forEach(function(c){
+      var v=cell[d+"|"+c];
+      var lv=mx===0?0:Math.min(5,Math.ceil(v/mx*5));
+      h+='<td class="h'+(v===0?0:lv)+'" title="'+d+" · "+c+"："+v+' 条">'+(v||"·")+"</td>";
+    });
+    h+='<td style="font-weight:600;background:#f7f9fc;text-align:center">'+rowTotal+"</td></tr>";
+  });
+  h+="</tbody><tfoot><tr><td>合计</td>";
+  CATES.forEach(function(c){
+    h+="<td>"+recs.filter(function(r){return r.cate===c;}).length+"</td>";
+  });
+  h+="<td>"+recs.length+"</td></tr></tfoot>";
+  document.getElementById("heat").innerHTML=h;
+}
+function renderTop(){
+  var closed=recs.filter(isClosed).slice();
+  var bySave=closed.slice().sort(function(a,b){return netSave(b)-netSave(a);}).slice(0,10);
+  document.getElementById("topSave").innerHTML=
+    "<thead><tr><th>#</th><th>编号</th><th>部门</th><th>提案内容</th><th>投入</th><th>年化收益</th><th>净收益</th></tr></thead><tbody>"+
+    (bySave.length?bySave.map(function(r,i){return "<tr><td>"+(i+1)+"</td><td><b>"+esc(r.code)+"</b></td><td>"+esc(r.dept)+"</td>"+
+      "<td>"+esc((r.plan||"").slice(0,46))+"</td><td class='money'>"+money(r.cost)+"</td><td class='money'>"+money(r.save)+"</td>"+
+      "<td class='money'><b>"+money(netSave(r))+"</b></td></tr>";}).join(""):
+      "<tr><td colspan='7'><div class='empty'>暂无已结案提案</div></td></tr>")+"</tbody>";
+
+  var byRoi=closed.filter(function(r){return num(r.cost)>0;})
+    .sort(function(a,b){return netSave(b)/num(b.cost)-netSave(a)/num(a.cost);}).slice(0,10);
+  document.getElementById("topRoi").innerHTML=
+    "<thead><tr><th>#</th><th>编号</th><th>部门</th><th>提案内容</th><th>投入</th><th>净收益</th><th>ROI</th></tr></thead><tbody>"+
+    (byRoi.length?byRoi.map(function(r,i){var roi=netSave(r)/num(r.cost);
+      return "<tr><td>"+(i+1)+"</td><td><b>"+esc(r.code)+"</b></td><td>"+esc(r.dept)+"</td>"+
+      "<td>"+esc((r.plan||"").slice(0,46))+"</td><td class='money'>"+money(r.cost)+"</td><td class='money'>"+money(netSave(r))+"</td>"+
+      "<td class='money'><b>"+(Math.round(roi*10)/10)+"×</b></td></tr>";}).join(""):
+      "<tr><td colspan='7'><div class='empty'>暂无可计算 ROI 的已结案提案</div></td></tr>")+"</tbody>";
+}
+function renderAlerts(){
+  var s=stat();
+  var od=recs.filter(isOverdue);
+  var noResp=recs.filter(function(r){return +r.status===2&&r.date&&r.date<dayShift(-3);});
+  var noScore=recs.filter(function(r){return +r.status>=3&&!(+r.sI&&+r.sF&&+r.sB&&+r.sS);});
+  var noSys=recs.filter(function(r){return isClosed(r)&&(!(r.sys||[]).length||r.sys.indexOf("无需更新")>=0);});
+  var noSpread=recs.filter(function(r){return isClosed(r)&&!(r.spread||"").trim();});
+  var scNoEcr=recs.filter(function(r){return r.sc==="是"&&isAdopted(r)&&r.ecr!=="是";});
+  var h="";
+  h+='<div class="note '+(od.length?"warn":"ok")+'"><b>逾期未推进（'+od.length+' 条）</b><br>'+
+    (od.length?od.map(function(r){var d=Math.round((new Date(today())-new Date(r.planDate))/864e5);
+      return "· "+esc(r.code)+" "+esc(r.dept)+" 「"+esc((r.plan||"").slice(0,34))+"」 目标 "+esc(r.planDate)+"，已逾期 "+d+" 天（责任人 "+esc(r.owner||"—")+"）";}).join("<br>"):
+      "当前无逾期提案。")+'</div>';
+  h+='<div class="note '+(noResp.length?"warn":"ok")+'"><b>超 3 个工作日未初评（'+noResp.length+' 条）</b><br>'+
+    (noResp.length?noResp.map(function(r){return "· "+esc(r.code)+" 提交于 "+esc(r.date)+"，"+esc(r.dept)+" 主管需给出初评意见";}).join("<br>"):
+      "所有待初评提案均在 3 个工作日内。")+'</div>';
+  h+='<div class="note '+(noScore.length?"warn":"ok")+'"><b>进入评审但未完成四维评分（'+noScore.length+' 条）</b><br>'+
+    (noScore.length?noScore.map(function(r){return "· "+esc(r.code)+" 状态 "+sChip(+r.status)+" 缺评分，无法定级发奖";}).join("<br>"):
+      "已评审提案均已评分。")+'</div>';
+  h+='<div class="note '+(scNoEcr.length?"warn":"ok")+'"><b>涉及特殊特性但未走工程变更（'+scNoEcr.length+' 条）</b><br>'+
+    (scNoEcr.length?scNoEcr.map(function(r){return "· "+esc(r.code)+" 标记为涉及 SC/CC，但 ecr 字段未填「是」，存在审核风险";}).join("<br>"):
+      "涉及特殊特性的提案均已挂接 ECR。")+'</div>';
+  h+='<div class="note '+(noSys.length?"warn":"ok")+'"><b>已结案但体系文件未更新（'+noSys.length+' 条）</b><br>'+
+    (noSys.length?noSys.map(function(r){return "· "+esc(r.code)+" 已结案，但未登记任何受控文件更新，改善存在回潮风险";}).join("<br>"):
+      "所有结案提案均已登记体系文件更新或明确无需更新。")+'</div>';
+  h+='<div class="note '+(noSpread.length?"warn":"ok")+'"><b>已结案但未填写横向展开范围（'+noSpread.length+' 条）</b><br>'+
+    (noSpread.length?noSpread.map(function(r){return "· "+esc(r.code)+" 尚未明确可推广至哪些工序/产线/产品";}).join("<br>"):
+      "所有结案提案均已明确展开范围。")+'</div>';
+  document.getElementById("alerts").innerHTML=h;
+}
+
+/* ================= 渲染：看板 ================= */
+function filtered(){
+  return recs;
+}
+function renderBoard(){
+  var h="";
+  for(var n=1;n<=7;n++){
+    var list=recs.filter(function(r){return +r.status===n;});
+    h+='<div class="col" ondragover="dov(event)" ondragleave="this.classList.remove(\'dragover\')" ondrop="drp(event,'+n+')">'+
+       '<div class="col-h"><span><span class="sn">'+n+'</span>'+STATUSES[n-1].replace(/^\d+\./,"")+'</span><span class="cnt">'+list.length+'</span></div>';
+    if(!list.length)h+='<div class="empty" style="padding:14px 4px;font-size:11.5px">暂无</div>';
+    list.forEach(function(r){
+      h+='<div class="item" draggable="true" ondragstart="dst(event,\''+r.id+'\')" onclick="openForm(\''+r.id+'\')" style="border-top-color:'+(DEPT_COLOR[r.dept]||"#0f4c81")+'">'+
+         '<div class="i-code">'+esc(r.code)+(isOverdue(r)?' <span class="chip r">逾期</span>':'')+'</div>'+
+         '<div class="i-title">'+esc((r.plan||r.now||"").slice(0,56))+'</div>'+
+         '<div class="chips">'+
+           '<span class="chip" style="background:'+(DEPT_COLOR[r.dept]||"#888")+'18;color:'+(DEPT_COLOR[r.dept]||"#555")+';border-color:'+(DEPT_COLOR[r.dept]||"#888")+'40">'+esc(r.dept||"—")+'</span>'+
+           '<span class="chip" style="background:'+(CATE_COLOR[r.cate]||"#888")+'18;color:'+(CATE_COLOR[r.cate]||"#555")+'">'+esc(r.cate||"—")+'</span>'+
+           (r.sc==="是"?'<span class="chip r">SC/CC</span>':'')+
+           (isClosed(r)?'<span class="chip g">'+money(netSave(r))+'</span>':'')+
+         '</div>'+
+         '<div class="i-meta"><span>'+esc(r.name||"—")+'</span><span>'+(r.planDate||"—")+'</span></div>'+
+         '</div>';
+    });
+    h+='</div>';
+  }
+  document.getElementById("board").innerHTML=h;
+
+  var rej=recs.filter(function(r){return +r.status===8;});
+  document.getElementById("rejTbl").innerHTML=
+   "<thead><tr><th>编号</th><th>提案人</th><th>部门</th><th>提案内容</th><th>不采纳理由</th><th>操作</th></tr></thead><tbody>"+
+   (rej.length?rej.map(function(r){return "<tr><td><b>"+esc(r.code)+"</b></td><td>"+esc(r.name||"—")+"</td><td>"+esc(r.dept||"—")+"</td>"+
+     "<td>"+esc((r.plan||"").slice(0,50))+"</td><td style='color:var(--red)'>"+esc((r.note||"—").slice(0,120))+"</td>"+
+     "<td><button class='mini' onclick=\"openForm('"+r.id+"')\">编辑</button></td></tr>";}).join(""):
+   "<tr><td colspan='6'><div class='empty'>暂无未采纳提案</div></td></tr>")+"</tbody>";
+}
+var dragId=null;
+function dst(e,id){dragId=id;e.dataTransfer.effectAllowed="move";}
+function dov(e){e.preventDefault();e.currentTarget.classList.add("dragover");}
+function drp(e,s){e.preventDefault();e.currentTarget.classList.remove("dragover");
+  if(!dragId)return;var r=recs.find(function(x){return x.id===dragId;});if(!r)return;
+  r.status=s; if(s===7&&!r.doneDate)r.doneDate=today(); touch(r); save(); render(); toast(r.code+" 已推进至「"+STATUSES[s-1].replace(/^\d+\./,"")+"」");}
+
+/* ================= 渲染：台账 ================= */
+var LCOLS=[
+ {k:"code",t:"编号",w:106},
+ {k:"date",t:"提案日期",w:96,e:1},
+ {k:"name",t:"提案人",w:82,e:1},
+ {k:"dept",t:"部门",w:72,s:DEPTS},
+ {k:"cate",t:"类别",w:84,s:CATES},
+ {k:"kind",t:"改善类型",w:120,s:KINDS},
+ {k:"area",t:"区域/工序",w:150,e:1},
+ {k:"plan",t:"改善方案",w:280,e:1},
+ {k:"status",t:"状态",w:108,s:STATUSES},
+ {k:"owner",t:"责任人",w:120,e:1},
+ {k:"planDate",t:"目标完成",w:96,e:1},
+ {k:"doneDate",t:"实际完成",w:96,e:1},
+ {k:"cost",t:"投入",w:84,e:1,m:1},
+ {k:"save",t:"年化收益",w:88,e:1,m:1},
+ {k:"_score",t:"评分",w:56},
+ {k:"_level",t:"等级",w:70},
+ {k:"_prize",t:"奖金",w:88,m:1}
+];
+function initFilters(){
+  var keep={};
+  ["f-dept","f-cate","f-status","f-kind","f-month"].forEach(function(i){
+    var e=document.getElementById(i); if(e)keep[i]=e.value;});
+  var m={};recs.forEach(function(r){if(r.date)m[String(r.date).slice(0,7)]=1;});
+  document.getElementById("f-dept").innerHTML='<option value="">全部部门</option>'+DEPTS.map(function(d){return "<option>"+d+"</option>";}).join("");
+  document.getElementById("f-cate").innerHTML='<option value="">全部类别</option>'+CATES.map(function(c){return "<option>"+c+"</option>";}).join("");
+  document.getElementById("f-status").innerHTML='<option value="">全部状态</option>'+STATUSES.map(function(s){return '<option value="'+parseInt(s,10)+'">'+s+"</option>";}).join("");
+  document.getElementById("f-kind").innerHTML='<option value="">全部改善类型</option>'+KINDS.map(function(k){return "<option>"+k+"</option>";}).join("");
+  document.getElementById("f-month").innerHTML='<option value="">全部月份</option>'+Object.keys(m).sort().reverse().map(function(k){return "<option>"+k+"</option>";}).join("");
+  Object.keys(keep).forEach(function(i){
+    var e=document.getElementById(i); if(!e)return;
+    var ok=Array.prototype.some.call(e.options,function(o){return o.value===keep[i];});
+    if(ok&&keep[i]!==undefined)e.value=keep[i];
+  });
+}
+function listFiltered(){
+  var d=document.getElementById("f-dept").value,c=document.getElementById("f-cate").value,
+      st=document.getElementById("f-status").value,k=document.getElementById("f-kind").value,
+      mo=document.getElementById("f-month").value,kw=(document.getElementById("f-kw").value||"").toLowerCase();
+  return recs.filter(function(r){
+    if(d&&r.dept!==d)return false;
+    if(c&&r.cate!==c)return false;
+    if(st&&String(r.status)!==st)return false;
+    if(k&&r.kind!==k)return false;
+    if(mo&&String(r.date).slice(0,7)!==mo)return false;
+    if(kw){var t=(r.code+" "+(r.name||"")+" "+(r.area||"")+" "+(r.now||"")+" "+(r.plan||"")+" "+(r.owner||"")).toLowerCase();
+      if(t.indexOf(kw)<0)return false;}
+    return true;
+  }).sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""));});
+}
+function renderList(){
+  var rs=listFiltered();
+  var h="<thead><tr><th style='width:46px'>操作</th>";
+  LCOLS.forEach(function(c){h+="<th"+(c.w?" style='min-width:"+c.w+"px'":"")+">"+c.t+"</th>";});
+  h+="</tr></thead><tbody>";
+  if(!rs.length)h+="<tr><td colspan='"+(LCOLS.length+1)+"'><div class='empty'>没有符合条件的提案，点击「+ 新建提案」开始</div></td></tr>";
+  rs.forEach(function(r){
+    h+="<tr><td><button class='mini' onclick=\"openForm('"+r.id+"')\">编辑</button></td>";
+    LCOLS.forEach(function(c){
+      var k=c.k,v;
+      if(k==="_score"){h+="<td style='text-align:center'>"+scoreOf(r)+"/20</td>";return;}
+      if(k==="_level"){h+="<td><span class='chip "+(levelOf(r)==="参与奖"?"":"a")+"'>"+levelOf(r)+"</span></td>";return;}
+      if(k==="_prize"){h+="<td class='money'>"+money(totalPrize(r))+"</td>";return;}
+      v=r[k];
+      if(c.m)v=num(v)?money(v):"";
+      if(c.s){
+        var cur=String(v||"");
+        if(k==="cate"||k==="dept"||k==="kind")cur=String(v||"");
+        if(k==="status")cur=String(v)+". "+(STATUSES[+v-1]||"").replace(/^\d+\./,"");
+        h+="<td><select class='mini' data-id='"+r.id+"' data-k='"+k+"' onchange='cellSel(this)' style='width:100%'>";
+        c.s.forEach(function(o){
+          var ov=(k==="status")?String(o).split(".")[0]:String(o);
+          h+="<option value='"+esc(ov)+"'"+((String(v)===ov)?" selected":"")+">"+esc(o)+"</option>";});
+        h+="</select></td>";
+      }else{
+        h+="<td class='e' contenteditable='true' data-id='"+r.id+"' data-k='"+k+"' onblur='cellEdit(this)'>"+esc(v==null?"":v)+"</td>";
+      }
+    });
+    h+="</tr>";
+  });
+  h+="</tbody>";
+  document.getElementById("tbl").innerHTML=h;
+  document.getElementById("l-cnt").textContent="共 "+rs.length+" 条（总计 "+recs.length+" 条）";
+}
+function cellEdit(td){
+  var r=recs.find(function(x){return x.id===td.dataset.id;});if(!r)return;
+  var v=td.textContent.trim();
+  if(String(r[td.dataset.k]||"")===v)return;
+  r[td.dataset.k]=v; touch(r); save(); render();
+}
+function cellSel(sel){
+  var r=recs.find(function(x){return x.id===sel.dataset.id;});if(!r)return;
+  var k=sel.dataset.k,v=sel.value;
+  if(k==="status"){r.status=parseInt(v,10);if(r.status===7&&!r.doneDate)r.doneDate=today();}
+  else r[k]=v;
+  touch(r); save(); render();
+}
+function resetF(){
+  ["f-dept","f-cate","f-status","f-kind","f-month"].forEach(function(i){document.getElementById(i).value="";});
+  document.getElementById("f-kw").value="";renderList();
+}
+
+/* ================= 渲染：部门 ================= */
+function renderDept(){
+  var s=stat();
+  document.getElementById("peopleN").textContent=cfg.people||"—";
+  document.getElementById("deptG").innerHTML=DEPTS.map(function(d){
+    var o=s.byDept[d]||{n:0,adopted:0,closed:0,net:0,cost:0,rejected:0};
+    var dec=o.adopted+o.rejected;
+    var ar=dec?Math.round(o.adopted/dec*100):0;
+    var cr=o.adopted?Math.round(o.closed/o.adopted*100):0;
+    var pn={};recs.forEach(function(r){if(r.dept===d&&r.name)pn[r.name]=1;});
+    var pnN=Object.keys(pn).length;
+    var top=recs.filter(function(r){return r.dept===d&&isClosed(r);}).sort(function(a,b){return netSave(b)-netSave(a);})[0];
+    return '<div class="dept" style="border-top-color:'+DEPT_COLOR[d]+'">'+
+      '<div class="dh"><div class="dn">'+d+'</div><div class="dc">提案 '+o.n+' 条</div></div>'+
+      '<div class="dst"><span>提案人 <b>'+pnN+'</b> 人</span><span>采纳 <b>'+o.adopted+'</b></span><span>结案 <b>'+o.closed+'</b></span><span>未采纳 <b>'+o.rejected+'</b></span></div>'+
+      '<div class="dst"><span>采纳率 <b>'+ar+'%</b></span><span>完成率 <b>'+cr+'%</b></span><span>净收益 <b>'+money(o.net)+'</b></span></div>'+
+      '<div class="dst">'+
+        (o.n===0?'<span class="tag r">本周期零提案</span>':
+         (ar>=80?'<span class="tag">采纳率优良</span>':'<span class="tag w">采纳待提升</span>'))+
+        (cr>=85&&o.adopted>0?'<span class="tag">闭环及时</span>':(o.adopted>0?'<span class="tag w">有提案未闭环</span>':''))+
+        (o.net>=100000?'<span class="tag">收益突出</span>':'')+
+      '</div>'+
+      '<div style="margin-top:8px;font-size:11.5px;color:var(--ink2);line-height:1.6">'+
+        (top?('<b>最佳改善：</b>'+esc(top.code)+" "+esc((top.plan||"").slice(0,40))+"…"):'<span style="color:var(--ink3)">暂无已结案提案</span>')+
+      '</div></div>';
+  }).join("");
+
+  var h="<thead><tr><th>部门</th>";
+  for(var i=1;i<=8;i++)h+="<th>"+STATUSES[i-1]+"</th>";
+  h+="<th>合计</th><th>采纳率</th><th>完成率</th><th>年化净收益</th></tr></thead><tbody>";
+  DEPTS.forEach(function(d){
+    var o=s.byDept[d]||{n:0,adopted:0,closed:0,net:0,rejected:0},dec=o.adopted+o.rejected;
+    h+="<tr><td><b>"+d+"</b></td>";
+    for(var i=1;i<=8;i++)h+="<td style='text-align:center'>"+(s.byStatus&&recs.filter(function(r){return r.dept===d&&+r.status===i;}).length)+"</td>";
+    h+="<td style='text-align:center'><b>"+o.n+"</b></td>"+
+       "<td style='text-align:center'>"+(dec?Math.round(o.adopted/dec*100):0)+"%</td>"+
+       "<td style='text-align:center'>"+(o.adopted?Math.round(o.closed/o.adopted*100):0)+"%</td>"+
+       "<td class='money'>"+money(o.net)+"</td></tr>";
+  });
+  h+="</tbody><tfoot><tr><td>合计</td>";
+  for(var i=1;i<=8;i++)h+="<td style='text-align:center'>"+(s.byStatus[i]||0)+"</td>";
+  h+="<td style='text-align:center'>"+recs.length+"</td><td>"+s.adoptRate+"%</td><td>"+s.closeRate+"%</td><td class='money'>"+money(s.net)+"</td></tr></tfoot>";
+  document.getElementById("deptTbl").innerHTML=h;
+
+  document.getElementById("dutyTbl").innerHTML=
+   "<thead><tr><th style='min-width:78px'>部门</th><th style='min-width:290px'>改善主攻方向</th><th style='min-width:120px'>主要提案类别</th><th style='min-width:140px'>在改善中的角色</th><th style='min-width:250px'>本部门改善 KPI</th></tr></thead><tbody>"+
+   DUTY.map(function(x){return "<tr><td><b style='color:"+DEPT_COLOR[x.d]+"'>"+x.d+"</b></td><td>"+x.f+"</td><td>"+x.c+"</td><td>"+x.r+"</td><td>"+x.k+"</td></tr>";}).join("")+
+   "</tbody>";
+}
+
+/* ================= 渲染：评审与激励 ================= */
+function renderReview(){
+  var h="<thead><tr><th style='min-width:82px'>评分维度</th><th style='min-width:200px'>判定内容</th>"+
+    "<th style='width:52px'>1 分</th><th style='width:52px'>2 分</th><th style='width:52px'>3 分</th><th style='width:52px'>4 分</th><th style='width:52px'>5 分</th></tr></thead><tbody>";
+  SCORE_DIM.forEach(function(d){
+    h+="<tr><td><b>"+d.n+"</b></td><td style='color:var(--ink2)'>"+d.d+"</td>"+
+      d.l.map(function(x){return "<td style='font-size:11.5px'>"+x+"</td>";}).join("")+"</tr>";
+  });
+  h+="</tbody>";
+  document.getElementById("scoreTbl").innerHTML=h;
+
+  document.getElementById("prizeTbl").innerHTML=
+   "<thead><tr><th style='min-width:96px'>奖励等级</th><th style='min-width:230px'>达成条件</th><th style='width:110px'>提案奖</th><th style='min-width:180px'>说明</th></tr></thead><tbody>"+
+   PRIZE_RULE.map(function(p){return "<tr><td><b>"+p.l+"</b></td><td>"+p.c+"</td>"+
+     "<td>"+(p.v?money(p.v):(p.rate||"—"))+"</td><td style='color:var(--ink2)'>"+p.m+"</td></tr>";}).join("")+"</tbody>";
+
+  var s=stat();
+  var lv={};var totalP=0,totalShare=0;
+  recs.forEach(function(r){var l=levelOf(r);lv[l]=(lv[l]||0)+1;totalP+=PRIZE(l);totalShare+=shareOf(r);});
+  document.getElementById("prizeStat").innerHTML=
+   '<div style="display:flex;flex-direction:column;gap:7px;margin:6px 0">'+
+   Object.keys(lv).map(function(l){var mx=Math.max.apply(null,Object.keys(lv).map(function(k){return lv[k];}));
+     return '<div style="display:flex;align-items:center;gap:8px"><div style="width:84px;font-size:12px;color:var(--ink2);text-align:right">'+l+'</div>'+
+       '<div style="flex:1;height:16px;background:#eef1f6;border-radius:4px;overflow:hidden"><div style="height:100%;width:'+(lv[l]/mx*100)+'%;background:#b26a00;border-radius:4px"></div></div>'+
+       '<div style="width:46px;font-size:11.5px">'+lv[l]+' 条</div></div>';}).join("")+
+   '</div>'+
+   '<div class="note info">提案奖合计 <b>'+money(totalP)+'</b>，效益分享奖合计 <b>'+money(totalShare)+'</b>，'+
+   '已发放/待发放合计 <b>'+money(totalP+totalShare)+'</b>。效益分享奖仅在提案「已结案且收益经财务确认」后计发。</div>';
+
+  var pd={};recs.forEach(function(r){var d=r.dept||"其他";pd[d]=(pd[d]||0)+totalPrize(r);});
+  var mxp=Math.max(1,Math.max.apply(null,Object.keys(pd).map(function(k){return pd[k];})));
+  document.getElementById("prizeDept").innerHTML=
+   '<div style="display:flex;flex-direction:column;gap:7px">'+
+   DEPTS.map(function(d){var v=pd[d]||0;
+     return '<div style="display:flex;align-items:center;gap:8px"><div style="width:52px;font-size:12px;color:var(--ink2);text-align:right">'+d+'</div>'+
+       '<div style="flex:1;height:16px;background:#eef1f6;border-radius:4px;overflow:hidden"><div style="height:100%;width:'+(v/mxp*100)+'%;background:'+DEPT_COLOR[d]+';border-radius:4px"></div></div>'+
+       '<div style="width:92px;font-size:11.5px;text-align:right">'+money(v)+'</div></div>';}).join("")+'</div>';
+
+  var pend=recs.filter(function(r){return [2,3,4,6].indexOf(+r.status)>=0;})
+    .sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});
+  document.getElementById("pending").innerHTML=
+   "<div class='tbl-wrap' style='max-height:none'><table><thead><tr><th>编号</th><th>提交日期</th><th>提案人</th><th>部门</th><th>方案摘要</th><th>当前状态</th><th>停留天数</th><th>操作</th></tr></thead><tbody>"+
+   (pend.length?pend.map(function(r){var days=r.date?Math.round((new Date(today())-new Date(r.date))/864e5):0;
+     return "<tr><td><b>"+esc(r.code)+"</b></td><td>"+esc(r.date||"—")+"</td><td>"+esc(r.name||"—")+"</td><td>"+esc(r.dept||"—")+"</td>"+
+       "<td>"+esc((r.plan||"").slice(0,52))+"</td><td>"+sChip(+r.status)+"</td>"+
+       "<td"+(days>30?" style='color:var(--red);font-weight:600'":"")+">"+days+" 天</td>"+
+       "<td><button class='mini' onclick=\"openForm('"+r.id+"')\">处理</button></td></tr>";}).join(""):
+   "<tr><td colspan='8'><div class='empty'>没有待处理的提案</div></td></tr>")+"</tbody></table></div>";
+}
+
+/* ================= 渲染：收益与标准化 ================= */
+function renderGain(){
+  var s=stat();
+  var byDept={};recs.filter(isClosed).forEach(function(r){var d=r.dept||"其他";byDept[d]=(byDept[d]||0)+netSave(r);});
+  var mxn=Math.max(1,Math.max.apply(null,DEPTS.map(function(d){return byDept[d]||0;})));
+  var byCate={};recs.filter(isClosed).forEach(function(r){var c=r.cate||"其他";byCate[c]=(byCate[c]||0)+netSave(r);});
+  var mxc=Math.max(1,Math.max.apply(null,CATES.map(function(c){return byCate[c]||0;})));
+  document.getElementById("gainBox").innerHTML=
+   '<div class="note info">已结案提案合计：投入 <b>'+money(s.costClosed)+'</b>，年化收益 <b>'+money(s.save)+'</b>，'+
+   '年化净收益 <b>'+money(s.net)+'</b>，投入产出比 <b>'+(s.costClosed>0?Math.round(s.net/s.costClosed*10)/10+"×":"—")+'</b>。'+
+   '收益数字须由财务独立确认后方可计入奖金基数。</div>'+
+   '<h3>按部门（已结案年化净收益）</h3>'+
+   DEPTS.map(function(d){var v=byDept[d]||0;
+     return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="width:52px;font-size:12px;color:var(--ink2);text-align:right">'+d+'</div>'+
+       '<div style="flex:1;height:16px;background:#eef1f6;border-radius:4px;overflow:hidden"><div style="height:100%;width:'+(v/mxn*100)+'%;background:'+DEPT_COLOR[d]+';border-radius:4px"></div></div>'+
+       '<div style="width:96px;font-size:11.5px;text-align:right">'+money(v)+'</div></div>';}).join("")+
+   '<h3>按改善类别（已结案年化净收益）</h3>'+
+   CATES.map(function(c){var v=byCate[c]||0;
+     return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="width:78px;font-size:12px;color:var(--ink2);text-align:right">'+c+'</div>'+
+       '<div style="flex:1;height:16px;background:#eef1f6;border-radius:4px;overflow:hidden"><div style="height:100%;width:'+(v/mxc*100)+'%;background:'+CATE_COLOR[c]+';border-radius:4px"></div></div>'+
+       '<div style="width:96px;font-size:11.5px;text-align:right">'+money(v)+'</div></div>';}).join("");
+
+  document.getElementById("stdBox").innerHTML=
+   '<div style="display:flex;flex-direction:column;gap:7px;margin:6px 0">'+
+   '<div style="display:flex;align-items:center;gap:8px"><div style="width:120px;font-size:12px;color:var(--ink2);text-align:right">已更新体系文件</div>'+
+     '<div style="flex:1;height:18px;background:#eef1f6;border-radius:4px;overflow:hidden"><div style="height:100%;width:'+s.stdRate+'%;background:#1b6b3a;border-radius:4px"></div></div>'+
+     '<div style="width:96px;font-size:11.5px;text-align:right">'+s.stdClosed+"/"+s.closed+'（'+s.stdRate+'%）</div></div>'+
+   '<div style="display:flex;align-items:center;gap:8px"><div style="width:120px;font-size:12px;color:var(--ink2);text-align:right">已明确展开范围</div>'+
+     '<div style="flex:1;height:18px;background:#eef1f6;border-radius:4px;overflow:hidden"><div style="height:100%;width:'+s.spreadRate+'%;background:#c8620a;border-radius:4px"></div></div>'+
+     '<div style="width:96px;font-size:11.5px;text-align:right">'+s.spreadClosed+"/"+s.closed+'（'+s.spreadRate+'%）</div></div>'+
+   '</div>'+
+   '<div class="note '+(s.stdRate>=90?"ok":"warn")+'">国际通行的成熟做法（丰田、博世、大陆 KVP）都有一条硬规矩：<b>改善不写进标准作业文件，就不算完成</b>。'+
+   '固化率和展开率低的工厂，通常每年都在重复解决同一批问题。</div>';
+
+  var need=recs.filter(function(r){return isAdopted(r)&&(r.sys||[]).length&&r.sys.indexOf("无需更新")<0;});
+  document.getElementById("sysTbl").innerHTML=
+   "<thead><tr><th>编号</th><th>部门</th><th>提案内容</th><th>需更新受控文件</th><th>涉及SC/CC</th><th>需走ECR</th><th>状态</th></tr></thead><tbody>"+
+   (need.length?need.map(function(r){return "<tr><td><b>"+esc(r.code)+"</b></td><td>"+esc(r.dept||"—")+"</td>"+
+     "<td>"+esc((r.plan||"").slice(0,52))+"</td>"+
+     "<td>"+(r.sys||[]).map(function(x){return '<span class="chip b">'+esc(x)+'</span>';}).join(" ")+"</td>"+
+     "<td>"+(r.sc==="是"?'<span class="chip r">是</span>':'<span class="chip">否</span>')+"</td>"+
+     "<td>"+(r.ecr==="是"?'<span class="chip r">需 ECR</span>':'<span class="chip g">否</span>')+"</td>"+
+     "<td>"+sChip(+r.status)+"</td></tr>";}).join(""):
+   "<tr><td colspan='7'><div class='empty'>暂无需要更新体系文件的提案</div></td></tr>")+"</tbody>";
+
+  var cl=recs.filter(isClosed);
+  document.getElementById("spreadTbl").innerHTML=
+   "<thead><tr><th>编号</th><th>部门</th><th>提案内容</th><th>横向展开范围</th><th>状态</th></tr></thead><tbody>"+
+   (cl.length?cl.map(function(r){var sp=(r.spread||"").trim();
+     return "<tr><td><b>"+esc(r.code)+"</b></td><td>"+esc(r.dept||"—")+"</td><td>"+esc((r.plan||"").slice(0,50))+"</td>"+
+       "<td>"+(sp?esc(sp):'<span class="chip r">待补充展开范围</span>')+"</td><td>"+sChip(+r.status)+"</td></tr>";}).join(""):
+   "<tr><td colspan='5'><div class='empty'>暂无已结案提案</div></td></tr>")+"</tbody>";
+}
+
+/* ================= 渲染：制度与流程 ================= */
+function renderStd(){
+  document.getElementById("flow").innerHTML=FLOW.map(function(s){
+    return '<div class="fstep"><span class="fs-n">步骤 '+s.n+'</span><h4>'+s.name+'</h4>'+
+      '<div class="meta">责任：'+s.lead+' · 周期：'+s.cycle+'</div><ul>'+
+      s.act.map(function(a){return "<li>"+a+"</li>";}).join("")+'</ul>'+
+      '<div class="out"><b>输出：</b>'+s.out.join("、")+'</div>'+
+      '<div class="gate"><b>放行门槛：</b>'+s.gate+'</div></div>';
+  }).join("");
+
+  document.getElementById("benchTbl").innerHTML=
+   "<thead><tr><th style='min-width:150px'>标杆对象</th><th style='min-width:110px'>核心机制</th><th style='min-width:420px'>做法要点</th><th style='min-width:250px'>可借鉴之处</th></tr></thead><tbody>"+
+   BENCH.map(function(b){return "<tr><td><b>"+b.c+"</b></td><td><span class='chip b'>"+b.k+"</span></td><td>"+b.d+"</td><td style='color:var(--teal)'>"+b.t+"</td></tr>";}).join("")+"</tbody>";
+
+  var G=[
+   ["① 现状：问题到底是什么","写清「何时、何地、哪个零件/工序、发生了多少次、占比多少」。没有数字的描述一律退回。","3 月装配 OP30 卡扣装反 12 件/班，占不良总量 41%"],
+   ["② 目标：要到什么程度","给出可衡量的目标值与达成时间，不要写「尽量改善」。","4 月底前降至 0，班产由 1,850 件提升至 2,200 件"],
+   ["③ 根因：为什么会发生","至少追问 3 个为什么，区分「现象」和「原因」。","对准全靠目视 → 无定位基准 → 夹具缺少防转销"],
+   ["④ 对策：具体怎么做","写清改什么、改成什么样、谁来做，避免「加强管理」这类空话。","增加尼龙定位治具 + 防转销，一次放件即对齐"],
+   ["⑤ 效果：改善了多少","用与现状同一口径的数字对比，并说明统计周期。","单件工时 6.8s → 4.1s，连续 3 周无装反不良"],
+   ["⑥ 标准化：写进什么文件","明确需更新的受控文件名，这是汽车行业审核必查项。","作业指导书 SOP-A03 修订，5S 定置标准更新，培训 18 人"],
+   ["⑦ 横展：还有哪里适用","列出可复制的工序、产线、产品，或明确说明「不适用」。","装配二线 OP30 同工序、三线同类卡扣工位"]
+  ];
+  document.getElementById("guide").innerHTML=G.map(function(g,i){
+    return '<div class="fstep" style="margin-bottom:8px"><span class="fs-n">第 '+g[0].slice(0,1)+' 步</span><h4>'+g[0].slice(2)+'</h4>'+
+      '<div style="font-size:11.5px;color:var(--ink2);margin-bottom:5px">'+g[1]+'</div>'+
+      '<div class="out"><b>示例：</b>'+g[2]+'</div></div>';
+  }).join("");
+
+  var GB=[
+   ["加强员工培训，提高质量意识","无法衡量、无法验证，属于把责任推给员工","OP30 增加定位治具，装反不良由 12 件/班降至 0"],
+   ["建议增加检验人员","增加成本不消除缺陷，是典型的「检出」而非「预防」","扭枪加装计数联锁，未完成规定数量工位不放行"],
+   ["设备老化，建议更新设备","投入巨大且无方案，属于「大建议」，不予立项","更换输送带变频器 + 光电检测，空转占比 34%→6%，投入 1.9 万元"],
+   ["改善工作环境","无对象、无指标","原料库高频物料前移，配料单趟 120m→45m，月省 138km 步行"],
+   ["建议优化流程","无具体环节，无法评审","检验结果改移动端录入，录入工时由 52min/日降至 0，追溯查询 25min→1min"]
+  ];
+  document.getElementById("goodBad").innerHTML=
+   "<thead><tr><th style='min-width:230px'>✗ 常见不合格写法</th><th style='min-width:230px'>为什么不合格</th><th style='min-width:300px'>✓ 合格写法示例</th></tr></thead><tbody>"+
+   GB.map(function(x){return "<tr><td style='color:var(--red)'>"+x[0]+"</td><td style='color:var(--ink2)'>"+x[1]+"</td><td style='color:var(--green)'>"+x[2]+"</td></tr>";}).join("")+"</tbody>";
+}
+
+/* ================= 渲染：模板 ================= */
+function renderTplSel(){
+  var s=document.getElementById("t-sel"),v=s.value;
+  s.innerHTML='<option value="">（空白模板，不带入提案信息）</option>'+
+    recs.map(function(r){return '<option value="'+r.id+'">'+esc(r.code)+" · "+esc(r.dept||"")+" · "+esc((r.plan||"").slice(0,26))+'</option>';}).join("");
+  s.value=v;
+}
+function getSel(){var id=document.getElementById("t-sel").value;return id?recs.find(function(r){return r.id===id;}):null;}
+function V(r,k,dv){if(!r)return dv||"";var v=r[k];if(v==null||v===""||(Array.isArray(v)&&!v.length))return dv||"";return Array.isArray(v)?v.join("、"):v;}
+function TPL(){
+  var r=getSel();
+  var g={
+    code:V(r,"code","【提案编号】"),date:V(r,"date","【提案日期】"),name:V(r,"name","【提案人】"),
+    empno:V(r,"empno","【工号】"),dept:V(r,"dept","【部门】"),cate:V(r,"cate","【类别】"),kind:V(r,"kind","【改善类型】"),
+    area:V(r,"area","【区域/工序】"),apqp:V(r,"apqp","不适用"),sc:V(r,"sc","否"),ecr:V(r,"ecr","否"),
+    now:V(r,"now","【现状：何时/何地/多少次/占比】"),plan:V(r,"plan","【改善方案：改什么、改成什么样】"),
+    benefit:V(r,"benefit","【预期收益：改善前后数字对比】"),
+    cost:V(r,"cost","【投入成本 元】"),save:V(r,"save","【年化收益 元】"),
+    owner:V(r,"owner","【实施责任人】"),reviewer:V(r,"reviewer","【评审人】"),
+    planDate:V(r,"planDate","【目标完成日期】"),doneDate:V(r,"doneDate","【实际完成日期】"),
+    score:r?String(scoreOf(r)):"【总分】",level:r?levelOf(r):"【等级】",
+    sys:V(r,"sys","【PFMEA / 控制计划 / SOP / SIP / 点检表】"),
+    spread:V(r,"spread","【可推广至：工序/产线/产品】"),note:V(r,"note","【备注】"),
+    today:today()
+  };
+  g.net=r?money(netSave(r)):"【净收益】";
+  g.prize=r?money(totalPrize(r)):"【奖金】";
+  return [
+  {t:"1. 改善提案表（提案人填写 · 步骤 1）",f:"改善提案表_"+g.code+".md",c:
+"改善提案表  /  Continuous Improvement Proposal\n"+
+"────────────────────────────────────────────────\n"+
+"提案编号      ："+g.code+"        提案日期："+g.date+"\n"+
+"提案人 / 工号 ："+g.name+" / "+g.empno+"        部门："+g.dept+"\n"+
+"改善类别      ：□ 质量 □ 效率 □ 成本 □ 交付 □ 安全 □ 5S与环境 □ 士气与其他      ["+g.cate+"]\n"+
+"改善类型      ：□ 小改善Kaizen □ 防错Poka-Yoke □ 快速改善QCC □ 项目型 □ 管理优化 □ 数字化/自动化      ["+g.kind+"]\n"+
+"发生区域/工序 ："+g.area+"\n"+
+"关联阶段      ：□ 不适用 □ P1 □ P2 □ P3 □ P4 □ P5 □ P6          ["+g.apqp+"]\n"+
+"涉及特殊特性  ：□ 是（SC/CC） □ 否                              ["+g.sc+"]\n"+
+"需走工程变更  ：□ 是（须 ECR，涉及顾客要求时提交 PCN） □ 否      ["+g.ecr+"]\n"+
+"\n【一、现状（问题是什么）】\n"+
+"  何时：____________  何地/工序：____________  对象：____________\n"+
+"  发生频次 / 数量：____________  占比 / 比例：____________\n"+
+"  具体描述：\n"+g.now+"\n"+
+"\n【二、目标（要到什么程度，什么时候）】\n"+
+"  改善后目标值：____________        达成时间：____________\n"+
+"\n【三、根因分析（连续追问为什么）】\n"+
+"  为什么发生？ ____________________________________________\n"+
+"  为什么（再问）？ ____________________________________________\n"+
+"  为什么（再问）？ ____________________________________________\n"+
+"  根本原因：______________________________________________________\n"+
+"\n【四、改善对策（具体怎么做）】\n"+g.plan+"\n"+
+"\n【五、预期收益（与现状同口径数字对比）】\n"+g.benefit+"\n"+
+"  质量：____________   效率：____________\n"+
+"  成本：年化收益 ____________ 元，投入成本 ____________ 元\n"+
+"  安全 / 环境 / 士气：____________\n"+
+"\n提案人签字：____________    日期："+g.today+"\n"+
+"班组长初收：____________    日期：____________\n"},
+
+  {t:"2. 部门初评意见表（班组长/主管 · 步骤 2 · 3 个工作日内）",f:"部门初评_"+g.code+".md",c:
+"改善提案 部门初评意见表\n"+
+"────────────────────────────────────────────────\n"+
+"提案编号      ："+g.code+"    提案人："+g.name+"("+g.empno+")    部门："+g.dept+"\n"+
+"提案内容      ："+g.plan+"\n"+
+"初评人        ：____________    初评日期："+g.today+"\n"+
+"\n【一、情况核实】\n"+
+"  □ 已到现场核实，情况属实         □ 描述与现场不符，需补充：____________\n"+
+"  数据可信度：□ 有记录支撑  □ 口述估算  □ 需重新测量：____________\n"+
+"\n【二、安全 / 法规 / 顾客影响判定】\n"+
+"  □ 涉及安全或环保，须优先处理        □ 涉及职业健康\n"+
+"  □ 涉及产品特性或顾客要求            □ 涉及特殊特性 SC/CC："+g.sc+"\n"+
+"  □ 需走工程变更 ECR，顾客影响时提交 PCN："+g.ecr+"\n"+
+"\n【三、处置意见】\n"+
+"  □ 本部门可直接实施，转实施（责任人：____________ 完成日期：____________）\n"+
+"  □ 跨部门，提交改善委员会评审\n"+
+"  □ 投入超出部门权限，提交委员会并附预算测算\n"+
+"  □ 暂不具备条件，建议不采纳，理由：____________________________________\n"+
+"\n【四、对提案人的回复】（无论处置意见如何，均须在 3 个工作日内回复）\n"+
+"  回复方式：□ 当面沟通  □ 班组看板公告  □ 书面通知\n"+
+"  回复内容要点：__________________________________________________\n"+
+"\n初评人签字：____________    部门主管：____________\n"},
+
+  {t:"3. 改善委员会评审评分表（步骤 3 · 每周例会 · 四维满分 20）",f:"评审评分表_"+g.code+".md",c:
+"改善提案 委员会评审评分表\n"+
+"────────────────────────────────────────────────\n"+
+"提案编号      ："+g.code+"    提案人："+g.name+"    部门："+g.dept+"\n"+
+"提案内容      ："+g.plan+"\n"+
+"评审日期      ："+g.today+"    评审主持人：____________\n"+
+"\n【一、四维评分】（各 1~5 分，满分 20）\n"+
+"  1. 创新性  （方案是否新颖、是否跳出常规做法）        得分：____/5\n"+
+"     1 常规做法  2 略有改动  3 有改进思路  4 思路新颖  5 首创或行业领先\n"+
+"  2. 可行性  （以现有资源能否落地）                    得分：____/5\n"+
+"     1 需大量投入  2 需外部资源  3 部门内可实施  4 本周可实施  5 立即实施零成本\n"+
+"  3. 效益性  （年化净收益或风险降低程度）              得分：____/5\n"+
+"     1 无量化收益  2 <1万元  3 1~5万元  4 5~10万元  5 ≥10万元或消除重大风险\n"+
+"  4. 推广性  （成果能否复制）                          得分：____/5\n"+
+"     1 仅本工位  2 可推广本班组/产线  3 可推广本车间  4 可推广全厂  5 可推广其他工厂/供方\n"+
+"  ─────────────────────────────────────────\n"+
+"  总分：____/20     拟定等级：□ 特等 □ 一等 □ 二等 □ 三等 □ 鼓励 □ 参与\n"+
+"\n【二、收益测算】（财务当场核价，不采信提案人自报）\n"+
+"  投入成本：人工 ____ + 材料 ____ + 设备 ____ + 其他 ____ = ____________ 元\n"+
+"  年化收益来源：□ 节约材料 □ 节约工时 □ 减少报废/返工 □ 减少能耗 □ 避免投诉/召回\n"+
+"  测算依据与口径：__________________________________________________\n"+
+"  财务核定年化收益：____________ 元      财务签字：____________\n"+
+"\n【三、合规性判定】\n"+
+"  □ 涉及过程参数/作业方法/检验方法/设备/工装，须同步更新受控文件："+g.sys+"\n"+
+"  □ 涉及特殊特性 SC/CC（"+g.sc+"），须经顾客代表确认\n"+
+"  □ 涉及形状、配合、功能、性能、耐久性，须走 ECR 并事前取得顾客书面批准（"+g.ecr+"）\n"+
+"  □ 需提交 PPAP，等级：______\n"+
+"\n【四、评审决议】\n"+
+"  □ 采纳 —— 实施责任人："+g.owner+"    目标完成日期："+g.planDate+"    预算编号：______\n"+
+"  □ 采纳（附条件）：__________________________________________________\n"+
+"  □ 不采纳 —— 理由（必须书面反馈提案人）：\n"+
+"     __________________________________________________________________\n"+
+"     __________________________________________________________________\n"+
+"  □ 转 CIP 工作坊集中攻关（3~5 天跨部门）\n"+
+"\n评审委员签字：工艺 ____  质量 ____  生产 ____  设备 ____  财务 ____  项目 ____\n"},
+
+  {t:"4. 改善实施计划与跟踪表（步骤 5）",f:"实施计划_"+g.code+".md",c:
+"改善实施计划与跟踪表\n"+
+"────────────────────────────────────────────────\n"+
+"提案编号      ："+g.code+"    实施责任人："+g.owner+"    目标完成："+g.planDate+"\n"+
+"提案内容      ："+g.plan+"\n"+
+"提案人        ："+g.name+"（全程参与，不得由实施部门独立完成）\n"+
+"\n【一、实施分解】\n"+
+"  序号 | 工作内容                    | 责任 | 计划日期 | 实际日期 | 状态\n"+
+"  -----|---------------------------|------|---------|---------|------\n"+
+"   1   |                           |      |         |         |\n"+
+"   2   |                           |      |         |         |\n"+
+"   3   |                           |      |         |         |\n"+
+"   4   |                           |      |         |         |\n"+
+"\n【二、每日站会跟踪】（改善期间每日记录，未达预期立即调整对策）\n"+
+"  日期 | 当日进展 | 偏差 | 调整对策 | 是否需升级\n"+
+"  -----|---------|------|---------|----------\n"+
+"       |         |      |         |\n"+
+"\n【三、改善前后对比】\n"+
+"  项目          改善前        改善后（实测）    目标值      是否达成\n"+
+"  --------------------------------------------------------------\n"+
+"                                                          \n"+
+"  改善前照片编号：____________    改善后照片编号：____________\n"+
+"\n【四、异常与升级】\n"+
+"  实施中发现的问题：____________________________________________\n"+
+"  升级对象与时间：______________________________________________\n"+
+"\n实施责任人：____________   提案人确认：____________   部门主管：____________\n"},
+
+  {t:"5. 效果验证与财务收益确认单（步骤 6 · 质量 + 财务双签）",f:"效果验证_"+g.code+".md",c:
+"改善效果验证与收益确认单\n"+
+"────────────────────────────────────────────────\n"+
+"提案编号      ："+g.code+"    提案人："+g.name+"    部门："+g.dept+"\n"+
+"改善内容      ："+g.plan+"\n"+
+"实施完成日期  ：____________    验证周期：□ ≥30 天  □ ≥3 批  □ 其他：______\n"+
+"\n【一、质量指标验证】（质量部门填写）\n"+
+"  指标            改善前      改善后实测    目标      判定\n"+
+"  --------------------------------------------------------\n"+
+"  不良率/PPM                                           \n"+
+"  过程能力 Cpk                                    ≥1.33 \n"+
+"  客户投诉件数                                          \n"+
+"  返工/报废数量                                         \n"+
+"  结论：□ 达标，同意结案      □ 未达标，退回调整对策（说明：____________）\n"+
+"  质量工程师：____________    日期：____________\n"+
+"\n【二、财务收益确认】（财务部门独立核算，不采信提案人自报）\n"+
+"  收益类别        计算口径                          金额（元/年）\n"+
+"  --------------------------------------------------------------\n"+
+"  节约材料                                                    \n"+
+"  节约工时                                                    \n"+
+"  减少报废/返工                                               \n"+
+"  减少能耗                                                    \n"+
+"  其他                                                        \n"+
+"  ─────────────────────────────────────────────────\n"+
+"  年化收益合计：____________ 元\n"+
+"  投入成本合计：____________ 元\n"+
+"  年化净收益  ：____________ 元      投入产出比：______×\n"+
+"  财务确认人：____________    日期：____________\n"+
+"\n【三、标准化与横向展开】（与验证同步，文件未更新的不得结案）\n"+
+"  需更新受控文件："+g.sys+"\n"+
+"  □ PFMEA 已更新    □ 控制计划已更新    □ 作业指导书已更新\n"+
+"  □ 检验指导书已更新 □ 设备点检表已更新  □ 旧版文件已回收\n"+
+"  □ 岗位培训完成（人数：______，培训记录编号：______）\n"+
+"  横向展开范围："+g.spread+"\n"+
+"  □ 涉及顾客要求，已走 ECR（"+g.ecr+"）并取得批准\n"+
+"\n【四、结案意见】\n"+
+"  □ 同意结案并计发奖励    □ 暂不结案，需继续观察至：____________\n"+
+"  质量：____________   财务：____________   工艺：____________   批准：____________\n"},
+
+  {t:"6. 奖励定级与发放表 / 改善案例卡（步骤 8）",f:"奖励与案例_"+g.code+".md",c:
+"改善奖励定级与发放表 / 改善案例卡\n"+
+"────────────────────────────────────────────────\n"+
+"提案编号      ："+g.code+"    提案人："+g.name+"("+g.empno+")    部门："+g.dept+"\n"+
+"改善内容      ："+g.plan+"\n"+
+"评审总分      ："+g.score+" / 20        拟定等级："+g.level+"\n"+
+"投入 / 年化收益 / 净收益："+g.cost+" / "+g.save+" / "+g.net+"\n"+
+"\n【一、奖励构成】\n"+
+"  1. 提案奖（按等级）            ：____________ 元\n"+
+"  2. 效益分享奖（净收益 × 2%，封顶 20,000）：____________ 元\n"+
+"  3. 合计                        ："+g.prize+" 元（参考）\n"+
+"  * 效益分享奖仅在「已结案 + 收益经财务确认」后次月发放，与提案奖可叠加\n"+
+"\n【二、发放与公示】\n"+
+"  发放方式：□ 随工资发放  □ 改善大会现场发放     发放月份：____________\n"+
+"  公示方式：□ 车间改善看板  □ 厂级通报表扬  □ 班组会表扬\n"+
+"  行政确认：____________    财务审核：____________    厂长批准：____________\n"+
+"\n【三、改善案例卡】（一张 A4，张贴于车间看板）\n"+
+"  ┌──────────────────────────────────────────────┐\n"+
+"  │  改善案例 "+g.code+"            "+g.dept+" · "+g.name+"  │\n"+
+"  ├──────────────────────────────────────────────┤\n"+
+"  │  【问题】"+g.now+"  │\n"+
+"  │  【对策】"+g.plan+"  │\n"+
+"  │  【效果】"+g.benefit+"  │\n"+
+"  │  【标准化】"+g.sys+"  │\n"+
+"  │  【展开】"+g.spread+"  │\n"+
+"  └──────────────────────────────────────────────┘\n"+
+"\n【四、归档与知识沉淀】\n"+
+"  □ 提案表 □ 初评意见 □ 评审评分表 □ 实施记录 □ 验证报告 □ 收益确认单\n"+
+"  □ 文件更新记录 □ 培训记录 □ 奖励发放记录\n"+
+"  □ 已同步至 APQP P6 知识经验库（编号：____________）\n"+
+"  归档编号：____________    保存期限：按顾客要求及 IATF 16949（建议 ≥15 年或产品生命周期+1 年）\n"+
+"\n编制："+g.reviewer+"    日期："+g.today+"\n"+
+"\n"+g.note+"\n"}
+  ];
+}
+function renderTpl(){
+  var box=document.getElementById("tpls");
+  if(!box)return;
+  box.innerHTML=TPL().map(function(t,i){
+    return '<div class="acc" id="acc'+i+'"><div class="acc-h" onclick="this.parentNode.classList.toggle(\'open\')"><span>'+t.t+'</span><span style="color:var(--ink3);font-weight:400">展开 / 收起</span></div>'+
+      '<div class="acc-b"><div style="display:flex;gap:8px;margin-bottom:8px"><button onclick="copyTpl('+i+')">复制全文</button><button onclick="dlTpl('+i+')">下载 .md</button></div>'+
+      '<pre class="tpl" id="tpl'+i+'">'+esc(t.c)+'</pre></div></div>';
+  }).join("");
+}
+function copyTpl(i){var t=document.getElementById("tpl"+i).textContent;
+  navigator.clipboard.writeText(t).then(function(){toast("已复制到剪贴板");},function(){toast("复制失败，请手动选择");});}
+function dlTpl(i){var t=TPL()[i];dl(t.c,t.f,"text/markdown",true);}
+function dl(txt,name,mime,bom){
+  var b=new Blob([(bom?"\ufeff":"")+txt],{type:(mime||"text/plain")+";charset=utf-8"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);toast("已下载 "+name);
+}
+
+/* ================= 表单 ================= */
+function nextCode(){
+  var y=new Date().getFullYear();
+  var n=recs.filter(function(r){return (r.code||"").indexOf("CI-"+y)===0;}).length+1;
+  return "CI-"+y+"-"+String(n).padStart(3,"0");
+}
+function fld(l,inp){return '<div class="fld"><label>'+l+'</label>'+inp+'</div>';}
+function sel(id,opts,v){
+  return "<select id='"+id+"'>"+opts.map(function(o){
+    var ov=String(o).indexOf(".")>0?String(o).split(".")[0]:String(o);
+    return "<option value='"+esc(ov)+"'"+((String(v)===ov)?" selected":"")+">"+esc(o)+"</option>";}).join("")+"</select>";
+}
+function openForm(id){
+  var r=id?recs.find(function(x){return x.id===id;}):null;
+  curId=r?r.id:null;
+  var isNew=!r;
+  if(isNew)r={code:nextCode(),date:today(),name:"",empno:"",dept:DEPTS[0],cate:CATES[0],kind:KINDS[0],
+    area:"",apqp:"不适用",sc:"否",ecr:"否",now:"",plan:"",benefit:"",cost:"",save:"",
+    status:1,owner:"",reviewer:"改善委员会",planDate:"",doneDate:"",
+    sI:0,sF:0,sB:0,sS:0,sys:[],spread:"",note:""};
+  var f=function(k,dv){return r[k]==null?(dv||""):r[k];};
+  var h='<div class="note info"><b>填写提示：</b>现状必须带数字（多少次 / 多少比例 / 多少金额），对策要写清改什么，'+
+    '收益用与现状同一口径对比。缺这三样的提案会被委员会退回。</div>'+
+    '<div class="frow">'+
+    fld("提案编号","<input id='f-code' value='"+esc(f("code"))+"'>")+
+    fld("提案日期","<input type='date' id='f-date' value='"+esc(f("date"))+"'>")+
+    fld("提案人","<input id='f-name' value='"+esc(f("name"))+"'>")+
+    '</div><div class="frow">'+
+    fld("工号","<input id='f-empno' value='"+esc(f("empno"))+"'>")+
+    fld("部门",sel("f-dept2",DEPTS,f("dept")))+
+    fld("改善类别",sel("f-cate2",CATES,f("cate")))+
+    '</div><div class="frow">'+
+    fld("改善类型",sel("f-kind2",KINDS,f("kind")))+
+    fld("发生区域 / 工序","<input id='f-area' value='"+esc(f("area"))+"'>")+
+    fld("关联 APQP 阶段",sel("f-apqp",APQP,f("apqp")))+
+    '</div>'+
+    '<div class="fld" style="margin-bottom:12px"><label>现状：问题是什么（何时 / 何地 / 多少次 / 占比多少）</label>'+
+      "<textarea id='f-now' placeholder='例：3 月装配 OP30 卡扣装反 12 件/班，占不良总量 41%'>"+esc(f("now"))+'</textarea></div>'+
+    '<div class="fld" style="margin-bottom:12px"><label>改善对策：具体改什么、改成什么样</label>'+
+      "<textarea id='f-plan' placeholder='例：增加尼龙定位治具与防转销，一次放件即对齐'>"+esc(f("plan"))+'</textarea></div>'+
+    '<div class="fld" style="margin-bottom:12px"><label>预期收益：与现状同口径的数字对比</label>'+
+      "<textarea id='f-benefit' placeholder='例：单件工时 6.8s → 4.1s，班产 1850 → 2400 件，装反不良降至 0'>"+esc(f("benefit"))+'</textarea></div>'+
+    '<div class="frow">'+
+    fld("投入成本（元）","<input type='number' id='f-cost' value='"+esc(f("cost"))+"'>")+
+    fld("年化收益（元）","<input type='number' id='f-save' value='"+esc(f("save"))+"'>")+
+    fld("当前状态",sel("f-status2",STATUSES,f("status")))+
+    '</div><div class="frow">'+
+    fld("实施责任人","<input id='f-owner' value='"+esc(f("owner"))+"'>")+
+    fld("目标完成日期","<input type='date' id='f-planDate' value='"+esc(f("planDate"))+"'>")+
+    fld("实际完成日期","<input type='date' id='f-doneDate' value='"+esc(f("doneDate"))+"'>")+
+    '</div>'+
+    '<h3>四维评审评分（1~5 分，合计 '+scoreOf(r)+'/20）</h3>'+
+    '<div class="frow">'+SCORE_DIM.map(function(d){
+      return fld(d.n+"　"+d.d.slice(0,16)+"…",sel("f-"+d.k,[0,1,2,3,4,5],f(d.k)));}).join("")+
+      fld("评审人","<input id='f-reviewer' value='"+esc(f("reviewer"))+"'>")+
+    '</div>'+
+    '<h3>汽车行业合规性判定</h3>'+
+    '<div class="frow">'+
+    fld("涉及特殊特性 SC/CC",sel("f-sc",["否","是"],f("sc")))+
+    fld("需走工程变更 ECR",sel("f-ecr",["否","是"],f("ecr")))+
+    '</div>'+
+    '<div class="fld" style="margin-bottom:12px"><label>需更新的受控文件（可多选；改善不写进文件就不算完成）</label>'+
+      '<div class="sysbox">'+SYSFILES.map(function(s){
+        var on=(r.sys||[]).indexOf(s)>=0;
+        return '<label><input type="checkbox" data-s="'+esc(s)+'"'+(on?" checked":"")+'>'+esc(s)+'</label>';}).join("")+'</div></div>'+
+    '<div class="fld" style="margin-bottom:12px"><label>横向展开范围（可推广至哪些工序 / 产线 / 产品；无则写「不适用」）</label>'+
+      "<textarea id='f-spread' style='min-height:50px'>"+esc(f("spread"))+'</textarea></div>'+
+    '<div class="fld"><label>备注（评审意见 / 不采纳理由 / 实施注意事项）</label>'+
+      "<textarea id='f-note'>"+esc(f("note"))+'</textarea></div>';
+  document.getElementById("m-title").textContent=(isNew?"新建改善提案 · ":"编辑改善提案 · ")+r.code;
+  document.getElementById("m-del").style.display=isNew?"none":"inline-block";
+  document.getElementById("m-body").innerHTML=h;
+  document.getElementById("modal").classList.add("on");
+}
+function saveForm(){
+  var g=function(i){var e=document.getElementById(i);return e?String(e.value).trim():"";};
+  var sys=[];document.querySelectorAll("#m-body .sysbox input[type=checkbox]").forEach(function(cb){if(cb.checked)sys.push(cb.dataset.s);});
+  var obj={code:g("f-code"),date:g("f-date"),name:g("f-name"),empno:g("f-empno"),dept:g("f-dept2"),cate:g("f-cate2"),
+    kind:g("f-kind2"),area:g("f-area"),apqp:g("f-apqp"),
+    now:document.getElementById("f-now").value.trim(),
+    plan:document.getElementById("f-plan").value.trim(),
+    benefit:document.getElementById("f-benefit").value.trim(),
+    cost:g("f-cost"),save:g("f-save"),status:parseInt(g("f-status2"),10)||1,
+    owner:g("f-owner"),planDate:g("f-planDate"),doneDate:g("f-doneDate"),
+    sI:+g("f-sI")||0,sF:+g("f-sF")||0,sB:+g("f-sB")||0,sS:+g("f-sS")||0,
+    sc:g("f-sc"),ecr:g("f-ecr"),reviewer:g("f-reviewer"),sys:sys,
+    spread:document.getElementById("f-spread").value.trim(),
+    note:document.getElementById("f-note").value.trim()};
+  if(!obj.code){toast("请填写提案编号");return;}
+  if(!obj.plan&&!obj.now){toast("请至少填写现状或改善对策");return;}
+  if(obj.status===7&&!obj.doneDate)obj.doneDate=today();
+  if(curId){
+    var r=recs.find(function(x){return x.id===curId;});
+    Object.assign(r,obj); touch(r);
+  }else{
+    if(recs.some(function(x){return x.code===obj.code;})){toast("编号 "+obj.code+" 已存在");return;}
+    obj.id=uid(); touch(obj); recs.unshift(obj);
+  }
+  closeForm(); save(); render(); toast("已保存 "+obj.code);
+}
+function delRec(){
+  if(!curId)return;
+  var r=recs.find(function(x){return x.id===curId;});
+  if(!confirm("确认删除提案 "+r.code+"？删除后全员都将看不到该条，此操作不可撤销。"))return;
+  recs=recs.filter(function(x){return x.id!==curId;});
+  deleted[curId]=Date.now();
+  closeForm(); save(); render(); toast("已删除 "+r.code);
+}
+function closeForm(){document.getElementById("modal").classList.remove("on");curId=null;}
+
+/* ================= 导入导出 ================= */
+function exportJSON(){dl(JSON.stringify({items:recs,deleted:deleted,cfg:cfg},null,2),"CIP改善提案备份_"+today()+".json","application/json",false);}
+function exportCSV(){
+  var head=["提案编号","提案日期","提案人","工号","部门","改善类别","改善类型","区域/工序","关联APQP阶段",
+    "现状问题","改善对策","预期收益","投入成本","年化收益","年化净收益","状态","实施责任人","评审人",
+    "目标完成","实际完成","创新分","可行分","效益分","推广分","总分","奖励等级","提案奖","效益分享奖",
+    "涉及SC/CC","需走ECR","需更新体系文件","横向展开范围","闭环天数","备注"];
+  var rows=recs.map(function(r){
+    var c=cycleOf(r);
+    return [r.code,r.date,r.name,r.empno,r.dept,r.cate,r.kind,r.area,r.apqp,
+      (r.now||"").replace(/\n/g," "),(r.plan||"").replace(/\n/g," "),(r.benefit||"").replace(/\n/g," "),
+      num(r.cost),num(r.save),netSave(r),STATUSES[+r.status-1]||"",r.owner,r.reviewer,
+      r.planDate,r.doneDate,r.sI,r.sF,r.sB,r.sS,scoreOf(r),levelOf(r),PRIZE(levelOf(r)),shareOf(r),
+      r.sc,r.ecr,(r.sys||[]).join("、"),r.spread,c===null?"":c,(r.note||"").replace(/\n/g," ")];});
+  var csv=[head].concat(rows).map(function(a){return a.map(function(v){return '"'+String(v==null?"":v).replace(/"/g,'""')+'"';}).join(",");}).join("\r\n");
+  dl(csv,"CIP改善提案台账_"+today()+".csv","text/csv",true);
+}
+function importJSON(e){
+  var f=e.target.files[0];if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var d=JSON.parse(rd.result);
+      var items=Array.isArray(d)?d:(d.items||[]);
+      if(!Array.isArray(items))throw 0;
+      if(!confirm("导入 "+items.length+" 条提案，将整体覆盖云端当前数据，是否继续？"))return;
+      recs=items.map(normRec); deleted={};
+      if(d.cfg)cfg=Object.assign({people:120},d.cfg);
+      pushNow("replace").then(function(){render();toast("已导入 "+recs.length+" 条");});
+    }catch(err){toast("文件格式错误");}
+    e.target.value="";
+  };
+  rd.readAsText(f,"utf-8");
+}
+function saveCfg(){
+  var v=parseInt(document.getElementById("cfg-people").value,10);
+  if(!v||v<1){toast("在册人数须大于 0");return;}
+  cfg.people=v; save(); render(); toast("已保存");
+}
+
+/* ================= 初始化 ================= */
+function switchTab(v){
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.dataset.v===v);});
+  document.querySelectorAll(".view").forEach(function(x){x.classList.toggle("on",x.id==="v-"+v);});
+  if(v==="tpl")renderTpl();
+}
+document.getElementById("modal").onclick=function(e){if(e.target===this)closeForm();};
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeForm();});
+
+function render(){
+  renderKPI();
+  renderFunnel();
+  renderCharts();
+  renderHeat();
+  renderTop();
+  renderAlerts();
+  renderBoard();
+  initFilters(); renderList();
+  renderDept();
+  renderReview();
+  renderGain();
+  renderStd();
+  renderTplSel(); renderTpl();
+  var pe=document.getElementById("cfg-people"); if(pe&&document.activeElement!==pe)pe.value=cfg.people||120;
+}
+function boot(){
+  pullCloud()
+    .then(function(){
+      if(!recs.length){ setPill("ok"); }
+      render();
+      startPoll();
+    })
+    .catch(function(){ render(); startPoll(); });
+}
+render();
+boot();
+</script>
+</body>
+</html>
