@@ -603,7 +603,9 @@ function normalize(cfg){
       b.color = COLOR_HEX[b.color] ? b.color : 'blue';
       b.mode = (b.mode === 'new' || b.mode === 'auto') ? b.mode : 'auto';
       b.alt = typeof b.alt === 'string' ? b.alt : '';
-      if (b._useAlt === undefined) b._useAlt = false;     // 默认在线版：数据是云端最新的
+      // 腾讯云看板默认走「同域副本」：页面从本站点加载（不会出现风险提醒中间页），
+      // 数据仍通过绝对地址打到云函数，云端同步不受影响。
+      if (b._useAlt === undefined) b._useAlt = !!b.altPrimary;
     });
   });
   cfg.homeCards = Array.isArray(cfg.homeCards) ? cfg.homeCards : [];
@@ -892,16 +894,16 @@ function renderFrame(){
   if (altBtn){
     if (b.alt){
       altBtn.classList.remove('hidden');
-      altBtn.textContent = b._useAlt ? '看在线同步版' : '看离线版';
+      altBtn.textContent = b._useAlt ? '官方在线版' : '本站点副本';
       altBtn.className = 'mini' + (b._useAlt ? ' primary' : '');
       altBtn.title = b._useAlt
-        ? '当前是离线版：打开最快，但不会显示别人改的数据。点此切换到在线同步版（首次需点一次「确定访问」）'
-        : '当前是在线版：数据是云端最新的，但每次需点一次安全确认。点此切回离线版';
+        ? '当前是本站点副本：无安全确认页，数据照样走云端同步。点此切到腾讯云官方地址（会先出现风险提醒页）'
+        : '当前是腾讯云官方地址：每次会先出现安全确认页。点此切到本站点副本（无确认页，数据同样云端同步）';
       altBtn.onclick = function(){
         b._useAlt = !b._useAlt;
         dropFrame(b.id);
         openBoard(b.id, true);
-        toast(b._useAlt ? '已切到离线版：打开最快，数据不同步' : '已切到在线同步版：首次打开请点页面里的「确定访问」');
+        toast(b._useAlt ? '已切到本站点副本：无确认页，数据仍云端同步' : '已切到腾讯云官方地址：会出现风险提醒页');
       };
     }else{
       altBtn.classList.add('hidden');
