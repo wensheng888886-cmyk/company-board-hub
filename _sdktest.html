@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>SDK 调用同步函数测试</title>
+<script src="https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js"></script>
+</head>
+<body style="font-family:sans-serif;padding:16px">
+<h3>用 CloudBase SDK 调用 xxxSync 函数（不经过网关跨域限制）</h3>
+<div id="out" style="white-space:pre-wrap;font-family:monospace;font-size:12px;line-height:1.6">运行中…</div>
+<script>
+const ENV = 'as1532656116-d6g77h3laf139a81d';
+const out = document.getElementById('out');
+function log(s){ out.textContent += '\n' + s; }
+(async function(){
+  out.textContent = '初始化…';
+  const app = cloudbase.init({ env: ENV });
+  const auth = app.auth({ persistence: 'local' });
+  if (!auth.hasLoginState || !auth.hasLoginState()) await auth.signInAnonymously();
+  log('匿名登录 OK');
+
+  for (const fn of ['quoteSync', 'cisSync', 'apqpSync', 'ecmSync']) {
+    try {
+      const r = await app.callFunction({
+        name: fn,
+        data: { httpMethod: 'GET', headers: {}, queryStringParameters: {}, path: '/' + fn }
+      });
+      log('【' + fn + '】返回: ' + JSON.stringify(r).slice(0, 260));
+    } catch (e) {
+      log('【' + fn + '】失败: ' + String(e && e.message || e).slice(0, 200));
+    }
+  }
+})();
+</script>
+</body></html>
