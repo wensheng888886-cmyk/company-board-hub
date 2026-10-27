@@ -297,6 +297,7 @@ select.mini{height:26px;padding:0 4px;font-family:inherit;cursor:pointer}
         </select>
         <button class="mini" id="btnReload">刷新</button>
         <button class="mini" id="btnExternal">在新窗口打开</button>
+        <button class="mini hidden" id="btnAlt" title="在线版可同步数据；若因网络等原因打不开，可切到本地备用版（数据不同步）">备用版本</button>
         <button class="mini" id="btnReport">打不开？</button>
       </div>
       <div class="frame-host" id="frameHost"></div>
@@ -351,16 +352,16 @@ function defaultConfig(){
         { id:'b_7', name:'磁芯样件交付', url:'magnetic/', locked:true, pwd:'plain:1234', color:'green', mode:'auto' }
       ]},
       { id:'g_pm', name:'项目管理', collapsed:false, boards:[
-        { id:'b_8', name:'APQP', url:'apqp/', locked:true, pwd:'plain:1234', color:'rose', mode:'auto' }
+        { id:'b_8', name:'APQP', url:'https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/apqp/', alt:'apqp/', locked:true, pwd:'plain:1234', color:'rose', mode:'auto' }
       ]},
       { id:'g_ecm', name:'工程变更', collapsed:false, boards:[
-        { id:'b_9', name:'ECM', url:'ecm/', locked:true, pwd:'plain:1234', color:'cyan', mode:'auto' }
+        { id:'b_9', name:'ECM', url:'https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/ecm/', alt:'ecm/', locked:true, pwd:'plain:1234', color:'cyan', mode:'auto' }
       ]},
       { id:'g_quote', name:'报价管理', collapsed:false, boards:[
-        { id:'b_10', name:'报价系统', url:'quote/', locked:true, pwd:'plain:1234', color:'olive', mode:'auto' }
+        { id:'b_10', name:'报价系统', url:'https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/quote/', alt:'quote/', locked:true, pwd:'plain:1234', color:'olive', mode:'auto' }
       ]},
       { id:'g_cip', name:'持续改善', collapsed:false, boards:[
-        { id:'b_11', name:'CIP 改善建议', url:'cis/', locked:true, pwd:'plain:1234', color:'slate', mode:'auto' }
+        { id:'b_11', name:'CIP 改善建议', url:'https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/cis/', alt:'cis/', locked:true, pwd:'plain:1234', color:'slate', mode:'auto' }
       ]}
     ],
     homeCards: ['b_1','b_2','b_3','b_4','b_5','b_6','b_7','b_8','b_9','b_10','b_11'],
@@ -414,6 +415,9 @@ function allBoards(){
   });
   return out;
 }
+/* 云同步看板优先用在线原址（数据才能同步）；alt 是本地备用版本 */
+function boardUrl(b){ return (b._useAlt && b.alt) ? b.alt : b.url; }
+function isCloudHost(url){ return /^https?:\/\/[a-z0-9-]*\.?tcloudbase(app|)\.com/i.test(String(url || '')) || /tcloudbaseapp\.com/i.test(String(url || '')); }
 function toast(msg){
   var old = document.querySelector('.toast');
   if (old) old.remove();
@@ -499,7 +503,7 @@ var cfgTimer = null;
 function boardMap(){
   var m = {};
   (state.config.groups || []).forEach(function(g){
-    (g.boards || []).forEach(function(b){ m[b.id] = { url:b.url, locked:b.locked, mode:b.mode, name:b.name }; });
+    (g.boards || []).forEach(function(b){ m[b.id] = { url:boardUrl(b), locked:b.locked, mode:b.mode, name:b.name }; });
   });
   return m;
 }
@@ -596,6 +600,8 @@ function normalize(cfg){
       b.pwd = b.pwd || '';
       b.color = COLOR_HEX[b.color] ? b.color : 'blue';
       b.mode = (b.mode === 'new' || b.mode === 'auto') ? b.mode : 'auto';
+      b.alt = typeof b.alt === 'string' ? b.alt : '';
+      if (b._useAlt === undefined) b._useAlt = false;
     });
   });
   cfg.homeCards = Array.isArray(cfg.homeCards) ? cfg.homeCards : [];
@@ -703,7 +709,7 @@ function showLoadingMask(b){
   d.className = 'frame-mask';
   d.innerHTML = '<div class="spinner"></div><div class="mask-desc">正在载入 ' + esc(b.name) + '…</div>' +
     '<div class="mask-actions"><button class="mini" data-act="external">在新窗口打开</button></div>';
-  d.querySelector('[data-act=external]').onclick = function(){ window.open(b.url, '_blank', 'noopener'); };
+  d.querySelector('[data-act=external]').onclick = function(){ window.open(boardUrl(b), '_blank', 'noopener'); };
   host.appendChild(d);
   clearTimeout(frameTimers[b.id]);
   frameTimers[b.id] = setTimeout(function(){
@@ -714,7 +720,7 @@ function showLoadingMask(b){
       '<div class="mask-desc">可能是看板本身较慢，或该站点禁止被嵌入页面。你可以继续等待，或直接在新窗口打开。</div>' +
       '<div class="mask-actions"><button class="mini" data-act="wait">继续等待</button>' +
       '<button class="mini" data-act="external">在新窗口打开</button></div>';
-    live.querySelector('[data-act=external]').onclick = function(){ window.open(b.url, '_blank', 'noopener'); };
+    live.querySelector('[data-act=external]').onclick = function(){ window.open(boardUrl(b), '_blank', 'noopener'); };
     live.querySelector('[data-act=wait]').onclick = function(){ live.remove(); };
   }, 6000);
 }
@@ -756,9 +762,9 @@ function ensureFrame(b, force){
   }
   var srcNow = f.getAttribute('src');
   var stale = force || (srcNow && f.dataset.loadedAt && (Date.now() - Number(f.dataset.loadedAt) > STALE_MS));
-  if (srcNow !== b.url || stale){
+  if (srcNow !== boardUrl(b) || stale){
     f.dataset.loaded = '0';
-    setFrameSrc(f, b.url);
+    setFrameSrc(f, boardUrl(b));
   }
   f.style.display = 'block';
   if (f.dataset.loaded !== '1') showLoadingMask(b); else clearMask();
@@ -767,7 +773,7 @@ function reloadFrame(b){
   var f = frameCache[b.id];
   if (!f){ ensureFrame(b); return; }
   f.dataset.loaded = '0';
-  setFrameSrc(f, b.url);
+  setFrameSrc(f, boardUrl(b));
   showLoadingMask(b);
   toast('正在拉取最新数据…');
 }
@@ -813,6 +819,35 @@ function dropFrame(id){
   delete frameCache[id];
   clearTimeout(frameTimers[id]);
 }
+var LS_CBHINT = 'boardhub_cbhint_v1';
+/* 云开发测试域名首次访问会有「风险提醒」页，点一次即可长期放行 —— 提前告知，避免被当成故障 */
+function showAccessHint(b){
+  if (!isCloudHost(boardUrl(b))) return;
+  var flag = null;
+  try{ flag = localStorage.getItem(LS_CBHINT); }catch(e){}
+  if (flag === 'done') return;
+  var host = $('frameHost');
+  if (!host || host.querySelector('.access-hint')) return;
+  Array.prototype.forEach.call(host.querySelectorAll('.block-hint:not(.access-hint)'), function(x){ x.remove(); });
+  var d = document.createElement('div');
+  d.className = 'block-hint access-hint';
+  d.style.maxWidth = '460px';
+  d.innerHTML = '<span>首次显示「风险提醒」时，点页面里的「确定访问」即可（每个看板首次各点一次，之后本机自动放行）</span>' +
+    '<button class="mini" id="cbHintOpen">去激活</button>' +
+    '<button class="mini" id="cbHintOk">知道了</button>' +
+    '<span class="hint-x" id="cbHintX">&#215;</span>';
+  host.appendChild(d);
+  var close = function(){
+    try{ localStorage.setItem(LS_CBHINT, 'done'); }catch(e){}
+    if (d.parentNode) d.remove();
+  };
+  $('cbHintOk').onclick = close;
+  $('cbHintX').onclick = close;
+  $('cbHintOpen').onclick = function(){
+    window.open(boardUrl(b), '_blank', 'noopener');
+    setTimeout(close, 1500);
+  };
+}
 function showBlockHint(b){
   if (!b.url || state.hintShown[b.id]) return;
   state.hintShown[b.id] = true;
@@ -827,7 +862,7 @@ function showBlockHint(b){
   host.appendChild(d);
   var t = setTimeout(function(){ if (d.parentNode) d.remove(); }, 10000);
   $('hintX').onclick = function(){ clearTimeout(t); d.remove(); };
-  $('hintNew').onclick = function(){ clearTimeout(t); window.open(b.url, '_blank', 'noopener'); };
+  $('hintNew').onclick = function(){ clearTimeout(t); window.open(boardUrl(b), '_blank', 'noopener'); };
   $('hintAlways').onclick = async function(){
     clearTimeout(t); d.remove();
     b.mode = 'new';
@@ -849,8 +884,26 @@ function renderFrame(){
   $('frameBar').classList.remove('hidden');
   $('frameTitle').textContent = b.name;
   $('frameSub').textContent = f.group.name;
-  $('btnExternal').onclick = function(){ window.open(b.url, '_blank', 'noopener'); };
+  $('btnExternal').onclick = function(){ window.open(boardUrl(b), '_blank', 'noopener'); };
   $('btnReload').onclick = function(){ reloadFrame(b); };
+  var altBtn = $('btnAlt');
+  if (altBtn){
+    if (b.alt){
+      altBtn.classList.remove('hidden');
+      altBtn.textContent = b._useAlt ? '切回在线版' : '备用版本';
+      altBtn.title = b._useAlt
+        ? '当前是本地备用版（数据不同步），点此切回在线同步版'
+        : '在线版可多人同步；打不开时切到本地备用版（数据不同步）';
+      altBtn.onclick = function(){
+        b._useAlt = !b._useAlt;
+        dropFrame(b.id);
+        openBoard(b.id, true);
+        toast(b._useAlt ? '已切到本地备用版（此版本不与云端同步）' : '已切回在线版，数据恢复正常同步');
+      };
+    }else{
+      altBtn.classList.add('hidden');
+    }
+  }
   var sel = $('autoRefresh');
   if (sel){
     sel.value = String(autoMinutes());
@@ -874,6 +927,7 @@ function renderFrame(){
     return;
   }
   ensureFrame(b);
+  showAccessHint(b);
   startAutoRefresh(b);
   renderAge();
 }
@@ -893,7 +947,7 @@ function renderMask(title, desc, b, needPwd){
   d.innerHTML = inner;
   host.appendChild(d);
   var ext = $('maskExt');
-  if (ext) ext.onclick = function(){ window.open(b.url, '_blank', 'noopener'); };
+  if (ext) ext.onclick = function(){ window.open(boardUrl(b), '_blank', 'noopener'); };
   var ok = $('pwdOk');
   if (ok){
     var input = $('pwdInput');
@@ -1464,7 +1518,7 @@ function slideLoad(force){
       $('kLoad').classList.add('hidden');
       slideArm();
     };
-    fr.setAttribute('src', b.url);
+    fr.setAttribute('src', boardUrl(b));
   }else{
     $('kLoad').classList.add('hidden');
     slideArm();
