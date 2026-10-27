@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>activate test</title>
+<style>body{margin:0;font-family:sans-serif}iframe{width:100%;border:0}</style>
+</head>
+<body>
+<div style="padding:8px;font-size:13px">① 先在根路径 iframe 里点「确定访问」 ② 再看下方两个看板是否还提示</div>
+<iframe id="rootFrame" style="height:280px" src="https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/"></iframe>
+<div id="later"></div>
+<script>
+window.addBoards = function(){
+  ['/quote/', '/cis/', '/apqp/'].forEach(function(p){
+    var f = document.createElement('iframe');
+    f.style.height = '300px';
+    f.src = 'https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com' + p;
+    document.getElementById('later').appendChild(f);
+  });
+};
+</script>
+</body></html>
