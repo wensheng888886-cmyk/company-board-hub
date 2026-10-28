@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>公司运营看板平台</title>
+<title>富霖新材运营看板平台</title>
 <style>
 :root{
   --bg:#f5f6f8; --panel:#ffffff; --side:#fafbfc; --line:#e4e7ec; --line-soft:#eef0f3;
@@ -29,7 +29,7 @@ input,select{font-family:inherit;font-size:inherit;color:inherit}
   padding:0 16px;background:var(--panel);border-bottom:1px solid var(--line);
 }
 .brand{display:flex;align-items:center;gap:9px;flex:none}
-.brand-mark{width:26px;height:26px;border-radius:7px;background:var(--brand);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600}
+.brand-mark{width:36px;height:26px;padding:0 1px;border-radius:7px;background:var(--brand);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;letter-spacing:.5px;flex:none}
 .brand-name{font-size:15px;font-weight:600;letter-spacing:.2px}
 .search-wrap{flex:1;max-width:360px;position:relative}
 .search-wrap input{
@@ -249,8 +249,8 @@ select.mini{height:26px;padding:0 4px;font-family:inherit;cursor:pointer}
 <div id="app">
   <header class="topbar">
     <div class="brand">
-      <div class="brand-mark" id="brandMark">看</div>
-      <div class="brand-name" id="brandName">公司运营看板平台</div>
+      <div class="brand-mark" id="brandMark">富霖</div>
+      <div class="brand-name" id="brandName">富霖新材运营看板平台</div>
     </div>
     <div class="search-wrap">
       <svg class="search-ico" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
@@ -330,7 +330,8 @@ function uid(p){ return p + '_' + Math.random().toString(36).slice(2,9); }
 
 function defaultConfig(){
   return {
-    title: '公司运营看板平台',
+    title: '富霖新材运营看板平台',
+    logo: '富霖',
     groups: [
       { id:'g_rd', name:'研发中心', collapsed:false, boards:[
         { id:'b_1', name:'滤波器项目', url:'https://ops-delivery-board-40171.app.workbuddy.host/', locked:true, pwd:'plain:1234', color:'blue', mode:'auto' }
@@ -589,8 +590,7 @@ function normalize(cfg){
   cfg = cfg || {};
   cfg.title = cfg.title || d.title;
   cfg.groups = Array.isArray(cfg.groups) ? cfg.groups : d.groups;
-  /* 迁移 #3：OTD 换成新的分享页链接。该站点禁止外站内嵌，只能新窗口打开。
-     用 _mig 版本号保证只执行一次，之后管理员在「管理」里改 OTD 不受影响。 */
+  /* 迁移 #3：OTD 换成新的分享页链接。该站点禁止外站内嵌，只能新窗口打开。 */
   if (!cfg._mig || cfg._mig < 3){
     cfg.groups.forEach(function(g){
       (g.boards || []).forEach(function(b){
@@ -603,6 +603,13 @@ function normalize(cfg){
     });
     cfg._mig = 3;
   }
+  /* 迁移 #4：品牌改为「富霖」/ 富霖新材运营看板平台 */
+  if (!cfg._mig || cfg._mig < 4){
+    cfg.title = cfg.title && cfg.title !== '公司运营看板平台' ? cfg.title : '富霖新材运营看板平台';
+    cfg.logo = '富霖';
+    cfg._mig = 4;
+  }
+  if (!cfg.logo) cfg.logo = (cfg.title || '富霖').trim().slice(0, 4);
   cfg.groups.forEach(function(g){
     if (!g.id) g.id = uid('g');
     g.name = g.name || '未命名分组';
@@ -1007,9 +1014,9 @@ function openBoard(id, force, viaUser){
   renderFrame(viaUser); renderSidebar();
 }
 function renderAll(){
-  $('brandName').textContent = state.config.title || '公司运营看板平台';
-  $('brandMark').textContent = (state.config.title || '看').trim().charAt(0);
-  document.title = state.config.title || '公司运营看板平台';
+  $('brandName').textContent = state.config.title || '富霖新材运营看板平台';
+  $('brandMark').textContent = (state.config.logo || state.config.title || '富霖').trim().slice(0, 4);
+  document.title = state.config.title || '富霖新材运营看板平台';
   if (state.view !== 'home' && !findBoard(state.view)) state.view = 'home';
   if (state.view === 'home'){
     hideAllFrames();
@@ -1141,6 +1148,7 @@ function openAdmin(){
 function renderAdminBody(){
   var groups = state.config.groups || [];
   var html = '';
+  html += '<div class="field"><label>左上角标识（LOGO 文字）</label><input type="text" id="adLogo" value="' + esc(state.config.logo || state.config.title || '富霖') + '" maxlength="4"></div>';
   html += '<div class="field"><label>平台标题</label><input type="text" id="adTitle" value="' + esc(state.config.title) + '"></div>';
 
   groups.forEach(function(g, gi){
@@ -1186,6 +1194,8 @@ function bindAdminInputs(){
   var body = $('adBody');
   var title = body.querySelector('#adTitle');
   title.oninput = function(){ state.config.title = title.value; };
+  var logo = body.querySelector('#adLogo');
+  if (logo) logo.oninput = function(){ state.config.logo = logo.value.trim() || (state.config.title || '富霖').trim().slice(0, 4); };
 
   body.querySelectorAll('[data-gname]').forEach(function(el){
     el.oninput = function(){
@@ -1335,7 +1345,9 @@ function moveBoard(id, d){
 
 async function saveAdmin(){
   var titleEl = $('adTitle');
-  if (titleEl) state.config.title = titleEl.value.trim() || '公司运营看板平台';
+  if (titleEl) state.config.title = titleEl.value.trim() || '富霖新材运营看板平台';
+  var logoEl = $('adLogo');
+  if (logoEl) state.config.logo = logoEl.value.trim() || (state.config.title || '富霖').trim().slice(0, 4);
   var boards = allBoards();
   for (var i=0;i<boards.length;i++){
     var b = boards[i];
