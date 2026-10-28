@@ -297,9 +297,9 @@ select.mini{height:26px;padding:0 4px;font-family:inherit;cursor:pointer}
           <option value="10" selected>10 分钟</option>
           <option value="30">30 分钟</option>
         </select>
-        <select class="mini" id="frameScale" title="看板多为按 1400px 宽设计的桌面页面。屏幕较小或系统缩放较大时，可让它自动缩放到刚好放得下，不必手动调整浏览器缩放">
+        <select class="mini" id="frameScale" title="若左侧菜单和整个页面都偏大，那是浏览器缩放/显示器缩放造成的，请在浏览器按 Ctrl+0 恢复 100%。这里只负责让看板内容自动缩放到刚好放得下，免去手动放大缩小。">
           <option value="auto" selected>智能适配</option>
-          <option value="1">100%</option>
+          <option value="1">不缩放</option>
           <option value="0.9">90%</option>
           <option value="0.8">80%</option>
           <option value="0.7">70%</option>
@@ -996,11 +996,12 @@ function renderFrame(viaUser){
       /* 按钮文案始终描述"点下去会切到哪边"：目标是相对路径=本站点副本，否则=官方在线版 */
       var tgt = b._useAlt ? b.url : b.alt;
       var tgtIsLocal = !/^https?:/i.test(String(tgt || ''));
-      altBtn.textContent = tgtIsLocal ? '本站点副本' : '官方在线版';
+      /* 不可编辑的内嵌副本 vs 可编辑的官方原页面，说人话就好懂 */
+      altBtn.textContent = tgtIsLocal ? '内嵌副本' : '官方原版';
       altBtn.className = 'mini' + (b._useAlt ? ' primary' : '');
       altBtn.title = tgtIsLocal
-        ? '当前是官方在线地址。点此切到本站点副本：直接内嵌在页面里，不出现安全确认页，数据仍走云端同步。'
-        : '当前是本站点副本。点此切到官方在线地址。';
+        ? '当前看的是「官方原版」——由原平台托管的原始页面，可以编辑数据。点此切到「内嵌副本」：嵌在本页面里显示，同样实时同步，但只读。'
+        : '当前看的是页面里的一份内嵌副本：数据和官方实时一致，但不能编辑。点此切到「官方原版」（可以编辑数据）。';
       altBtn.onclick = function(){
         b._useAlt = !b._useAlt;
         dropFrame(b.id);
