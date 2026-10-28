@@ -1006,7 +1006,7 @@ function renderFrame(viaUser){
         b._useAlt = !b._useAlt;
         dropFrame(b.id);
         openBoard(b.id, true);
-        toast(tgtIsLocal ? '已切到本站点副本：内嵌显示，数据仍云端同步' : '已切到官方在线地址');
+        toast(tgtIsLocal ? '已切到内嵌副本：数据实时同步，只读' : '已切到官方原版：可编辑数据');
       };
     }else{
       altBtn.classList.add('hidden');
