@@ -342,7 +342,7 @@ function defaultConfig(){
         { id:'b_3', name:'出勤管理', url:'https://fulin-dashboard-24804.app.workbuddy.host/', locked:true, pwd:'plain:1234', color:'gray', mode:'auto' }
       ]},
       { id:'g_mfg', name:'生产制造', collapsed:false, boards:[
-        { id:'b_4', name:'OTD', url:'https://www.workbuddy.link/p/XI8ZFvzFepQrY4ka0Llv01', locked:true, pwd:'plain:1234', color:'amber', mode:'auto' }
+        { id:'b_4', name:'OTD', url:'https://www.workbuddy.link/p/XI8ZFvzFepQrY4ka0Llv01', locked:true, pwd:'plain:1234', color:'amber', mode:'new' }
       ]},
       { id:'g_wh', name:'仓储物流', collapsed:false, boards:[
         { id:'b_5', name:'仓库管理', url:'wms/', locked:true, pwd:'plain:1234', color:'purple', mode:'auto' }
@@ -876,7 +876,7 @@ function showBlockHint(b){
   };
 }
 
-function renderFrame(){
+function renderFrame(viaUser){
   clearInterval(autoTimer); clearInterval(ageTimer);
   var f = findBoard(state.view);
   if (!f){ showHome(); return; }
@@ -920,7 +920,13 @@ function renderFrame(){
   }
 
   if (b.mode === 'new'){
-    renderMask('此看板设置为「新窗口打开」', '为避免内嵌被目标站点拒绝，这个看板默认不嵌在页面里。', b, false);
+    // 此类站点禁止被外站内嵌（frame-ancestors 校验整条祖先链），只能在顶层窗口打开。
+    // 用户主动点击时直接弹出新标签页，省掉"再按一次按钮"的步骤；弹窗被拦截时给出按钮兜底。
+    var _nw = viaUser ? window.open(boardUrl(b), '_blank', 'noopener') : null;
+    renderMask('「' + b.name + '」在新窗口打开',
+      _nw ? '已在新的浏览器标签页打开，切过去即可查看。'
+          : '这个站点限制了页面内嵌，请点下方按钮打开。',
+      b, false);
     return;
   }
   if (b.locked && !state.unlocked[b.id]){
@@ -980,11 +986,11 @@ function showHome(){
   $('homeView').classList.remove('hidden');
   renderHome(); renderSidebar();
 }
-function openBoard(id, force){
+function openBoard(id, force, viaUser){
   if (!force && state.view === id) return;
   state.view = id;
   $('homeView').classList.add('hidden');
-  renderFrame(); renderSidebar();
+  renderFrame(viaUser); renderSidebar();
 }
 function renderAll(){
   $('brandName').textContent = state.config.title || '公司运营看板平台';
@@ -1632,11 +1638,11 @@ $('sideScroll').addEventListener('click', function(e){
     return;
   }
   var item = e.target.closest('[data-board]');
-  if (item){ openBoard(item.getAttribute('data-board')); }
+  if (item){ openBoard(item.getAttribute('data-board'), false, true); }
 });
 $('homeView').addEventListener('click', function(e){
   var card = e.target.closest('[data-card]');
-  if (card) openBoard(card.getAttribute('data-card'));
+  if (card) openBoard(card.getAttribute('data-card'), false, true);
 });
 $('searchInput').addEventListener('input', function(e){
   state.search = e.target.value;
