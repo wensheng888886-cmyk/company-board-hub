@@ -589,6 +589,20 @@ function normalize(cfg){
   cfg = cfg || {};
   cfg.title = cfg.title || d.title;
   cfg.groups = Array.isArray(cfg.groups) ? cfg.groups : d.groups;
+  /* 迁移 #3：OTD 换成新的分享页链接。该站点禁止外站内嵌，只能新窗口打开。
+     用 _mig 版本号保证只执行一次，之后管理员在「管理」里改 OTD 不受影响。 */
+  if (!cfg._mig || cfg._mig < 3){
+    cfg.groups.forEach(function(g){
+      (g.boards || []).forEach(function(b){
+        if (b.id === 'b_4'){
+          b.url = 'https://www.workbuddy.link/p/XI8ZFvzFepQrY4ka0Llv01';
+          b.alt = '';
+          b.mode = 'new';
+        }
+      });
+    });
+    cfg._mig = 3;
+  }
   cfg.groups.forEach(function(g){
     if (!g.id) g.id = uid('g');
     g.name = g.name || '未命名分组';
