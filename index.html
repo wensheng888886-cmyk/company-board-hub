@@ -344,6 +344,9 @@ function defaultConfig(){
       { id:'g_rd', name:'研发中心', collapsed:false, boards:[
         { id:'b_1', name:'滤波器项目', url:'https://ops-delivery-board-40171.app.workbuddy.host/', locked:true, pwd:'plain:1234', color:'blue', mode:'auto' }
       ]},
+      { id:'g_quality', name:'质量部门', collapsed:false, boards:[
+        { id:'b_12', name:'质量数据看板', url:'quality/', alt:'https://www.workbuddy.link/p/oNq5geqSJj6aWtRBZs3z4h', locked:true, pwd:'plain:1234', color:'cyan', mode:'auto' }
+      ]},
       { id:'g_pur', name:'采购交付', collapsed:false, boards:[
         { id:'b_2', name:'订单监控', url:'purchase/', locked:true, pwd:'plain:1234', color:'teal', mode:'auto' }
       ]},
@@ -375,8 +378,8 @@ function defaultConfig(){
         { id:'b_11', name:'CIP 改善建议', url:'https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/cis/', alt:'cis/', altPrimary:true, locked:true, pwd:'plain:1234', color:'slate', mode:'auto' }
       ]}
     ],
-    homeCards: ['b_1','b_2','b_3','b_4','b_5','b_6','b_7','b_8','b_9','b_10','b_11'],
-    slideCards: ['b_1','b_2','b_3','b_4','b_5','b_6','b_7','b_8','b_9','b_10','b_11'],
+    homeCards: ['b_1','b_12','b_2','b_3','b_4','b_5','b_6','b_7','b_8','b_9','b_10','b_11'],
+    slideCards: ['b_1','b_12','b_2','b_3','b_4','b_5','b_6','b_7','b_8','b_9','b_10','b_11'],
     adminPwd: 'plain:admin888',
     updatedAt: '',
     updatedBy: ''
@@ -630,6 +633,35 @@ function normalize(cfg){
       });
     });
     cfg._mig = 5;
+  }
+  /* 迁移 #6：新增「质量部门 · 质量数据看板」，插在研发中心与采购交付之间。
+     该看板同样是 workbuddy 分享页（禁止外站内嵌），站点内嵌副本用 qualityData 云函数代理取实时数据。 */
+  if (!cfg._mig || cfg._mig < 6){
+    var hasQ = false, rdIdx = -1, purIdx = -1;
+    cfg.groups.forEach(function(g, i){
+      if (g.id === 'g_quality') { hasQ = true; }
+      if (g.id === 'g_rd') rdIdx = i;
+      if (g.id === 'g_pur') purIdx = i;
+      (g.boards || []).forEach(function(b){ if (b.id === 'b_12') hasQ = true; });
+    });
+    if (!hasQ){
+      var gq = {
+        id: 'g_quality', name: '质量部门', collapsed: false,
+        boards: [{ id:'b_12', name:'质量数据看板', url:'quality/',
+          alt:'https://www.workbuddy.link/p/oNq5geqSJj6aWtRBZs3z4h',
+          locked:true, pwd:'plain:1234', color:'cyan', mode:'auto' }]
+      };
+      var at = rdIdx >= 0 ? rdIdx + 1 : (purIdx >= 0 ? purIdx : cfg.groups.length);
+      cfg.groups.splice(at, 0, gq);
+    }
+    ['homeCards','slideCards'].forEach(function(k){
+      if (!Array.isArray(cfg[k])) cfg[k] = [];
+      if (cfg[k].indexOf('b_12') < 0){
+        var p = cfg[k].indexOf('b_1');
+        cfg[k].splice(p >= 0 ? p + 1 : cfg[k].length, 0, 'b_12');
+      }
+    });
+    cfg._mig = 6;
   }
   if (!cfg.logo) cfg.logo = (cfg.title || '富霖').trim().slice(0, 4);
   cfg.groups.forEach(function(g){
@@ -996,13 +1028,22 @@ function renderFrame(viaUser){
       /* 按钮文案始终描述"点下去会切到哪边"：目标是相对路径=本站点副本，否则=官方在线版 */
       var tgt = b._useAlt ? b.url : b.alt;
       var tgtIsLocal = !/^https?:/i.test(String(tgt || ''));
+      /* 官方站点的分享页禁止被别的网站内嵌（CSP 限制），只能另开窗口；
+         相对路径的副本是本站点的页面，可以直接嵌在这里切换。 */
+      var tgtIsExternal = tgtIsLocal ? false : true;
       /* 不可编辑的内嵌副本 vs 可编辑的官方原页面，说人话就好懂 */
       altBtn.textContent = tgtIsLocal ? '内嵌副本' : '官方原版';
       altBtn.className = 'mini' + (b._useAlt ? ' primary' : '');
-      altBtn.title = tgtIsLocal
-        ? '当前看的是「官方原版」——由原平台托管的原始页面，可以编辑数据。点此切到「内嵌副本」：嵌在本页面里显示，同样实时同步，但只读。'
-        : '当前看的是页面里的一份内嵌副本：数据和官方实时一致，但不能编辑。点此切到「官方原版」（可以编辑数据）。';
+      altBtn.title = tgtIsExternal
+        ? '当前看的是「内嵌副本」：数据和官方实时一致，但不能编辑。点此在新窗口打开「官方原版」——可以新增 / 修改 / 删除数据。'
+        : '点此切回「内嵌副本」：嵌在本页面里显示，数据实时同步，只读。';
       altBtn.onclick = function(){
+        if (tgtIsExternal){
+          /* 官方页面禁止外站内嵌，只能新窗口打开，不能切换过来显示 */
+          window.open(b.alt, '_blank', 'noopener');
+          toast('已在新窗口打开官方原版（可编辑）');
+          return;
+        }
         b._useAlt = !b._useAlt;
         dropFrame(b.id);
         openBoard(b.id, true);
