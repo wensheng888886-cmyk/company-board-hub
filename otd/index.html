@@ -1230,5 +1230,44 @@ $('btnExport').addEventListener('click', ()=>{
   }
 })();
 </script>
+<style>
+  /* 内嵌只读版提示条 */
+  #embedRO{position:fixed;right:14px;bottom:14px;z-index:9999;max-width:300px;
+    background:#fff8e6;border:1px solid #f0d9a0;color:#7a5a10;border-radius:10px;
+    padding:8px 12px;font-size:12px;line-height:1.6;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+  #embedRO b{display:block;font-size:12px;margin-bottom:2px}
+  #embedRO .ro-x{position:absolute;top:4px;right:8px;cursor:pointer;color:#a98b4a;font-size:14px}
+</style>
+<script>
+/* 内嵌版只读：把写操作拦下来并给出明确说明，避免出现"保存失败"这种误导 */
+(function () {
+  var MSG = '这是总看板内的只读副本，数据实时来自云端。要编辑请点顶栏「官方在线版」。';
+  function notify() {
+    var n = document.getElementById('embedRO');
+    if (!n) return;
+    n.style.outline = '2px solid #f0c36d';
+    setTimeout(function () { n.style.outline = ''; }, 900);
+  }
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('button,.btn,[data-act]') : null;
+    if (!el) return;
+    var t = (el.innerText || el.textContent || '').replace(/\s+/g, '');
+    if (/编辑模式|新增一行|导入并覆盖云端|写入云端|删除|保存/.test(t)) {
+      e.preventDefault(); e.stopPropagation(); notify();
+    }
+  }, true);
+  document.addEventListener('dblclick', function (e) {
+    if (e.target.isContentEditable) { e.preventDefault(); notify(); }
+  }, true);
+  window.addEventListener('load', function () {
+    var d = document.createElement('div');
+    d.id = 'embedRO';
+    d.innerHTML = '<span class="ro-x" id="roX">&times;</span><b>只读内嵌版</b>' + MSG;
+    document.body.appendChild(d);
+    var x = document.getElementById('roX');
+    if (x) x.onclick = function () { d.remove(); };
+  });
+})();
+</script>
 </body>
 </html>
