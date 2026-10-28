@@ -343,7 +343,7 @@ function defaultConfig(){
         { id:'b_3', name:'出勤管理', url:'https://fulin-dashboard-24804.app.workbuddy.host/', locked:true, pwd:'plain:1234', color:'gray', mode:'auto' }
       ]},
       { id:'g_mfg', name:'生产制造', collapsed:false, boards:[
-        { id:'b_4', name:'OTD', url:'https://www.workbuddy.link/p/XI8ZFvzFepQrY4ka0Llv01', locked:true, pwd:'plain:1234', color:'amber', mode:'new' }
+        { id:'b_4', name:'OTD', url:'otd/', alt:'https://www.workbuddy.link/p/XI8ZFvzFepQrY4ka0Llv01', locked:true, pwd:'plain:1234', color:'amber', mode:'auto' }
       ]},
       { id:'g_wh', name:'仓储物流', collapsed:false, boards:[
         { id:'b_5', name:'仓库管理', url:'wms/', locked:true, pwd:'plain:1234', color:'purple', mode:'auto' }
@@ -608,6 +608,20 @@ function normalize(cfg){
     cfg.title = cfg.title && cfg.title !== '公司运营看板平台' ? cfg.title : '富霖新材运营看板平台';
     cfg.logo = '富霖';
     cfg._mig = 4;
+  }
+  /* 迁移 #5：OTD 改为站点内嵌副本（otd/），数据经 otdData 云函数代理，照样实时 */
+  if (!cfg._mig || cfg._mig < 5){
+    cfg.groups.forEach(function(g){
+      (g.boards || []).forEach(function(b){
+        if (b.id === 'b_4'){
+          b.url = 'otd/';
+          b.alt = 'https://www.workbuddy.link/p/XI8ZFvzFepQrY4ka0Llv01';
+          b.mode = 'auto';
+          b._useAlt = false;
+        }
+      });
+    });
+    cfg._mig = 5;
   }
   if (!cfg.logo) cfg.logo = (cfg.title || '富霖').trim().slice(0, 4);
   cfg.groups.forEach(function(g){
@@ -915,16 +929,19 @@ function renderFrame(viaUser){
   if (altBtn){
     if (b.alt){
       altBtn.classList.remove('hidden');
-      altBtn.textContent = b._useAlt ? '官方在线版' : '本站点副本';
+      /* 按钮文案始终描述"点下去会切到哪边"：目标是相对路径=本站点副本，否则=官方在线版 */
+      var tgt = b._useAlt ? b.url : b.alt;
+      var tgtIsLocal = !/^https?:/i.test(String(tgt || ''));
+      altBtn.textContent = tgtIsLocal ? '本站点副本' : '官方在线版';
       altBtn.className = 'mini' + (b._useAlt ? ' primary' : '');
-      altBtn.title = b._useAlt
-        ? '当前是本站点副本：无安全确认页，数据照样走云端同步。点此切到腾讯云官方地址（会先出现风险提醒页）'
-        : '当前是腾讯云官方地址：每次会先出现安全确认页。点此切到本站点副本（无确认页，数据同样云端同步）';
+      altBtn.title = tgtIsLocal
+        ? '当前是官方在线地址。点此切到本站点副本：直接内嵌在页面里，不出现安全确认页，数据仍走云端同步。'
+        : '当前是本站点副本。点此切到官方在线地址。';
       altBtn.onclick = function(){
         b._useAlt = !b._useAlt;
         dropFrame(b.id);
         openBoard(b.id, true);
-        toast(b._useAlt ? '已切到本站点副本：无确认页，数据仍云端同步' : '已切到腾讯云官方地址：会出现风险提醒页');
+        toast(tgtIsLocal ? '已切到本站点副本：内嵌显示，数据仍云端同步' : '已切到官方在线地址');
       };
     }else{
       altBtn.classList.add('hidden');
