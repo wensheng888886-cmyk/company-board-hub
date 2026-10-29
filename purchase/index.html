@@ -9,7 +9,7 @@
 <script src="../vendor/chart.umd.min.js"></script>
 <script src="../vendor/chartjs-plugin-datalabels.min.js"></script>
 <script src="../vendor/xlsx.full.min.js"></script>
-<script src="../vendor/mqtt.min.js"></script>
+
 <script src="../vendor/pako.min.js"></script>
 <style>
 :root {
@@ -490,8 +490,8 @@ body {
       <h3>协作设置</h3>
       <div style="font-size:13px;color:#6b7280;">您的昵称（保存时会记录为更新者）</div>
       <input class="sync-input" id="sync-nickname" placeholder="例如：张三" maxlength="20">
-      <div style="font-size:13px;color:#6b7280;margin-top:14px;">云端服务地址（一般无需修改）</div>
-      <input class="sync-input" id="sync-broker" placeholder="wss://...">
+      <div style="font-size:13px;color:#6b7280;margin-top:14px;">云端服务地址（腾讯云，一般无需修改）</div>
+      <input class="sync-input" id="sync-broker" placeholder="https://...（一般无需修改）">
       <div style="font-size:13px;color:#6b7280;margin-top:14px;">共享频道（同频道的人共享同一份数据）</div>
       <input class="sync-input" id="sync-topic" placeholder="频道名">
       <div class="sync-actions">
@@ -1387,20 +1387,20 @@ function calcDelayDays(est, act) {
   return Math.round((b - a) / 86400000);
 }
 
-// 云端节点列表：按顺序自动切换，任意一个可用即可实现多人实时同步
-var BROKER_LIST = [
-  'wss://broker.hivemq.com:8884/mqtt',
-  'wss://broker.emqx.io:8084/mqtt',
-  'wss://test.mosquitto.org:8081/mqtt'
+/* 云端同步：腾讯云 CloudBase 云函数 purchaseSync（全链路国内节点）
+   原先走境外公共 MQTT（hivemq / emqx / mosquitto），国内网络经常连不上，
+   同事打开就退化成本机数据、互相看不到改动。现改为「HTTP 推送 + 6 秒轮询拉取」，效果一致。 */
+var SYNC_API_LIST = [
+  'https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/purchaseSync',
+  'https://as1532656116-d6g77h3laf139a81d.service.tcloudbase.com/purchaseSync'
 ];
 
 var CloudSync = {
-  broker: 'wss://broker.hivemq.com:8884/mqtt',
+  broker: SYNC_API_LIST[0],
   topic: 'wb/jq/v1/gJ7xQ2mK9p/data',
-  _tryList: null,
-  _tryIdx: 0,
-  _connTimer: null,
-  _fbTimer: null,
+  _poll: null,
+  _busy: false,
+  _apiIdx: 0,
   client: null,
   state: 'connecting',
   nickname: '',
@@ -1455,7 +1455,9 @@ var CloudSync = {
       var b = localStorage.getItem('jt_broker');
       var t = localStorage.getItem('jt_topic');
       var n = localStorage.getItem('jt_nickname');
-      if (b) this.broker = b;
+      // 兼容旧版本：以前存的是 wss:// 的 MQTT 地址，现已废弃，强制回落到腾讯云
+      if (b && /^https?:\/\//.test(b)) this.broker = b;
+      else if (b) { try { localStorage.removeItem('jt_broker'); } catch (e) {} }
       if (t) this.topic = t;
       if (n) this.nickname = n;
     } catch (e) {}
@@ -1471,7 +1473,7 @@ var CloudSync = {
     var b = (document.getElementById('sync-broker').value || '').trim();
     var t = (document.getElementById('sync-topic').value || '').trim();
     var n = (document.getElementById('sync-nickname').value || '').trim();
-    if (b) this.broker = b;
+    if (b && /^https?:\/\//.test(b)) this.broker = b;
     if (t) this.topic = t;
     this.nickname = n;
     try {
@@ -1483,112 +1485,47 @@ var CloudSync = {
 
   connect: function() {
     var self = this;
-    if (typeof mqtt === 'undefined') {
-      this.state = 'offline';
-      this.setUI();
-      this.log('MQTT 库未加载，无法连接云端', 'err');
-      return;
-    }
-    if (this._connTimer) { clearTimeout(this._connTimer); this._connTimer = null; }
-    if (this._fbTimer) { clearTimeout(this._fbTimer); this._fbTimer = null; }
-
-    // 优先使用用户配置的节点，其后依次尝试内置备选节点
-    var list = [this.broker];
-    for (var i = 0; i < BROKER_LIST.length; i++) {
-      if (BROKER_LIST[i] !== this.broker) list.push(BROKER_LIST[i]);
-    }
-    this._tryList = list;
-    this._tryIdx = 0;
-    this._attempt(0);
-  },
-
-  _attempt: function(idx) {
-    var self = this;
-    if (idx >= this._tryList.length) {
-      this.state = 'offline';
-      this.setUI();
-      this.log('所有云端节点均不可用，已切换为本地模式（数据仍可查看，恢复后自动同步）', 'err');
-      return;
-    }
-    var url = this._tryList[idx];
-    if (this.client) {
-      try { this.client.end(true); } catch (e) {}
-      this.client = null;
-    }
+    if (this._poll) { clearInterval(this._poll); this._poll = null; }
     this.state = 'connecting';
     this.setUI();
-    this.log('连接云端节点 ' + (idx + 1) + '/' + this._tryList.length + '：' + url);
-    try {
-      this.client = mqtt.connect(url, {
-        clientId: this.clientId,
-        clean: true,
-        keepalive: 60,
-        connectTimeout: 12000,
-        reconnectPeriod: 5000,
-        protocolVersion: 4
-      });
-    } catch (e) {
-      this.log('节点不可用: ' + e.message, 'err');
-      this._fbTimer = setTimeout(function() { self._attempt(idx + 1); }, 800);
-      return;
-    }
-
-    this.client.on('connect', function() {
-      if (self._connTimer) { clearTimeout(self._connTimer); self._connTimer = null; }
-      if (self._fbTimer) { clearTimeout(self._fbTimer); self._fbTimer = null; }
-      self.state = 'online';
-      self.broker = url;
-      var eb = document.getElementById('sync-broker');
-      if (eb && eb.value !== url) eb.value = url;
-      self.setUI();
-      self.log('已连接云端，订阅共享频道', 'ok');
-      self.client.subscribe(self.topic, { qos: 1 }, function(err) {
-        if (err) self.log('订阅失败: ' + err.message, 'err');
-      });
-    });
-    this.client.on('reconnect', function() {
-      if (self.state !== 'online') {
-        self.state = 'connecting';
-        self.setUI();
-        self.log('正在重连...', 'warn');
-      }
-    });
-    this.client.on('close', function() {
-      if (self.state === 'online') {
-        self.state = 'offline';
-        self.setUI();
-        self.log('连接已断开', 'warn');
-      }
-    });
-    this.client.on('error', function(e) {
-      var m = (e && e.message) ? e.message : '未知';
-      if (self.state !== 'online') {
-        self.log('连接异常: ' + m + '，尝试备用节点', 'warn');
-        if (self._fbTimer) clearTimeout(self._fbTimer);
-        self._fbTimer = setTimeout(function() { self._attempt(idx + 1); }, 1200);
-      } else {
-        self.log('连接错误: ' + m, 'err');
-      }
-    });
-    this.client.on('message', function(topic, payload) { self.onMessage(payload); });
-
-    // 12 秒内未连上则切换下一个节点
-    this._connTimer = setTimeout(function() {
-      if (self.state !== 'online') {
-        self.log('节点连接超时，切换下一个...', 'warn');
-        self._attempt(idx + 1);
-      }
-    }, 12000);
+    this.log('正在连接腾讯云云端…');
+    this.pull();
+    this._poll = setInterval(function() { self.pull(); }, 6000);
   },
 
-  onMessage: function(payload) {
-    var env;
-    try {
-      env = JSON.parse(payload.toString());
-    } catch (e) {
-      this.log('收到无法解析的云端数据', 'err');
-      return;
-    }
+  pull: function() {
+    var self = this;
+    if (this._busy) return;
+    this._busy = true;
+    var url = this.broker + '?topic=' + encodeURIComponent(this.topic) + '&_=' + Date.now();
+    fetch(url, { cache: 'no-store' })
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(res) {
+        self._busy = false;
+        if (!res || res.ok === false) throw new Error((res && res.error) || '返回异常');
+        if (self.state !== 'online') {
+          self.state = 'online';
+          self.client = { http: true };
+          self.setUI();
+          self.log('已连接腾讯云云端，实时同步中', 'ok');
+        }
+        if (res.gz) self.onMessage(res);
+      })
+      .catch(function(e) {
+        self._busy = false;
+        if (self.state !== 'offline') {
+          self.state = 'offline';
+          self.client = null;
+          self.setUI();
+          self.log('云端连接失败：' + ((e && e.message) ? e.message : e) + '，稍后自动重试', 'err');
+        }
+        self._apiIdx = (self._apiIdx + 1) % SYNC_API_LIST.length;
+        self.broker = SYNC_API_LIST[self._apiIdx];
+      });
+  },
+
+  onMessage: function(env) {
+    if (!env || !env.gz) return;
     var orders;
     try {
       orders = JSON.parse(b64ToStr(env.gz));
@@ -1622,21 +1559,28 @@ var CloudSync = {
     this.lastBy = by;
     this.selfPublishAt = Date.now();
 
-    if (!this.client || this.state !== 'online') {
-      this.log('未连接云端，改动仅在本机生效', 'warn');
-      if (cb) cb(false);
-      return;
-    }
-    this.client.publish(this.topic, JSON.stringify(env), { qos: 1, retain: true }, function(err) {
-      if (err) {
-        self.log('同步云端失败: ' + (err.message || ''), 'err');
-        if (cb) cb(false);
-      } else {
+    fetch(this.broker, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: this.topic, gz: env.gz, updatedAt: at, updatedBy: by, count: env.count
+      })
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (!res || res.ok === false) {
+          self.log('同步云端失败：' + ((res && res.error) || '未知'), 'err');
+          if (cb) cb(false);
+          return;
+        }
         self.log('已同步到云端（' + orders.length + ' 条），其他人将实时更新', 'ok');
         self.setUI();
         if (cb) cb(true);
-      }
-    });
+      })
+      .catch(function(e) {
+        self.log('同步云端失败：' + ((e && e.message) ? e.message : e), 'err');
+        if (cb) cb(false);
+      });
   }
 };
 
