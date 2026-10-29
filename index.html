@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>富霖新材运营看板平台</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23185FA5'/%3E%3Ctext x='16' y='22' font-size='18' font-family='Microsoft YaHei,sans-serif' font-weight='bold' text-anchor='middle' fill='%23fff'%3E%E5%AF%8C%3C/text%3E%3C/svg%3E">
 <style>
 :root{
   --bg:#f5f6f8; --panel:#ffffff; --side:#fafbfc; --line:#e4e7ec; --line-soft:#eef0f3;
@@ -351,7 +352,7 @@ function defaultConfig(){
         { id:'b_2', name:'订单监控', url:'purchase/', locked:true, pwd:'plain:1234', color:'teal', mode:'auto' }
       ]},
       { id:'g_adm', name:'行政管理', collapsed:false, boards:[
-        { id:'b_3', name:'出勤管理', url:'attendance/', alt:'https://fulin-dashboard-24804.app.workbuddy.host/', locked:true, pwd:'plain:1234', color:'gray', mode:'auto' }
+        { id:'b_3', name:'出勤管理', url:'attendance/', locked:true, pwd:'plain:1234', color:'gray', mode:'auto' }
       ]},
       { id:'g_mfg', name:'生产制造', collapsed:false, boards:[
         { id:'b_4', name:'OTD', url:'otd/', alt:'https://www.workbuddy.link/p/XI8ZFvzFepQrY4ka0Llv01', locked:true, pwd:'plain:1234', color:'amber', mode:'auto' }
@@ -366,16 +367,16 @@ function defaultConfig(){
         { id:'b_7', name:'磁芯样件交付', url:'magnetic/', locked:true, pwd:'plain:1234', color:'green', mode:'auto' }
       ]},
       { id:'g_pm', name:'项目管理', collapsed:false, boards:[
-        { id:'b_8', name:'APQP', url:'apqp/', alt:'https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/apqp/', locked:true, pwd:'plain:1234', color:'rose', mode:'auto' }
+        { id:'b_8', name:'APQP', url:'apqp/', locked:true, pwd:'plain:1234', color:'rose', mode:'auto' }
       ]},
       { id:'g_ecm', name:'工程变更', collapsed:false, boards:[
-        { id:'b_9', name:'ECM', url:'ecm/', alt:'https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/ecm/', locked:true, pwd:'plain:1234', color:'cyan', mode:'auto' }
+        { id:'b_9', name:'ECM', url:'ecm/', locked:true, pwd:'plain:1234', color:'cyan', mode:'auto' }
       ]},
       { id:'g_quote', name:'报价管理', collapsed:false, boards:[
-        { id:'b_10', name:'报价系统', url:'quote/', alt:'https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/quote/', locked:true, pwd:'plain:1234', color:'olive', mode:'auto' }
+        { id:'b_10', name:'报价系统', url:'quote/', locked:true, pwd:'plain:1234', color:'olive', mode:'auto' }
       ]},
       { id:'g_cip', name:'持续改善', collapsed:false, boards:[
-        { id:'b_11', name:'CIP 改善建议', url:'cis/', alt:'https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/cis/', locked:true, pwd:'plain:1234', color:'slate', mode:'auto' }
+        { id:'b_11', name:'CIP 改善建议', url:'cis/', locked:true, pwd:'plain:1234', color:'slate', mode:'auto' }
       ]}
     ],
     homeCards: ['b_1','b_12','b_2','b_3','b_4','b_5','b_6','b_7','b_8','b_9','b_10','b_11'],
@@ -684,6 +685,21 @@ function normalize(cfg){
       });
     });
     cfg._mig = 8;
+  }
+  /* 迁移 #9：清理备用地址（顶部「备用版本」按钮）。
+     只保留「内嵌副本只读、原页面可编辑」的那一类（质量 / OTD，数据来自 workbuddy 分享页）；
+     其余全部去掉，原因有三：
+       - 滤波器的旧地址已失效（打开就是「链接已失效」）；
+       - 出勤的原版会把数据写回境外 textdb.dev，和现在写腾讯云的副本分成两拨，互相看不到；
+       - APQP / ECM / 报价 / CIP 的备用地址和本站点副本是同一个页面，点了没有意义。 */
+  if (!cfg._mig || cfg._mig < 9){
+    var KEEP_ALT = { b_4: 1, b_12: 1 };
+    cfg.groups.forEach(function(g){
+      (g.boards || []).forEach(function(b){
+        if (!KEEP_ALT[b.id]){ b.alt = ''; b.altPrimary = false; b._useAlt = false; }
+      });
+    });
+    cfg._mig = 9;
   }
   if (!cfg.logo) cfg.logo = (cfg.title || '富霖').trim().slice(0, 4);
   cfg.groups.forEach(function(g){
@@ -1050,26 +1066,26 @@ function renderFrame(viaUser){
       /* 按钮文案始终描述"点下去会切到哪边"：目标是相对路径=本站点副本，否则=官方在线版 */
       var tgt = b._useAlt ? b.url : b.alt;
       var tgtIsLocal = !/^https?:/i.test(String(tgt || ''));
-      /* 官方站点的分享页禁止被别的网站内嵌（CSP 限制），只能另开窗口；
+      /* 外部地址禁止被别的网站内嵌（对方站点的安全限制），只能另开窗口；
          相对路径的副本是本站点的页面，可以直接嵌在这里切换。 */
-      var tgtIsExternal = tgtIsLocal ? false : true;
-      /* 不可编辑的内嵌副本 vs 可编辑的官方原页面，说人话就好懂 */
-      altBtn.textContent = tgtIsLocal ? '内嵌副本' : '官方原版';
+      var tgtIsExternal = !tgtIsLocal;
+      /* 说人话：这里内嵌的是「只能看」的副本，点按钮是去「能改数据」的那个页面 */
+      altBtn.textContent = tgtIsLocal ? '回到只读副本' : '去改数据';
       altBtn.className = 'mini' + (b._useAlt ? ' primary' : '');
       altBtn.title = tgtIsExternal
-        ? '当前看的是「内嵌副本」：数据和官方实时一致，但不能编辑。点此在新窗口打开「官方原版」——可以新增 / 修改 / 删除数据。'
-        : '点此切回「内嵌副本」：嵌在本页面里显示，数据实时同步，只读。';
+        ? '这里内嵌的是只读副本（看得到最新数据，但改不了）。点这个按钮会在新窗口打开可以新增 / 修改 / 删除数据的页面。'
+        : '点此切回嵌在本页面里的只读副本。';
       altBtn.onclick = function(){
         if (tgtIsExternal){
-          /* 官方页面禁止外站内嵌，只能新窗口打开，不能切换过来显示 */
+          /* 外部页面禁止被本站内嵌，只能新窗口打开，不能切换过来显示 */
           window.open(b.alt, '_blank', 'noopener');
-          toast('已在新窗口打开官方原版（可编辑）');
+          toast('已在新窗口打开可编辑的页面');
           return;
         }
         b._useAlt = !b._useAlt;
         dropFrame(b.id);
         openBoard(b.id, true);
-        toast(tgtIsLocal ? '已切到内嵌副本：数据实时同步，只读' : '已切到官方原版：可编辑数据');
+        toast(tgtIsLocal ? '已切回只读副本' : '已切到可编辑的页面');
       };
     }else{
       altBtn.classList.add('hidden');
