@@ -352,7 +352,7 @@ function defaultConfig(){
         { id:'b_2', name:'订单监控', url:'purchase/', locked:true, pwd:'plain:1234', color:'teal', mode:'auto' }
       ]},
       { id:'g_adm', name:'行政管理', collapsed:false, boards:[
-        { id:'b_3', name:'出勤管理', url:'https://fulin-dashboard-24804.app.workbuddy.host/', locked:true, pwd:'plain:1234', color:'gray', mode:'auto' }
+        { id:'b_3', name:'出勤管理', url:'attendance/', alt:'https://fulin-dashboard-24804.app.workbuddy.host/', locked:true, pwd:'plain:1234', color:'gray', mode:'auto' }
       ]},
       { id:'g_mfg', name:'生产制造', collapsed:false, boards:[
         { id:'b_4', name:'OTD', url:'otd/', alt:'https://www.workbuddy.link/p/XI8ZFvzFepQrY4ka0Llv01', locked:true, pwd:'plain:1234', color:'amber', mode:'auto' }
@@ -686,6 +686,22 @@ function normalize(cfg){
       });
     });
     cfg._mig = 7;
+  }
+  /* 迁移 #8：出勤管理改为站点内嵌副本（attendance/）。
+     原版把数据存在境外免费 KV 服务 textdb.dev，国内访问慢且不受控；
+     现改由腾讯云云函数 attendanceSync 承接，存量数据已整体搬迁。 */
+  if (!cfg._mig || cfg._mig < 8){
+    cfg.groups.forEach(function(g){
+      (g.boards || []).forEach(function(b){
+        if (b.id === 'b_3'){
+          b.url = 'attendance/';
+          b.alt = 'https://fulin-dashboard-24804.app.workbuddy.host/';
+          b.altPrimary = false;
+          b._useAlt = false;
+        }
+      });
+    });
+    cfg._mig = 8;
   }
   if (!cfg.logo) cfg.logo = (cfg.title || '富霖').trim().slice(0, 4);
   cfg.groups.forEach(function(g){
