@@ -327,11 +327,10 @@ var SS_UNLOCK = 'boardhub_unlocked_v1';
 var COLL = 'board_hub_config';
 var DOC_ID = 'main';
 var DEFAULT_ENV = 'as1532656116-d6g77h3laf139a81d';
-var SDK_CDNS = [
-  'vendor/cloudbase-js-sdk.min.js',
-  'https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js',
-  'https://imgcache.qq.com/qcloud/cloudbase-js-sdk/1.7.6/cloudbase.full.js'
-];
+/* 部门清单（看板网址 / 分组 / 密码）存在腾讯云云函数 hubConfig 里。
+   本环境只开通了 PostgreSQL，没有文档型数据库，所以不再走 cloudbase SDK。 */
+var HUB_API = 'https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/hubConfig';
+var HUB_TOKEN = 'fulin-board-hub-2026';
 var COLORS = ['blue','green','amber','purple','teal','gray','coral','rose','cyan','olive','slate'];
 var COLOR_HEX = {blue:'#185FA5',green:'#3B6D11',amber:'#BA7517',purple:'#534AB7',teal:'#0F6E56',gray:'#5F5E5A',coral:'#993C1D',rose:'#A32D5E',cyan:'#0B6E99',olive:'#634D0C',slate:'#3D4D5C'};
 
@@ -459,35 +458,12 @@ try{
 
 /* ==================== 云端 ==================== */
 async function initCloud(silent){
-  var env = localStorage.getItem(LS_ENV) || DEFAULT_ENV || '';
-  if (!env){
-    state.cloud = { ready:false, reason:'未配置云环境', db:null };
-    renderSync(); return false;
-  }
-  var CB = window.cloudbase || window.tcb;
-  if (!CB){
-    for (var i=0;i<SDK_CDNS.length;i++){
-      try{ await loadScript(SDK_CDNS[i]); CB = window.cloudbase || window.tcb; if (CB) break; }catch(e){}
-    }
-  }
-  if (!CB){
-    state.cloud = { ready:false, reason:'云开发 SDK 加载失败', db:null };
-    renderSync(); return false;
-  }
   try{
-    var app = CB.init({ env: env });
-    var auth = app.auth({ persistence: 'local' });
-    if (!auth.getLoginState || !auth.getLoginState()){
-      await auth.signInAnonymously();
-    }
-    var db = app.database();
-    state.cloud = { ready:true, reason:'云端已同步', db:db, collError:'' };
-    try{
-      await db.collection(COLL).limit(1).get();
-    }catch(e){
-      state.cloud.collError = (e && e.message) ? e.message : '集合不可访问';
-      state.cloud.reason = '云端已连接，但集合 ' + COLL + ' 不可访问（需在控制台新建并设为「所有用户可读写」）';
-    }
+    var r = await fetch(HUB_API + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    var j = await r.json();
+    if (!j || j.ok !== true) throw new Error((j && j.error) || '返回异常');
+    state.cloud = { ready:true, reason:'云端已同步', db:null, collError:'' };
     renderSync(); return true;
   }catch(e){
     state.cloud = { ready:false, reason:'云端不可用：' + (e && e.message ? e.message : '未知错误'), db:null };
@@ -496,11 +472,10 @@ async function initCloud(silent){
   }
 }
 async function pullFromCloud(){
-  if (!state.cloud.ready) return false;
   try{
-    var res = await state.cloud.db.collection(COLL).doc(DOC_ID).get();
-    var doc = res && res.data;
-    if (doc && doc.length) doc = doc[0];
+    var r = await fetch(HUB_API + '?t=' + Date.now(), { cache: 'no-store' });
+    var j = await r.json();
+    var doc = j && j.config;
     if (doc && doc.groups){
       state.config = normalize(doc);
       localStorage.setItem(LS_CFG, JSON.stringify(state.config));
@@ -513,7 +488,6 @@ async function pullFromCloud(){
     return false;
   }
 }
-/* ---- 配置实时同步：别人在别处改了部门清单，这边自动跟上 ---- */
 var cfgTimer = null;
 function boardMap(){
   var m = {};
@@ -526,9 +500,9 @@ async function syncConfigOnce(){
   if (!state.cloud.ready || layerOpen()) return false;
   if (slide && slide.on) return false;               // 幻灯片播放中不被打断
   try{
-    var res = await state.cloud.db.collection(COLL).doc(DOC_ID).get();
-    var doc = res && res.data;
-    if (doc && doc.length) doc = doc[0];
+    var r = await fetch(HUB_API + '?t=' + Date.now(), { cache: 'no-store' });
+    var j = await r.json();
+    var doc = j && j.config;
     if (!doc || !doc.groups) return false;
     if (doc.updatedAt && state.config.updatedAt){
       if (String(doc.updatedAt) === String(state.config.updatedAt)) return false;
@@ -587,9 +561,17 @@ async function pushToCloud(){
   var payload = cleanConfig(state.config);
   payload.updatedAt = new Date().toISOString();
   localStorage.setItem(LS_CFG, JSON.stringify(payload));
-  if (!state.cloud.ready) return false;
   try{
-    await state.cloud.db.collection(COLL).doc(DOC_ID).set(payload);
+    var r = await fetch(HUB_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Hub-Token': HUB_TOKEN },
+      body: JSON.stringify({ config: payload })
+    });
+    var j = await r.json();
+    if (!j || j.ok !== true){
+      console.warn('[boardhub] push failed', j && j.error);
+      return false;
+    }
     state.config.updatedAt = payload.updatedAt;
     return true;
   }catch(e){
@@ -1237,32 +1219,25 @@ function askAdminPassword(){
 
 function cloudSetupGuide(){
   overlay(
-    '<div class="modal"><h3>连接云开发环境</h3><p>填写云开发环境 ID 后，部门清单会存到云端，你在线改动即刻对所有人生效。也可以先跳过，用本地模式（配置只保存在本机浏览器）。</p>' +
-    '<div class="field"><label>环境 ID</label><input type="text" id="envInput" value="' + esc(localStorage.getItem(LS_ENV) || DEFAULT_ENV) + '" placeholder="例如 cloud1-1gxxxxxxxx" autocomplete="off"></div>' +
+    '<div class="modal"><h3>连接云端</h3><p>部门清单保存在腾讯云，任何人在总看板里的改动都会立刻同步给所有人。' +
+    '当前状态：<b>' + esc(state.cloud.reason || '未连接') + '</b></p>' +
     '<div class="err-tip" id="envErr"></div>' +
-    '<div class="modal-actions"><button class="mini" id="envSkip">先用本地模式</button>' +
-    '<button class="mini primary" id="envOk" style="background:var(--brand);color:#fff;border-color:var(--brand)">连接</button></div>' +
-    '<div class="hint" style="margin-top:12px">在腾讯云开发控制台「环境 → 环境 ID」可查看。还需在「登录授权」里开启匿名登录，并把集合 <code>' + COLL + '</code> 的权限设为「所有用户可读写」。</div></div>',
+    '<div class="modal-actions"><button class="mini" id="envSkip">关闭</button>' +
+    '<button class="mini primary" id="envOk" style="background:var(--brand);color:#fff;border-color:var(--brand)">重新连接</button></div></div>',
     function(){}
   );
   $('envSkip').onclick = function(){ closeLayer(); };
-  var input = $('envInput');
-  setTimeout(function(){ input.focus(); }, 50);
   $('envOk').onclick = async function(){
-    var v = input.value.trim();
-    if (!v){ $('envErr').textContent = '请填写环境 ID'; return; }
     $('envErr').textContent = '正在连接…';
-    localStorage.setItem(LS_ENV, v);
     var okCloud = await initCloud(true);
     if (okCloud){
       await pullFromCloud();
       closeLayer(); renderAll();
       toast('云端已连接');
     }else{
-      $('envErr').textContent = state.cloud.reason + '（已切回本地模式）';
+      $('envErr').textContent = state.cloud.reason;
     }
   };
-  input.onkeydown = function(e){ if (e.key === 'Enter') $('envOk').click(); };
 }
 
 /* ==================== 管理抽屉 ==================== */
