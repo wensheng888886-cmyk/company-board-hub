@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>富霖报价系统</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="../vendor/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -1128,7 +1128,7 @@ function exportQuote(){
   /* 优先导出真正的 xlsx（按需加载 SheetJS）；加载失败则退回 CSV */
   if(window.XLSX){ buildXlsx(rec, stamp); return; }
   const s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+  s.src = '../vendor/xlsx.full.min.js';
   s.onload = function(){ buildXlsx(rec, stamp); };
   s.onerror = function(){ download(stamp + '.csv', buildCsv(rec)); showToast('已导出 CSV（Excel 组件加载失败，已降级）'); };
   document.head.appendChild(s);
