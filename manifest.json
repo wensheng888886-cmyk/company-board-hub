@@ -1,0 +1,101 @@
+{
+  "pinnedAt": "2026-10-30T01:42:06.149Z",
+  "boards": {
+    "b_1": {
+      "name": "滤波器项目",
+      "orig": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/index.html",
+      "pinned": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/approved_b_1/index.html",
+      "hash": "3a803f3e4ee5c9ed5306f8f6802bee0ee47b28b694d35f7b79d58618fda10d5b",
+      "size": 290327,
+      "pinnedAt": "2026-10-30T01:42:06.492Z"
+    },
+    "b_2": {
+      "name": "订单监控",
+      "orig": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/purchase/index.html",
+      "pinned": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/approved_b_2/index.html",
+      "hash": "a8daa4e5c36ca65fdb281feb1d58d02911e32193ab5b7b0d6e60ae5008c58852",
+      "size": 363676,
+      "pinnedAt": "2026-10-30T01:42:06.811Z"
+    },
+    "b_3": {
+      "name": "出勤管理",
+      "orig": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/attendance/index.html",
+      "pinned": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/approved_b_3/index.html",
+      "hash": "b8c813bba270a56a67dfa944bc1326d66cc9513878bfea29697e9f8c1cdc8ea3",
+      "size": 1511851,
+      "pinnedAt": "2026-10-30T01:42:07.314Z"
+    },
+    "b_4": {
+      "name": "OTD",
+      "orig": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/otd/index.html",
+      "pinned": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/approved_b_4/index.html",
+      "hash": "ae08a2404ea64ace3040af35f400fdc4234dcdd4f5d73123567a5b4dfda9de84",
+      "size": 69038,
+      "pinnedAt": "2026-10-30T01:42:07.572Z"
+    },
+    "b_5": {
+      "name": "仓库管理",
+      "orig": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/wms/index.html",
+      "pinned": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/approved_b_5/index.html",
+      "hash": "a8c27a8de10bb9feea23e60fbe57da7ed8d7381ef065e3d8a32e2ca8672f855b",
+      "size": 458867,
+      "pinnedAt": "2026-10-30T01:42:08.028Z"
+    },
+    "b_6": {
+      "name": "潜在质量问题",
+      "orig": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/nearmiss/index.html",
+      "pinned": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/approved_b_6/index.html",
+      "hash": "b06741e72e3272ed8afc8c747562aa54c246b4e48067b7314c1325602d343796",
+      "size": 39262,
+      "pinnedAt": "2026-10-30T01:42:08.160Z"
+    },
+    "b_7": {
+      "name": "磁芯样件交付",
+      "orig": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/magnetic/index.html",
+      "pinned": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/approved_b_7/index.html",
+      "hash": "f3d6030969cc157840d5c98d54c9c7c2e0ecc26124505534a999cac2859c9cab",
+      "size": 134668,
+      "pinnedAt": "2026-10-30T01:42:08.429Z"
+    },
+    "b_8": {
+      "name": "APQP",
+      "orig": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/apqp/index.html",
+      "pinned": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/approved_b_8/index.html",
+      "hash": "aa905724db316cbfad2a65560cf0cbc6709129af22329cbbec6a7f147dfa024d",
+      "size": 1218144,
+      "pinnedAt": "2026-10-30T01:42:08.874Z"
+    },
+    "b_9": {
+      "name": "ECM",
+      "orig": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/ecm/index.html",
+      "pinned": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/approved_b_9/index.html",
+      "hash": "9eae724213abb1cb1bdafdb158d8f8ca32ab83549f49852457e162f45f97e898",
+      "size": 78784,
+      "pinnedAt": "2026-10-30T01:42:09.131Z"
+    },
+    "b_10": {
+      "name": "报价系统",
+      "orig": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/quote/index.html",
+      "pinned": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/approved_b_10/index.html",
+      "hash": "e0e080a9629d9f19adbc16c5b9c9056b4b8620956230758678bda82018840ff8",
+      "size": 69943,
+      "pinnedAt": "2026-10-30T01:42:09.389Z"
+    },
+    "b_11": {
+      "name": "CIP 改善建议",
+      "orig": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/cis/index.html",
+      "pinned": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/approved_b_11/index.html",
+      "hash": "2f53281b32828dd924b21a56d656f965947a3b27c216338f5df24034909867c0",
+      "size": 125452,
+      "pinnedAt": "2026-10-30T01:42:09.537Z"
+    },
+    "b_12": {
+      "name": "质量数据看板",
+      "orig": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/quality/index.html",
+      "pinned": "https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/approved_b_12/index.html",
+      "hash": "df87f4207e2e0d6c9884f3a02afc8276389d468684d995360a7181c7dc0c7ffd",
+      "size": 304314,
+      "pinnedAt": "2026-10-30T01:42:09.828Z"
+    }
+  }
+}
