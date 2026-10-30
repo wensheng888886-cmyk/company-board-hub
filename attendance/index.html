@@ -1716,7 +1716,7 @@ let saveQueue = Promise.resolve();
 
 // ===== 云端数据存储 (textdb.dev) =====
 const CLOUD_KEY = 'fulin-attendance-shared-2026';
-const CLOUD_URL = `https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/attendanceSync?key=${CLOUD_KEY}`;
+const CLOUD_URL = `https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/boardSync?app=attendance&key=${CLOUD_KEY}`;
 
 async function loadCloudData() {
   const resp = await fetch(CLOUD_URL);
@@ -1802,7 +1802,7 @@ async function loadSyncTime() {
   const el = document.getElementById('syncHint');
   if (!el) return;
   try {
-    const r = await fetch('https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/attendanceSync?key=fulin-dash-synctime-v1');
+    const r = await fetch('https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/boardSync?app=attendance&key=fulin-dash-synctime-v1');
     const t = await r.text();
     if (!t || t === 'null' || t.indexOf('404') === 0) { el.textContent = '🕒 表单同步：未知'; return; }
     const o = JSON.parse(t);
@@ -4726,7 +4726,7 @@ const MOD_CLOUD = {
 };
 async function modCloudGet(key) {
   try {
-    const resp = await fetch('https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/attendanceSync?key=' + key);
+    const resp = await fetch('https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/boardSync?app=attendance&key=' + key);
     const text = await resp.text();
     if (text && text.trim() && text !== 'null' && text !== '404: Not Found') {
       const p = JSON.parse(text);
@@ -4737,7 +4737,7 @@ async function modCloudGet(key) {
 }
 async function modCloudSet(key, obj) {
   try {
-    const resp = await fetch('https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/attendanceSync?key=' + key, {
+    const resp = await fetch('https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/boardSync?app=attendance&key=' + key, {
       method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(obj)
     });
     return resp.ok;
@@ -7469,7 +7469,7 @@ function hcRefreshTodo() { hcRenderTodo(); hcToast('已重新汇总', 'success')
 // ---------- 9. 云端 ----------
 async function hcLoadCloud() {
   try {
-    const resp = await fetch('https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/attendanceSync?key=' + HC_CLOUD_KEY);
+    const resp = await fetch('https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/boardSync?app=attendance&key=' + HC_CLOUD_KEY);
     const text = await resp.text();
     if (text && text.trim() && text !== 'null' && text.indexOf('404') < 0) {
       const obj = JSON.parse(text);
@@ -7489,7 +7489,7 @@ async function hcLoadCloud() {
 }
 async function hcSave() {
   try {
-    const resp = await fetch('https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/attendanceSync?key=' + HC_CLOUD_KEY, {
+    const resp = await fetch('https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/boardSync?app=attendance&key=' + HC_CLOUD_KEY, {
       method: 'POST', headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ rows: HC_ROWS, t: hcToday() })
     });
