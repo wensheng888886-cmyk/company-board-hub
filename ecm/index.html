@@ -357,7 +357,7 @@ function uid(){return "R"+Date.now().toString(36)+Math.random().toString(36).sli
 
 /* ============ 云端同步：数据只存云端，不落浏览器本地 ============ */
 var CLOUD={
-  URL:"https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/ecmSync",
+  URL:"https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/boardSync?app=ecm",
   TOKEN:[101,99,109,45,115,104,97,114,101,100,45,50,48,50,54].map(function(c){return String.fromCharCode(c);}).join(""),
   POLL_MS:8000
 };
