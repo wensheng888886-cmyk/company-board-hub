@@ -432,6 +432,30 @@ function allBoards(){
 }
 /* 云同步看板优先用在线原址（数据才能同步）；alt 是本地备用版本 */
 function boardUrl(b){ return (b._useAlt && b.alt) ? b.alt : b.url; }
+/* ==================== 页面固化（防止部门/外人改页面后我这跟着变） ====================
+   总看板内嵌的是「批准版」副本 hub/approved_<id>/index.html，不是部门的活跃版。
+   部门改他们自己的页面、改他们的原站，我这边都不会变；只有管理员在
+   「管理 → 页面版本」里点「更新到最新版」后，批准版才会跟着更新。
+   「外部打开」按钮仍然指向活跃版（boardUrl），方便部门正常编辑自己的页面。 */
+var PIN_MANIFEST = null;
+async function loadPinManifest(){
+  try{
+    var r = await fetch('manifest.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) return null;
+    PIN_MANIFEST = await r.json();
+  }catch(e){ PIN_MANIFEST = null; }
+  return PIN_MANIFEST;
+}
+function pinInfo(b){
+  return (PIN_MANIFEST && PIN_MANIFEST.boards && PIN_MANIFEST.boards[b.id]) || null;
+}
+function pinEnabled(){
+  return state.config && state.config.pinPages !== false;
+}
+function embedUrl(b){
+  var p = pinEnabled() ? pinInfo(b) : null;
+  return (p && p.pinned) ? p.pinned : boardUrl(b);
+}
 function isCloudHost(url){ return /^https?:\/\/[a-z0-9-]*\.?tcloudbase(app|)\.com/i.test(String(url || '')) || /tcloudbaseapp\.com/i.test(String(url || '')); }
 function toast(msg){
   var old = document.querySelector('.toast');
@@ -493,7 +517,7 @@ var cfgTimer = null;
 function boardMap(){
   var m = {};
   (state.config.groups || []).forEach(function(g){
-    (g.boards || []).forEach(function(b){ m[b.id] = { url:boardUrl(b), locked:b.locked, mode:b.mode, name:b.name }; });
+    (g.boards || []).forEach(function(b){ m[b.id] = { url:embedUrl(b), locked:b.locked, mode:b.mode, name:b.name }; });
   });
   return m;
 }
@@ -935,9 +959,9 @@ function ensureFrame(b, force){
   }
   var srcNow = f.getAttribute('src');
   var stale = force || (srcNow && f.dataset.loadedAt && (Date.now() - Number(f.dataset.loadedAt) > STALE_MS));
-  if (srcNow !== boardUrl(b) || stale){
+  if (srcNow !== embedUrl(b) || stale){
     f.dataset.loaded = '0';
-    setFrameSrc(f, boardUrl(b));
+    setFrameSrc(f, embedUrl(b));
   }
   f.style.display = 'block';
   if (f.dataset.loaded !== '1') showLoadingMask(b); else clearMask();
@@ -946,7 +970,7 @@ function reloadFrame(b){
   var f = frameCache[b.id];
   if (!f){ ensureFrame(b); return; }
   f.dataset.loaded = '0';
-  setFrameSrc(f, boardUrl(b));
+  setFrameSrc(f, embedUrl(b));
   showLoadingMask(b);
   toast('正在拉取最新数据…');
 }
@@ -1270,6 +1294,7 @@ function openAdmin(){
     '<button class="mini" id="adImport">导入</button>' +
     '<button class="mini" id="adPwd">改管理员密码</button>' +
     '<button class="mini" id="adRollback">数据回滚</button>' +
+    '<button class="mini" id="adPageVer">页面版本</button>' +
     '</div></div>';
   $('layer').innerHTML = html;
   $('adClose').onclick = function(){ discardPending(); closeLayer(); renderAll(); };
@@ -1308,7 +1333,81 @@ function openAdmin(){
   };
   $('adPwd').onclick = changeAdminPwd;
   $('adRollback').onclick = openRollback;
+  $('adPageVer').onclick = openPageVersions;
   renderAdminBody();
+}
+
+/* ==================== 页面版本（固化状态 / 变更检测） ====================
+   逐个抓取「活跃版」（部门自己那份）并与批准版哈希比对：
+   一致 = 部门没改过；不一致 = 部门改了，但总看板仍然显示旧的批准版，不受影响。
+   要采纳新版本，需要把新内容重新固化一次（静态文件只能由管理员在服务器侧更新）。 */
+async function checkPageDiff(){
+  var list = [];
+  (state.config.groups || []).forEach(function(g){
+    (g.boards || []).forEach(function(b){ list.push(b); });
+  });
+  var out = [];
+  for (var i = 0; i < list.length; i++){
+    var b = list[i];
+    var p = pinInfo(b);
+    if (!p){ out.push({ b: b, st: 'nocfg' }); continue; }
+    try{
+      var r = await fetch(p.orig + '?t=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok){ out.push({ b: b, st: 'err', p: p }); continue; }
+      var txt = await r.text();
+      var h = await sha256(txt);
+      out.push({ b: b, st: (h === p.hash) ? 'same' : 'changed', p: p, size: txt.length });
+    }catch(e){ out.push({ b: b, st: 'err', p: p }); }
+  }
+  return out;
+}
+function renderPvList(rows){
+  var box = $('pvList');
+  if (!box) return;
+  var changed = [];
+  var h = '';
+  rows.forEach(function(x){
+    var tag, color, act = '';
+    if (x.st === 'same'){ tag = '未改动'; color = 'var(--text-2)'; }
+    else if (x.st === 'changed'){ tag = '有新版本（部门已修改）'; color = '#BA7517'; changed.push(x.b.name); }
+    else if (x.st === 'nocfg'){ tag = '未纳入固化'; color = 'var(--text-2)'; }
+    else { tag = '读取失败'; color = 'var(--danger)'; }
+    if (x.p) act = '<button class="mini" data-pv="' + x.b.id + '">打开原页面</button>';
+    h += '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)">' +
+      '<div style="flex:1;font-size:12px;line-height:1.5">' +
+        '<div>' + esc(x.b.name) + '</div>' +
+        '<div style="color:' + color + '">' + tag + (x.p ? ' · 批准于 ' + esc(fmtTime(x.p.pinnedAt).slice(0, 16)) : '') + '</div>' +
+      '</div>' + act + '</div>';
+  });
+  box.innerHTML = h;
+  Array.prototype.forEach.call(box.querySelectorAll('[data-pv]'), function(btn){
+    btn.onclick = function(){
+      var b = findBoard(btn.getAttribute('data-pv'));
+      if (b) window.open(boardUrl(b), '_blank', 'noopener');
+    };
+  });
+  var tip = $('pvTip');
+  if (tip){
+    tip.textContent = changed.length
+      ? '有 ' + changed.length + ' 个页面被改动过：' + changed.join('、') + '。总看板目前仍显示旧版，不受影响；需要采纳时告诉我更新即可。'
+      : '所有页面都与批准版一致，没有被改动。';
+    tip.style.color = changed.length ? '#BA7517' : 'var(--text-2)';
+  }
+}
+async function openPageVersions(){
+  overlay(
+    '<div class="modal" style="max-width:660px"><h3>页面版本（固化）</h3>' +
+    '<p>总看板内嵌的是每个看板的<b>批准版副本</b>，不是部门的活跃版。' +
+    '部门改他们自己的页面、改他们的原站，这里都不会跟着变。下面是自动比对结果。</p>' +
+    '<div id="pvTip" style="font-size:12px;color:var(--text-2);margin:8px 0">正在逐个检测…</div>' +
+    '<div id="pvList" style="max-height:300px;overflow:auto"></div>' +
+    '<div class="modal-actions"><button class="mini" id="pvClose">关闭</button></div></div>',
+    closeLayer
+  );
+  $('pvClose').onclick = closeLayer;
+  if (!PIN_MANIFEST) await loadPinManifest();
+  var rows = await checkPageDiff();
+  renderPvList(rows);
 }
 
 /* ==================== 数据回滚（防误改 / 防外人篡改的兜底） ====================
@@ -1968,6 +2067,7 @@ $('btnReport').onclick = function(){
   var local = null;
   try{ local = JSON.parse(localStorage.getItem(LS_CFG) || 'null'); }catch(e){}
   if (local && local.groups) state.config = normalize(local);
+  await loadPinManifest();          /* 先读批准版清单，再渲染，保证 iframe 直接指向批准版 */
   renderAll();
   // 大屏常开：地址栏加 ?slide=1 直接进入幻灯片播放（可再加 &sec=60 指定秒数）
   try{
