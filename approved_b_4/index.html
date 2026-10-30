@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html data-page-node-id="ksp2xzYk2dSNgnttJX7ssT" lang="zh-CN">
+<head data-page-node-id="ww8VtbUo2alvZZlc8dq6fg">
+<base href="https://as1532656116-d6g77h3laf139a81d-1470518011.tcloudbaseapp.com/hub/otd/">
+
+<meta data-page-node-id="WrZB873bu52Ifg6QsRMmT1" charset="UTF-8">
+<meta data-page-node-id="6yAxN7qavE9ixeqO81RfPM" content="width=device-width, initial-scale=1.0" name="viewport">
+<title data-page-node-id="ZmmJ1TTRYJPz4Zxl0c4ho5" data-pnid-children="pAD2T6zKm0tlfMkMH1iDxC">生产OTD看板 · 交付率分析 2026.10.19-10.24</title>
+<style data-page-node-id="mINC2iXTjcrw6aVJuQsMng" data-pnid-children="Dk0yczYuyL7Xfg8m4gXaPc">
+  :root{
+    --bg:#f3f5f9; --card:#ffffff; --border:#e6e9f0;
+    --text:#1e293b; --muted:#64748b; --muted2:#94a3b8;
+    --blue:#3b82f6; --green:#10b981; --red:#ef4444; --amber:#f59e0b;
+    --green-bg:#ecfdf5; --red-bg:#fef2f2; --blue-bg:#eff6ff; --amber-bg:#fffbeb;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,-apple-system,sans-serif;
+    background:var(--bg); color:var(--text); padding:24px; line-height:1.5;
+  }
+  .wrap{max-width:1380px;margin:0 auto;}
+
+  /* Header */
+  .header{
+    display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 60%,#3b82f6 100%);
+    color:#fff; border-radius:16px; padding:24px 32px;
+    box-shadow:0 10px 30px rgba(37,99,235,.25);
+  }
+  .header h1{font-size:25px;font-weight:700;letter-spacing:1px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .header h1 .otd-badge{
+    font-size:12px;font-weight:600;background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.35); padding:4px 10px; border-radius:999px;
+  }
+  .header .sub{margin-top:8px;font-size:13px;color:#dbeafe;}
+  .header .meta{text-align:right;font-size:12.5px;color:#bfdbfe;line-height:1.9;}
+  .header .meta b{color:#fff;font-weight:600;}
+
+  /* Toolbar */
+  .toolbar{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:12px 18px; margin:16px 0; box-shadow:0 2px 8px rgba(30,41,59,.04);
+  }
+  .btn{
+    display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+    border:1px solid var(--border); background:#f8fafc; color:var(--text);
+    font-size:13px; font-weight:600; padding:8px 14px; border-radius:9px;
+    transition:all .15s ease; font-family:inherit;
+  }
+  .btn:hover{background:#eef2f7;border-color:#cbd5e1;}
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;}
+  .btn.primary:hover{background:#2563eb;}
+  .btn.ghost:hover{color:var(--blue);border-color:#bfdbfe;background:var(--blue-bg);}
+  .src-badge{
+    margin-left:auto; font-size:12px; padding:5px 12px; border-radius:999px;
+    background:var(--green-bg); color:#059669; font-weight:600;
+    border:1px solid #a7f3d0; display:inline-flex; align-items:center; gap:5px;
+  }
+  .src-badge.warn{background:var(--amber-bg); color:#b45309; border-color:#fde68a;}
+  .src-badge.err{background:var(--red-bg); color:#dc2626; border-color:#fecaca;}
+  .toolbar .hint{font-size:12px;color:var(--muted);}
+
+  /* Toast */
+  #toast{
+    position:fixed; top:20px; left:50%; transform:translateX(-50%) translateY(-80px);
+    background:#1e293b; color:#fff; font-size:13.5px; padding:12px 22px; border-radius:10px;
+    box-shadow:0 12px 30px rgba(15,23,42,.35); z-index:99; transition:transform .3s ease;
+    max-width:90vw; opacity:0;
+  }
+  #toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+  #toast.ok{background:#059669;}
+  #toast.bad{background:#dc2626;}
+
+  /* KPI cards */
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:20px;}
+  .kpi{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:18px 18px 14px; position:relative; overflow:hidden;
+    box-shadow:0 2px 8px rgba(30,41,59,.04); transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .kpi:hover{transform:translateY(-2px); box-shadow:0 8px 20px rgba(30,41,59,.08);}
+  .kpi .label{font-size:12.5px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .kpi .label .ico{width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;}
+  .kpi .value{font-size:30px;font-weight:700;letter-spacing:.5px;line-height:1.1;}
+  .kpi .value small{font-size:15px;font-weight:600;color:var(--muted);}
+  .kpi .foot{margin-top:8px;font-size:12px;color:var(--muted);}
+  .kpi .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;}
+  .tag-green{background:var(--green-bg);color:#059669;}
+  .tag-red{background:var(--red-bg);color:#dc2626;}
+  .tag-amber{background:var(--amber-bg);color:#d97706;}
+  .tag-blue{background:var(--blue-bg);color:#2563eb;}
+  .donut-mini{position:absolute;right:12px;top:14px;width:52px;height:52px;}
+
+  /* Panels */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .panel{
+    background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 20px;
+    box-shadow:0 2px 8px rgba(30,41,59,.04);
+  }
+  .panel h3{font-size:15.5px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+  .panel h3 .dot{width:8px;height:8px;border-radius:50%;}
+  .panel .desc{font-size:12px;color:var(--muted);margin-bottom:10px;}
+  .legend{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-bottom:8px;flex-wrap:wrap;}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;}
+  .chart{width:100%;}
+  .empty-tip{color:var(--muted2);font-size:13px;text-align:center;padding:70px 0;}
+
+  /* Table */
+  .table-wrap{max-height:420px;overflow:auto;border:1px solid var(--border);border-radius:10px;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead th{
+    position:sticky;top:0;background:#f8fafc;color:var(--muted);font-weight:600;text-align:left;
+    padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap;z-index:1;
+  }
+  tbody td{padding:8px 12px;border-bottom:1px solid #f1f5f9;white-space:nowrap;}
+  tbody tr:hover{background:#f8fafc;}
+  tr.row-bad{background:var(--red-bg);}
+  tr.row-bad:hover{background:#fde8e8;}
+  .st{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;}
+  .st-ok{background:var(--green-bg);color:#059669;}
+  .st-bad{background:var(--red-bg);color:#dc2626;}
+  .num{font-variant-numeric:tabular-nums;}
+  .neg{color:var(--red);font-weight:600;}
+  .pos{color:var(--green);font-weight:600;}
+  .zero{color:var(--muted2);}
+
+  /* Findings */
+  .findings{margin-top:16px;}
+  .findings ul{list-style:none;}
+  .findings li{
+    font-size:13px;padding:8px 12px 8px 30px;position:relative;background:var(--card);
+    border:1px solid var(--border);border-radius:10px;margin-bottom:8px;color:var(--text);
+  }
+  .findings li::before{
+    content:"";position:absolute;left:14px;top:13px;width:8px;height:8px;border-radius:50%;
+    background:var(--blue);
+  }
+  .findings li.warn::before{background:var(--red);}
+  .findings li b{color:#1d4ed8;}
+  .findings li.warn b{color:#dc2626;}
+  .footnote{font-size:11.5px;color:var(--muted2);margin-top:14px;text-align:center;}
+
+  @media (max-width:1100px){
+    .kpis{grid-template-columns:repeat(3,1fr);}
+    .grid2{grid-template-columns:1fr;}
+  }
+  @media (max-width:640px){
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    body{padding:12px;}
+  }
+
+  /* ===== 云端协作 · 新增控件 ===== */
+  .switch{
+    display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:600;
+    background:#f8fafc;border:1px solid var(--border);padding:7px 12px;border-radius:9px;color:var(--text);
+    transition:all .15s ease;user-select:none;
+  }
+  .switch input{width:15px;height:15px;cursor:pointer;accent-color:var(--blue);}
+  .switch:hover{background:#eef2f7;}
+  .switch.on{background:var(--amber-bg);border-color:#fde68a;color:#b45309;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  td.editable{cursor:text;}
+  td.editable:hover{box-shadow:inset 0 0 0 1.5px #cbd5e1;border-radius:5px;}
+  td[contenteditable="true"]{outline:none;background:#fffbeb;box-shadow:inset 0 0 0 1.5px #fbbf24;border-radius:5px;}
+  td[contenteditable="true"]:focus{background:#fff;box-shadow:inset 0 0 0 2px var(--blue);}
+  .del-btn{cursor:pointer;border:none;background:#fef2f2;color:#dc2626;font-size:11px;font-weight:600;
+    padding:3px 8px;border-radius:6px;font-family:inherit;}
+  .del-btn:hover{background:#fee2e2;}
+  .sync-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px;background:#10b981;}
+  .sync-dot.busy{background:#f59e0b;}
+  .sync-dot.off{background:#94a3b8;}
+  .sync-dot.err{background:#ef4444;}
+  tr.row-new{background:var(--blue-bg);}
+  .edit-tip{font-size:12px;color:#b45309;background:var(--amber-bg);border:1px solid #fde68a;
+    border-radius:9px;padding:7px 12px;margin:0 0 12px;}
+
+</style>
+<script>
+/* ===== 公司总看板内嵌版适配 =====
+   原看板依赖 window.__SMART_PAGE__.database（WorkBuddy 平台运行时）读写共享数据表。
+   内嵌到 github.io 后没有该运行时，这里用云函数 otdData 代理实现只读读取：
+   数据在服务端代调分享接口后返回（带跨域头），页面其余逻辑完全不变。 */
+(function () {
+  var API = 'https://as1532656116-d6g77h3laf139a81d.service.tcloudbase.com/otdData';
+  var DATABASE_ID = 'CtrxjkZhrHrGzoDfjZzPRs';
+  function readonly() {
+    return Promise.reject(new Error('内嵌版只读，请到官方分享页编辑'));
+  }
+  window.__SMART_PAGE__ = window.__SMART_PAGE__ || {};
+  window.__SMART_PAGE__.database = {
+    query: function (opt) {
+      opt = opt || {};
+      var payload = { databaseId: opt.databaseId || DATABASE_ID, pageSize: opt.pageSize || 2000 };
+      return fetch(API, {
+        method: 'POST',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        if (!j || !j.ok) throw new Error((j && j.error) || '读取失败');
+        return { results: j.results || [], hasMore: !!j.hasMore, nextCursor: j.nextCursor || null };
+      });
+    },
+    add: readonly, update: readonly, delete: readonly, batchCreate: readonly
+  };
+})();
+</script>
+</head>
+<body data-page-node-id="RhvCBJHQGdlbUXSAI4Zjkd">
+<div data-page-node-id="mzF4nYnJF0haZI4nuq2Cev" class="wrap">
+
+  <!--pnid:VD9wCZZYvnX7oSFBtZdV7z--><!-- Header -->
+  <div data-page-node-id="hioRnpBWHky5pmRXXawhqo" class="header">
+    <div data-page-node-id="YmxHhJ4rhH5ITfQeuC2EJN">
+      <h1 data-page-node-id="iknfOXzazZIPSSOfc57wN9"><!--pnid:WkC9FNBrSNSmlDE6jFEMpP-->生产 OTD 看板 <span data-page-node-id="1T0I2kVyYbjiJH2HQyk31E" class="otd-badge"><!--pnid:FKyR1EW7hDm9zMJKR5NVUQ-->On-Time Delivery</span></h1>
+      <div data-page-node-id="GqvGW1UnsZDZ1o1SaHCrfn" class="sub"><!--pnid:MjMYWO5iSIVznXOwRbMjE0-->发货计划 vs 实际发货 · 交付率分析 · 数据存于云端，多人打开同一链接即可同步查看</div>
+    </div>
+    <div data-page-node-id="AnPTMXaV6BodMhjfnKehwK" class="meta"><!--pnid:ltznJgIH6sB1o53Jhwc2ZD-->
+      统计周期：<b data-page-node-id="iPytitQFYWscX0RD88quO2" id="periodText"><!--pnid:NZC5w3yxRdUSmhP7pRvWRa-->--</b><br data-page-node-id="NW44WeBcH1y3zT9XcYhO5h"><!--pnid:qhL9xBSjUMmjo9jDPN7G4G-->
+      数据来源：<b data-page-node-id="4yhktrECaYpDnjfkUnI1DX" id="sourceText"><!--pnid:2jaclfrlxDUVI76PTn389l-->内置数据</b><br data-page-node-id="0I5Hw1mulqDGCUyNmWowq7"><!--pnid:5MbomIXufA3KkOQ0r8PxNd-->
+      最近更新：<span data-page-node-id="oCQozoqdwG2jeXU5S2B6MT" id="genTime"></span>
+    </div>
+  </div>
+
+  <!--pnid:snInWKORnKkrR3p9yyEoZJ--><!-- Toolbar: data import -->
+  <div data-page-node-id="FKCIhAuw0N9HXrZz6sMI4r" class="toolbar">
+    <label data-page-node-id="bTYqyWhARB2Wi7vBE5Q3wE" class="switch"><input data-page-node-id="isoHbA9QTR2y0zPkTDoeJj" id="editChk" type="checkbox"><span data-page-node-id="IlxEzi4ZT9jeZpo8FxmPfw"><!--pnid:8QRq4vSr7MQo4dMyWgn8Gq-->✏️ 编辑模式</span></label>
+    <button data-page-node-id="btnAddRow" class="btn primary" disabled id="btnAdd"><!--pnid:DkyKW8jWaVtBuACr9EPvKX-->➕ 新增一行</button>
+    <button data-page-node-id="CD4uTaiwJ0T8PYK1PcWctP" class="btn ghost" id="btnRefresh"><!--pnid:y4rG33IxltYaLTHkHbytDZ-->🔄 刷新</button>
+    <button data-page-node-id="cWY2X5rouopfFIphjLBDqh" class="btn ghost" id="btnImport"><!--pnid:o73mqU0KxEyc8cXo2koO05-->📥 导入并覆盖云端</button>
+    <input data-page-node-id="fileInput2" accept=".xlsx,.xls,.csv,.txt" hidden id="fileInput" type="file">
+    <button data-page-node-id="btnTpl2" class="btn ghost" id="btnTpl"><!--pnid:FFlx3okqb2ChBXm9TNB42g-->⬇ 模板</button>
+    <button data-page-node-id="btnExport2" class="btn ghost" id="btnExport"><!--pnid:fPhmS0idVrpsVuLEZL4RFA-->📤 导出 CSV</button>
+    <label data-page-node-id="autoWrap" class="switch"><input data-page-node-id="autoChk2" checked id="autoChk" type="checkbox"><span data-page-node-id="autoTxt2"><!--pnid:ZTDQQDlec0nBZDfM1FLEQS-->自动同步</span></label>
+    <span data-page-node-id="gTV14TXBRGyfA9xQTbcv3b" class="hint"><!--pnid:x7xyjUdkw7nrzwNsR3lSQl-->开启编辑模式后可直接改表格数字/备注，失焦自动保存到云端；查看无需登录，保存需登录账号</span>
+    <span data-page-node-id="7r5HrcqFUTvtjrm1BP6g1y" class="src-badge" id="srcBadge"><!--pnid:E0V0nTxBWmUBb3fZlo8aDM-->● 内置数据</span>
+  </div>
+
+  <!--pnid:gtazuNPxVH9nRV6aranwIp--><!-- KPI -->
+  <div data-page-node-id="bT80xep5VReeCY9LcNDRt2" class="kpis" data-sp-bindable="database" data-sp-database-id="CtrxjkZhrHrGzoDfjZzPRs">
+    <div data-page-node-id="E71cnnKdusrze1hJpt9by6" class="kpi">
+      <div data-page-node-id="45L31vZ3kdeQaz3bc5ahoh" class="label"><span data-page-node-id="DJzzl7MqLsuGSL1ZXjYqph" class="ico" style="background:var(--blue-bg)"><!--pnid:X5ufnTeckHpYO71NjOnLjY-->📊</span><!--pnid:gcx7FZDXNIGkxgUdKtuXjN-->整体交付率 OTD</div>
+      <div data-page-node-id="qysJYxV3ZJEJa1Qr3kRDat" class="value"><span data-page-node-id="ZJJcAGTQFXg2eVbSzJj9QX" id="kpiOtd"><!--pnid:w3WydN6WzrAVOzWxYn8xyA-->--</span><small data-page-node-id="mpgbZgy1q8MvmZR3kVklR1"><!--pnid:oc9Z6Iq0pm7M1XgdwvQrts-->%</small></div>
+      <div data-page-node-id="tAhMvDurpKB8a0jIKQKPiz" class="foot"><!--pnid:nzDFS5na7j6cNYwrIn6ZmF-->实际发货 <span data-page-node-id="pcW0MrPZQ3AzEnKWgR2SGX" class="num" id="kpiAct"></span><!--pnid:OUy8Kfp5X5SALKvmXYyqAX--> / 计划 <span data-page-node-id="tEom5IRtECdXE5HChOQSfA" class="num" id="kpiPlan"></span><!--pnid:qYujZvlYWyAB40kZGzBJQY--> 件</div>
+      <svg data-page-node-id="D4qsl2nQeDeli4cuaY9OYs" class="donut-mini" id="donutOtd" viewBox="0 0 52 52"></svg>
+    </div>
+    <div data-page-node-id="23wHZ5wsLEVyjSGeDFfQoE" class="kpi">
+      <div data-page-node-id="Yp9aw0CmeGu9Jd31XpdVsU" class="label"><span data-page-node-id="waINnThPdDRuPNAq6sED1U" class="ico" style="background:var(--blue-bg)"><!--pnid:lBopnuLIKz11jpCZvWnYjQ-->📦</span><!--pnid:hblZjlQ85nWmXmZt8NoPuV-->计划交货总量</div>
+      <div data-page-node-id="Ysd6FC4sqbazCJo3SXi5I6" class="value"><span data-page-node-id="6IdL9DBvKXBgABWCItZSYy" class="num" id="kpiPlan2"><!--pnid:hEvxAfaSSrb3BJJu93rmwC-->--</span></div>
+      <div data-page-node-id="0Kf5G6OiM3Xac2OkbG4oBf" class="foot"><!--pnid:6GjGSVeshWN8U8CJzMc8mL-->件（周期合计）</div>
+    </div>
+    <div data-page-node-id="UN16Tp0LyaKloDlT0UOKSL" class="kpi">
+      <div data-page-node-id="uJKbSJkAqopMMrI78b8g00" class="label"><span data-page-node-id="wi2Xi65vw3iSWrCSAJzCCP" class="ico" style="background:var(--green-bg)"><!--pnid:oNbEzGq13pOZEzbRkePG1q-->🚚</span><!--pnid:5nMrZDYhlz8cvx0UBB6Z54-->实际发货总量</div>
+      <div data-page-node-id="riVxeoM3cYtwT4nR1pZePq" class="value"><span data-page-node-id="sDmpnBlcfzMb5S03Ha7S1X" class="num" id="kpiAct2"><!--pnid:0RyLb4QKrGmyPY39VdKIFo-->--</span></div>
+      <div data-page-node-id="UW4Of2rrpkX9n9peWFnGEq" class="foot"><!--pnid:FddZtM75fNfiXCYqTVIlG1-->件（周期合计）</div>
+    </div>
+    <div data-page-node-id="kxIASHT994Hkn8KMikKLRe" class="kpi">
+      <div data-page-node-id="NqizTWnkIHxkCdc3In6Jub" class="label"><span data-page-node-id="hC2lza9Gs1oXIzvq6wn0Lg" class="ico" style="background:var(--red-bg)"><!--pnid:YJk2Q0n8IjYumlEB0r03g1-->⚠️</span><!--pnid:KNJ2HkUik4JZaRRSiPPPQg-->累计欠发</div>
+      <div data-page-node-id="SHRXKAlFvRY7T4y0QJdENi" class="value" style="color:var(--red)"><span data-page-node-id="k5WF1x1GEbxs2R9e65B89o" class="num" id="kpiGap"><!--pnid:CpSFF21lTAA2oURMhMHOE3-->--</span></div>
+      <div data-page-node-id="nMnNj0skENarHXIkhWqKfs" class="foot"><!--pnid:M58hqZ7KQmDjJolnX5TCp1-->占计划总量 <span data-page-node-id="RNNVFB4bFhbtjlBLTDmjZl" class="num" id="kpiGapPct"></span></div>
+    </div>
+    <div data-page-node-id="mCJbGpzibxoZEGW2LQWt4a" class="kpi">
+      <div data-page-node-id="7nDwY39s5bzVmPr1d2BqLi" class="label"><span data-page-node-id="LXrJruA1JJSSIR0a6FllQF" class="ico" style="background:var(--amber-bg)"><!--pnid:jvaePcm7XmpHRaL7mG1Cn7-->✅</span><!--pnid:9QeeuVxERA6HzvHQKFcDnP-->达标天数</div>
+      <div data-page-node-id="ngv4MyFUfCbGAMsnXbIqDn" class="value"><span data-page-node-id="wMsMRmLyEW8IiuQt1qHtT0" id="kpiDays"><!--pnid:D36FAB8fzDdGADvHiv2V9o-->--</span><small data-page-node-id="2YRRwgoKEM9wYnT7BSgZVH"><!--pnid:JBVwEJ6Ajvnude6TuApss7--> / <span data-page-node-id="M7gQxQwq7kHttTLZA7QR7K" id="kpiDaysTotal"><!--pnid:Ha2NFljwgvCWhCxeIHR0VE-->6</span><!--pnid:AHfVKCihJbO2qykIvE5Res--> 天</small></div>
+      <div data-page-node-id="y5lykNiO6MMxTPsKi28EbT" class="foot"><span data-page-node-id="QjZAnFuSGIBiOkb5OiV27S" class="tag tag-green" id="kpiDaysTag"><!--pnid:2jYcN7Ip8GA9XL2hQDhP43-->--</span> <span data-page-node-id="MBVz9wovnV9M2QFEfwXXZB" style="margin-left:6px"><!--pnid:WTGDUVCvWYNsFC5qXDABWN-->达标率 <span data-page-node-id="aOSw9NRr0kLdYtcLemwxp7" class="num" id="kpiDaysPct"></span></span></div>
+      <svg data-page-node-id="pOIwzIvfvwo4SLZ6LmIulx" class="donut-mini" id="donutDays" viewBox="0 0 52 52"></svg>
+    </div>
+    <div data-page-node-id="2fGU6TJrZanmxvGSkQeuZi" class="kpi">
+      <div data-page-node-id="D4vZ6uXCpMTmZm3neNrKyD" class="label"><span data-page-node-id="VPPEiXc4dz67aSM06mRmJi" class="ico" style="background:var(--red-bg)"><!--pnid:91btmILk0V5UmTFbZRGb1d-->🚫</span><!--pnid:Ob6Kht3Jv4SGfPMZbCb1sb-->未达标产品</div>
+      <div data-page-node-id="cScWeyawu5FuzRAnsrVIiT" class="value" style="color:var(--red)"><span data-page-node-id="Yr9688ccELEZunxrJTL8Ti" class="num" id="kpiBad"><!--pnid:HarUl5Oh2XQAFFI0AIPnn7-->--</span></div>
+      <div data-page-node-id="bcMmVfbPH87V9qrcQSCqwj" class="foot"><!--pnid:ZtCHG6rtGVDJpOqYplpjuy-->个 SKU 未达交付目标</div>
+    </div>
+  </div>
+
+  <!--pnid:sYT9p9FI4pKufpJyhNLKfF--><!-- Row 1 -->
+  <div data-page-node-id="GrQOnceWB206uS14Wywv7h" class="grid2">
+    <div data-page-node-id="4muKxmQLFjMCfONFjgV2Ud" class="panel">
+      <h3 data-page-node-id="wLXZlCSyFiG9C5sj1WgGLY"><span data-page-node-id="dwCby6Y9fhQIXQCuUizddA" class="dot" style="background:var(--amber)"></span><!--pnid:GaBOsKSbq0Mv1JhSoyteFD-->每日交付率趋势</h3>
+      <div data-page-node-id="Wp3YELseh4t9ZQHXEpZknI" class="desc"><!--pnid:LQCltEFNunIsiWaHToRad0-->折线为当日交付率（%），虚线为 95% 参考达标线</div>
+      <div data-page-node-id="FnyxHe5qm49E9RszSnea2T" class="legend">
+        <span data-page-node-id="XYqJ3U6I2WQyWmy0QkbawW"><i data-page-node-id="UjP5OgH58E9vLNyJQkNU5g" style="background:var(--amber)"></i><!--pnid:skg0MUYQDmtNCBr8QsYdOf-->交付率</span>
+        <span data-page-node-id="RtC9NP6ju0KdtjYc4C1Z1C"><i data-page-node-id="osH7S7gixCYWEweIAK2ziA" style="background:var(--red)"></i><!--pnid:7V4Wz0Ay9BkRfd842LADnB-->95% 参考线</span>
+      </div>
+      <div data-page-node-id="EbBCoLVdBwLaC9veAFQdja" class="chart" id="chartRate"></div>
+    </div>
+    <div data-page-node-id="xGWiJk9wmiRH2ZRKS0GJRf" class="panel">
+      <h3 data-page-node-id="2YwWv27t00DrIlkiwfacj6"><span data-page-node-id="4Y1qFrZcwTIrGxphLBQkfO" class="dot" style="background:var(--blue)"></span><!--pnid:jG5tJ1ofMf1wSdHAfkhbyy-->每日 计划 vs 实际发货量</h3>
+      <div data-page-node-id="DtGnURkGgvjHeJxy8nFo2k" class="desc"><!--pnid:LM94BcRLxWS8XShAw2Bxxi-->柱高为当日数量（件），高峰日为集中补发日</div>
+      <div data-page-node-id="ul5J06b1dBuKlAuRNpnLZB" class="legend">
+        <span data-page-node-id="0HaurHketiTJblKJs7WVy1"><i data-page-node-id="taiFrVg8gQeNniqiN6y3uG" style="background:#c7d2fe"></i><!--pnid:RMMVrt2jJ9LurBL05GYnya-->计划数量</span>
+        <span data-page-node-id="6QHptL42fCsxQw6HexPulm"><i data-page-node-id="EbO0wPZWzOy5Wx71z1T2S0" style="background:var(--blue)"></i><!--pnid:SSmegXqw0AA6SLJcClQtjr-->实际发货</span>
+      </div>
+      <div data-page-node-id="lx7nNyEZlqcCWc06qeFZyN" class="chart" id="chartVol"></div>
+    </div>
+  </div>
+
+  <!--pnid:uAM8oHI8cxkH9Z5c4hwe6e--><!-- Row 2 -->
+  <div data-page-node-id="1rRXYe0IJXMs0g0ymEXHc5" class="grid2">
+    <div data-page-node-id="TGJddEyEqNrL8srtA7BA7I" class="panel">
+      <h3 data-page-node-id="WqIiRua6mU9Gf46Oah8AO1"><span data-page-node-id="AkYGZvQkjQ0lXeYpkoypXn" class="dot" style="background:var(--blue)"></span><!--pnid:QjPGkdAaeXeTWZT1GQrhXu-->每日发货差异（实际 − 计划）</h3>
+      <div data-page-node-id="7hhy7imPoAm8T7oF1RAzZu" class="desc"><!--pnid:kWdbFryVxAqGZd20lpSX4N-->右侧为超发（绿），左侧为欠发（红）</div>
+      <div data-page-node-id="01MXltkv9HJDXWiBw32pFZ" class="chart" id="chartDiff"></div>
+    </div>
+    <div data-page-node-id="FIomnRt95JoaaApNA3ykhW" class="panel">
+      <h3 data-page-node-id="OPUL4my73hFrs4PmuVvR7T"><span data-page-node-id="GQjyERiGEfct3X3BbQqrup" class="dot" style="background:var(--red)"></span><!--pnid:f7JYBKeFPmS0GKOPZVcRiu-->欠货 TOP5 产品</h3>
+      <div data-page-node-id="7NKoY3xkdjV252dn7iJdMU" class="desc"><!--pnid:WM35yHVXh8hRApcPuGWlMV-->按欠货量排序，为主要未达标产品</div>
+      <div data-page-node-id="Ec147LVoO5iyCcgxENMF4r" class="chart" id="chartTop"></div>
+    </div>
+  </div>
+
+  <!--pnid:0TYuWmqJKAejoqg3IiZi26--><!-- Detail table -->
+  <div data-page-node-id="t1mLhI4iWRG1DFlL4MZ41o" class="panel" style="margin-bottom:0">
+    <h3 data-page-node-id="u0Tzeypb9xHUbbfxWuXL6H"><span data-page-node-id="WM7RJhEV1z17hoUpKmCzNw" class="dot" style="background:var(--green)"></span><!--pnid:NmjqcRJ4KJ4ncinyxRrb04-->产品级逐日明细（计划 vs 实际）</h3>
+    <div data-page-node-id="5zVhJBvNBhzU6v8iJVPJTZ" class="desc"><!--pnid:jZaYS1enKvnTVZNgn3CVzA-->共 <span data-page-node-id="qspG4Kc05siepkq0wE3117" id="rowCount"></span><!--pnid:hTf6rAk1zRQXgCwms98oS5--> 行明细 · 红色行为未达标项 · 开启编辑模式后可直接修改计划/实际/备注</div>
+    <div data-page-node-id="oQkkxCkKLdRlOMU4jm8wBY" class="table-wrap">
+      <table data-page-node-id="8By6szSzOumDkUcB3G0OeX">
+        <thead data-page-node-id="BuL8KkxP9l9j8HfIUSar3x">
+          <tr data-page-node-id="jfRtNGxuSdaWVOpfYTtlx6">
+            <th data-page-node-id="UE7fS6gZ3eKZ20GJWxi6LY"><!--pnid:0trIACwhKr8MMv8qnsEfuq-->日期</th><th data-page-node-id="her6rmpnB7aZcX47sEgqun"><!--pnid:aZTijQMaB5J2MrcnvgPmP6-->编码</th><th data-page-node-id="4cToReqAba3rq3VVexqIr5"><!--pnid:W1cG1aJ2XGXctCld3tWw8S-->规格 / 型号</th>
+            <th data-page-node-id="S5hKUFA7ITJt8H9bh7224l" style="text-align:right"><!--pnid:gRTFocxs0gzYkmjZyUtDq4-->计划数量</th><th data-page-node-id="Dr5TLBmn3ikdRXZfRaXb1p" style="text-align:right"><!--pnid:bNyNCdKBHtWTx2tTlqFm10-->实际数量</th>
+            <th data-page-node-id="EmukJJPtzVtyf2EUlybk5V" style="text-align:right"><!--pnid:ufL6UH0RRLFaRrE2m64pvz-->差异</th><th data-page-node-id="V1WOVw21lfKCbHvTOXsIvh" style="text-align:right"><!--pnid:896Sjqae10ZPdWG2K92aqK-->交付率</th>
+            <th data-page-node-id="JItIs923BCCqCI66eMSUoj"><!--pnid:JMKdPhnIDlUYh5PcG5QYSH-->状态</th><th data-page-node-id="WgARk7eBx4TpNH33TlnVvj"><!--pnid:Fa92Zd7g9592KRpVvTapWJ-->备注</th>
+          </tr>
+        </thead>
+        <tbody data-page-node-id="8WKbnKIZCBGZqC7KQyGGiP" id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!--pnid:g6OV437Gv2QenYgNgOCdI7--><!-- Findings -->
+  <div data-page-node-id="ToeUdq6h0T5hzc1sruR3yp" class="panel findings">
+    <h3 data-page-node-id="c1RtVFq10hI9pvHbvV4uM4"><span data-page-node-id="LuTUvyiJo575uwT1lQPLle" class="dot" style="background:var(--amber)"></span><!--pnid:4IcYzioxPpAh5quS7y7GkU-->关键发现</h3>
+    <ul data-page-node-id="84sXF1vOeSQLSyeuF107lV" id="findingsList"></ul>
+  </div>
+
+  <div data-page-node-id="uuZcwsiPGH5IGKXQkknIVY" class="footnote"><!--pnid:IARDSQSyy5ZlZRmbQ5q19r-->生产 OTD 看板 · 数据存于云端共享数据表（不存本地浏览器）· 打开链接或刷新即看到最新 · 由 WorkBuddy 生成</div>
+</div>
+
+<div data-page-node-id="a0CS9BT49O3rRrdEmRN7Rj" id="toast"></div>
+
+<script data-page-node-id="cqihbsUcZR77mG4AezMduE" data-pnid-children="aJtUZOr2INPxtuwStEOWi0">
+/* Excel 解析库 · 多源兜底加载（优先国内可访问 CDN） */
+(function(){
+  var srcs=[
+    '../vendor/xlsx.full.min.js',
+    'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/xlsx/0.18.5/xlsx.full.min.js',
+    'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
+  ];
+  var i=0;
+  window.__XLSX_LOADED__=false;
+  function load(){
+    if(i>=srcs.length){ return; }
+    var s=document.createElement('script');
+    s.src=srcs[i++];
+    s.onload=function(){ window.__XLSX_LOADED__=true; };
+    s.onerror=load;
+    document.head.appendChild(s);
+  }
+  load();
+})();
+</script>
+<script data-page-node-id="ZpGl2IVBjkrncL008VYxqW" data-pnid-children="ObpjZ83S19JTWKsr1kSvHu">
+/* ================================================================
+   生产 OTD 看板 · 数据导入模块
+   内置数据 (2026.10.19 - 10.24) + 支持 Excel/CSV 导入后自动重绘
+   ================================================================ */
+const DEFAULT_DAILY = [
+  {d:'10/19', plan:3216, act:3016, rate:93.78, diff:-200,    status:'未达标'},
+  {d:'10/20', plan:6139, act:6354, rate:103.5, diff:215,    status:'达标'},
+  {d:'10/21', plan:4962, act:5010, rate:100.97, diff:48,    status:'达标'},
+  {d:'10/22', plan:69258, act:69406, rate:100.21, diff:148,    status:'达标'},
+  {d:'10/23', plan:13994, act:16354, rate:116.86, diff:2360,    status:'达标'},
+  {d:'10/24', plan:26562, act:26562, rate:100, diff:0,    status:'达标'},
+];
+const DEFAULT_DETAIL = [
+  ["10-19","HR014","EN17-C03D01",190,190,0,100,"达标",""],
+  ["10-19","H31272","NPC2（NE1383323）",200,0,-200,0,"未达标","护盒尺寸有偏差"],
+  ["10-19","HR021","RPU351A 滤波模块",168,168,0,100,"达标",""],
+  ["10-19","HR020","三相铜排",160,160,0,100,"达标",""],
+  ["10-19","HR024","H77B 950400uF",350,350,0,100,"达标",""],
+  ["10-19","H31492","M18-3(NE715324)",312,312,0,100,"达标",""],
+  ["10-19","HR018-A","滤波器上肢（滤波器）",812,812,0,100,"达标",""],
+  ["10-19","H31225-3 M座03","87.9×19.7×78.7×10.5×13",1024,1024,0,100,"达标",""],
+  ["10-20","HR022","HT11",1200,1200,0,100,"达标",""],
+  ["10-20","H31385","HT30",1410,1410,0,100,"达标",""],
+  ["10-20","H31272","NPC2（NE1383323）",528,528,0,100,"达标",""],
+  ["10-20","S251134","NP52四相磁环(NE809014)",63,110,47,174.6,"达标",""],
+  ["10-20","H31244","GM",432,432,0,100,"达标",""],
+  ["10-20","HR021","RPU351A 滤波模块",160,160,0,100,"达标",""],
+  ["10-20","HR020","三相铜排",160,168,8,105,"达标",""],
+  ["10-20","HR024","H77B 950400uF",350,350,0,100,"达标",""],
+  ["10-20","H31492","M18-3(NE715324)",312,312,0,100,"达标",""],
+  ["10-20","H31225-3 M座03","87.9×19.7×78.7×10.5×13",1024,1024,0,100,"达标",""],
+  ["10-20","H31245","NE655212",500,660,160,132,"达标",""],
+  ["10-21","HR028","HT30变更件",2420,2420,0,100,"达标",""],
+  ["10-21","H31272","NPC2（NE1383323）",528,528,0,100,"达标",""],
+  ["10-21","HR021","RPU351A 滤波模块",160,160,0,100,"达标",""],
+  ["10-21","HR020","三相铜排",168,168,0,100,"达标",""],
+  ["10-21","HR024","H77B 950400uF",350,350,0,100,"达标",""],
+  ["10-21","H31492","M18-3(NE715324)",312,360,48,115.38,"达标",""],
+  ["10-21","H31225-3 M座03","87.9×19.7×78.7×10.5×13",1024,1024,0,100,"达标",""],
+  ["10-22","H31324","NPB3",2700,2700,0,100,"达标",""],
+  ["10-22","H31272","NPC2（NE1383323）",528,528,0,100,"达标",""],
+  ["10-22","H3372-A","20/44*21",23868,23868,0,100,"达标",""],
+  ["10-22","H3415","25/50*29.5",15000,15000,0,100,"达标",""],
+  ["10-22","H3453","16/25*10",25110,25110,0,100,"达标",""],
+  ["10-22","H31225-3 M座03","87.9×19.7×78.7×10.5×13",1024,1024,0,100,"达标",""],
+  ["10-22","HR021","RPU351A 滤波模块",160,200,40,125,"达标",""],
+  ["10-22","HR020","三相铜排",168,168,0,100,"达标",""],
+  ["10-22","HR024","H77B 950400uF",350,400,50,114.29,"达标",""],
+  ["10-22","H31492","M18-3(NE715324)",350,408,58,116.57,"达标",""],
+  ["10-23","H31251","TM",648,648,0,100,"达标",""],
+  ["10-23","H31244","GM",648,648,0,100,"达标",""],
+  ["10-23","H31272","NPC2（NE1383323）",528,528,0,100,"达标",""],
+  ["10-23","HR021","RPU351A 滤波模块",160,200,40,125,"达标",""],
+  ["10-23","HR020","三相铜排",120,120,0,100,"达标",""],
+  ["10-23","HR024","H77B 950400uF",400,400,0,100,"达标",""],
+  ["10-23","H31492","M18-3(NE715324)",408,408,0,100,"达标",""],
+  ["10-23","H31225-3 M座03","87.9×19.7×78.7×10.5×13",1082,1082,0,100,"达标",""],
+  ["10-23","H3374","ALF-H20P10M",10000,12320,2320,123.2,"达标",""],
+  ["10-24","H3303","40/54*20",17040,17040,0,100,"达标",""],
+  ["10-24","H3696","50/63*25",3200,3200,0,100,"达标",""],
+  ["10-24","HR022","HT11",3600,3600,0,100,"达标",""],
+  ["10-24","H31272","NPC2（NE1383323）",528,528,0,100,"达标",""],
+  ["10-24","HR021","RPU351A 滤波模块",200,200,0,100,"达标",""],
+  ["10-24","HR020","三相铜排",168,168,0,100,"达标",""],
+  ["10-24","HR024","H77B 950400uF",400,400,0,100,"达标",""],
+  ["10-24","H31492","M18-3(NE715324)",408,408,0,100,"达标",""],
+  ["10-24","HR018-B","下肢（磁环)",1018,1018,0,100,"达标",""],
+];
+
+/* ---------------- state ---------------- */
+let curDaily = DEFAULT_DAILY.map(x=>Object.assign({},x));
+let curDetail = DEFAULT_DETAIL.map(r=>r.slice());
+let dataSource = '内置数据 (2026.10.19-10.24)';
+let dataFileName = '';
+
+/* ================================================================
+   云端数据层 · 所有数据存放在共享数据表，不写入本地浏览器
+   ================================================================ */
+var DATABASE_ID = 'CtrxjkZhrHrGzoDfjZzPRs';
+var db = (window.__SMART_PAGE__ && window.__SMART_PAGE__.database) || null;
+var ONLINE = !!db;
+var editMode = false, saving = 0, lastSync = null;
+
+/* 新增行的临时草稿缓存：仅用于防止刷新丢失，正式数据一律存云端数据表 */
+var DRAFT_KEY = 'otd_draft_newrow';
+function saveDraft(rows){
+  try{ if(rows && rows.length) localStorage.setItem(DRAFT_KEY, JSON.stringify(rows)); else clearDraft(); }catch(e){}
+}
+function loadDraft(){
+  try{ var s = localStorage.getItem(DRAFT_KEY); return s ? JSON.parse(s) : []; }catch(e){ return []; }
+}
+function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} }
+function syncDraft(){ saveDraft(curDetail.filter(function(r){ return !r[9]; })); }
+
+function setSync(state, text){
+  var b = $('srcBadge'); if(!b) return;
+  var dot = state==='busy'?'busy':(state==='off'?'off':(state==='err'?'err':''));
+  b.className = 'src-badge' + (state==='err'?' err':((state==='busy'||state==='off')?' warn':''));
+  b.innerHTML = '<span class="sync-dot '+dot+'"></span>' + text;
+}
+
+async function cloudFetchAll(){
+  var all=[], cursor=null, guard=0;
+  do{
+    var res = cursor
+      ? await db.query({databaseId: DATABASE_ID, pageSize: 100, startCursor: cursor})
+      : await db.query({databaseId: DATABASE_ID, pageSize: 100});
+    var rs = (res && res.results) || [];
+    all = all.concat(rs);
+    cursor = (res && res.hasMore) ? res.nextCursor : null;
+  }while(cursor && (++guard) < 50);
+  return all;
+}
+
+function recToRow(rec){
+  return [
+    String(rec['日期']||''), String(rec['编码']||''), String(rec['规格']||''),
+    +rec['计划数量']||0, +rec['实际数量']||0, +rec['差异']||0, +rec['交付率']||0,
+    String(rec['状态']||'未达标'), String(rec['备注']||''), rec['_id']||''
+  ];
+}
+function rowToProps(r){
+  return {
+    '日期':{text:String(r[0]||'')}, '编码':{text:String(r[1]||'')}, '规格':{text:String(r[2]||'')},
+    '计划数量':{number:+r[3]||0}, '实际数量':{number:+r[4]||0}, '差异':{number:+r[5]||0},
+    '交付率':{number:+r[6]||0}, '状态':{select:(+r[6]>=95 ? '达标':'未达标')},
+    '备注':{text:String(r[8]||'')}
+  };
+}
+function recalcRow(r){
+  r[5] = (+r[4]||0) - (+r[3]||0);
+  r[6] = (+r[3])>0 ? Math.round((+r[4]||0)/(+r[3])*10000)/100 : ((+r[4]||0)>0?100:0);
+  r[7] = statusOf(r[6]);
+}
+
+async function cloudLoad(silent){
+  if(!ONLINE) return false;
+  try{
+    setSync('busy','同步中…');
+    var recs = await cloudFetchAll();
+    if(!recs.length){ setSync('off','云端暂无数据'); return false; }
+    curDetail = recs.map(recToRow).sort(function(a,b){ return (a[0]+a[1]).localeCompare(b[0]+b[1]); });
+    curDaily  = aggregate(curDetail);
+    dataSource = '云端共享数据表';
+    lastSync = new Date();
+    renderAll();
+    /* 若上次有未保存的新增行草稿，恢复出来让用户补存 */
+    var hasPending = curDetail.some(function(r){ return !r[9]; });
+    if(!hasPending){
+      var d = loadDraft();
+      if(d.length){
+        d.forEach(function(row){ if(row.length<10) row.push(''); curDetail.push(row); });
+        curDaily = aggregate(curDetail); renderAll();
+        toast('已恢复上次未保存的新增行（'+d.length+' 行），请检查后保存','ok');
+      }
+    }else{ clearDraft(); }
+    setSync('ok','☁ 云端同步 · ' + lastSync.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}));
+    return true;
+  }catch(err){
+    setSync('err','云端连接失败');
+    if(!silent) toast('读取云端数据失败：'+((err&&err.message)||err), 'bad');
+    return false;
+  }
+}
+
+async function saveRow(r){
+  if(!ONLINE){ toast('未连接云端，改动只在本地生效','bad'); return; }
+  saving++; setSync('busy','保存中…');
+  try{
+    if(r[9]){
+      await db.updateRecord({databaseId:DATABASE_ID, recordId:r[9], properties: rowToProps(r)});
+    }else{
+      var res = await db.addRecord({databaseId:DATABASE_ID, properties: rowToProps(r)});
+      r[9] = (res && (res.id || (res.result && res.result.id))) || '';
+    }
+    saving--;
+    lastSync = new Date();
+    syncDraft();
+    if(!saving) setSync('ok','☁ 已保存 · '+lastSync.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}));
+  }catch(err){
+    saving--;
+    var msg = ((err&&err.message)||String(err));
+    if(/not login|401|未登录/i.test(msg)){
+      setSync('off','只读 · 未登录');
+      toast('看板可自由查看；保存到云端需要先登录 WorkBuddy 账号（登录本站点后刷新即可编辑）','bad');
+    }else{
+      setSync('err','保存失败');
+      toast('保存失败：'+msg,'bad');
+    }
+  }
+}
+
+async function deleteRow(idx){
+  var r = curDetail[idx]; if(!r) return;
+  if(ONLINE && r[9]){
+    try{
+      setSync('busy','删除中…');
+      await db.deleteRecord({databaseId:DATABASE_ID, recordId:r[9]});
+    }catch(err){
+      var msg2 = ((err&&err.message)||String(err));
+      if(/not login|401|未登录/i.test(msg2)){
+        setSync('off','只读 · 未登录');
+        toast('删除需要先登录 WorkBuddy 账号','bad');
+      }else{
+        setSync('err','删除失败');
+        toast('删除失败：'+msg2,'bad');
+      }
+      return;
+    }
+  }
+  curDetail.splice(idx,1);
+  curDaily = aggregate(curDetail);
+  renderAll();
+  setSync('ok','☁ 已同步');
+  toast('已删除该行','ok');
+}
+
+/* 导入覆盖：先写新记录、成功后再删旧记录，避免中途失败丢数据 */
+async function replaceCloud(rows){
+  if(!ONLINE){ toast('未连接云端，无法同步','bad'); return; }
+  var old = curDetail.filter(function(r){ return r[9]; }).map(function(r){ return r[9]; });
+  setSync('busy','写入云端 0/'+rows.length);
+  try{
+    for(var i=0;i<rows.length;i+=5){
+      await Promise.all(rows.slice(i,i+5).map(function(r){
+        return db.addRecord({databaseId:DATABASE_ID, properties:rowToProps(r)});
+      }));
+      setSync('busy','写入云端 '+Math.min(i+5,rows.length)+'/'+rows.length);
+    }
+    for(var j=0;j<old.length;j+=5){
+      await Promise.all(old.slice(j,j+5).map(function(id){
+        return db.deleteRecord({databaseId:DATABASE_ID, recordId:id});
+      }));
+    }
+    await cloudLoad(true);
+    toast('已导入并同步到云端：'+rows.length+' 行，其他人刷新即可看到','ok');
+  }catch(err){
+    setSync('err','写入失败');
+    toast('写入云端失败：'+((err&&err.message)||err),'bad');
+    cloudLoad(true);
+  }
+}
+
+/* ---------------- helpers ---------------- */
+const $ = id => document.getElementById(id);
+const fmt = n => (n==null?'--':n.toLocaleString('zh-CN'));
+const nf = (n,d=1) => (Math.round(n*10**d)/10**d).toFixed(d);
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent){
+  const e = document.createElementNS(NS, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  if(parent) parent.appendChild(e);
+  return e;
+}
+let toastTimer=null;
+function toast(msg, type){
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'show ' + (type||'ok');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{t.className='';}, 3200);
+}
+const num = v => {
+  if(v==null || v==='') return NaN;
+  if(typeof v==='number') return v;
+  const s = String(v).replace(/[,\s]/g,'');
+  if(!s) return NaN;
+  return parseFloat(s);
+};
+function toPct(v, plan, act){
+  let r = NaN;
+  if(v!=null && v!==''){
+    if(typeof v==='number') r = (v>0 && v<=1) ? v*100 : v;
+    else {
+      const s = String(v).replace(/%/g,'').trim();
+      r = parseFloat(s);
+      if(r>0 && r<=1) r*=100;
+    }
+  }
+  if(isNaN(r)) r = (plan>0) ? act/plan*100 : 0;
+  return Math.round(r*100)/100;
+}
+const pad2 = n => String(n).padStart(2,'0');
+const fmtDate = v => {
+  if(v==null||v==='') return '';
+  if(v instanceof Date){
+    return pad2(v.getMonth()+1)+'-'+pad2(v.getDate());
+  }
+  let s = String(v).trim();
+  const ym = s.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+  if(ym) return pad2(+ym[2])+'-'+pad2(+ym[3]);
+  const m = s.match(/^(\d{1,2})[-/.](\d{1,2})/);
+  if(m) return pad2(+m[1])+'-'+pad2(+m[2]);
+  return s;
+};
+function statusOf(rate){
+  return rate>=95 ? '达标' : '未达标';
+}
+
+/* ================================================================
+   渲染（导入或重置后调用 renderAll）
+   ================================================================ */
+function renderAll(){
+  renderKPI(); renderRate(); renderVol(); renderDiff(); renderTop(); renderTable(); renderFindings();
+  $('sourceText').textContent = dataSource;
+  $('genTime').textContent = (lastSync ? lastSync.toLocaleString('zh-CN')+'（云端）' : new Date().toLocaleString('zh-CN'));
+}
+
+function renderKPI(){
+  const daily = curDaily;
+  const totPlan = daily.reduce((s,d)=>s+(+d.plan||0),0);
+  const totAct  = daily.reduce((s,d)=>s+(+d.act||0),0);
+  const totGap  = totAct - totPlan;
+  const otd     = totPlan>0 ? totAct/totPlan*100 : 0;
+  const okDays  = daily.filter(d=>d.status==='达标'||+d.rate>=95).length;
+  const badRows = curDetail.filter(r=>r[7]==='未达标');
+
+  $('kpiOtd').textContent = nf(otd,2);
+  $('kpiPlan').textContent = fmt(totPlan);
+  $('kpiAct').textContent = fmt(totAct);
+  $('kpiPlan2').textContent = fmt(totPlan);
+  $('kpiAct2').textContent = fmt(totAct);
+  $('kpiGap').textContent = fmt(Math.abs(totGap));
+  $('kpiGapPct').textContent = totPlan>0 ? nf(Math.abs(totGap)/totPlan*100,2)+'%' : '--';
+  $('kpiDays').textContent = okDays;
+  $('kpiDaysTotal').textContent = daily.length;
+  $('kpiDaysPct').textContent = daily.length? nf(okDays/daily.length*100,1)+'%':'--';
+  $('kpiDaysTag').textContent = okDays/daily.length>=0.8 ? '良好' : (okDays/daily.length>=0.5?'关注':'告警');
+  $('kpiDaysTag').className = 'tag ' + (okDays/daily.length>=0.8?'tag-green':okDays/daily.length>=0.5?'tag-amber':'tag-red');
+  $('kpiBad').textContent = badRows.length;
+  $('periodText').textContent = daily.length ? daily[0].d.replace('/','.')+' — '+daily[daily.length-1].d.replace('/','.') : '--';
+
+  const donut = (id,pct,color)=>{
+    const svg = $(id); svg.innerHTML='';
+    const r=20, c=2*Math.PI*r, off = c*(1-pct/100);
+    el('circle',{cx:26,cy:26,r,fill:'none',stroke:'#eef2f7','stroke-width':6},svg);
+    el('circle',{cx:26,cy:26,r,fill:'none',stroke:color,'stroke-width':6,
+      'stroke-dasharray':`${c-off} ${off}`,'stroke-linecap':'round',
+      transform:'rotate(-90 26 26)'},svg);
+    el('text',{x:26,y:29,'text-anchor':'middle','font-size':9,'font-weight':700,fill:color},svg)
+      .textContent = nf(pct,0)+'%';
+  };
+  donut('donutOtd', otd, '#3b82f6');
+  donut('donutDays', daily.length? okDays/daily.length*100:0, '#10b981');
+}
+
+function renderRate(){
+  const daily = curDaily; const box = $('chartRate'); box.innerHTML='';
+  if(!daily.length){ box.innerHTML='<div class="empty-tip">暂无交付率数据</div>'; return; }
+  const W=560, H=250, PL=42, PR=12, PT=16, PB=28;
+  const yMin=Math.max(0, Math.min(...daily.map(d=>+d.rate))-15);
+  const yMax=Math.max(110, Math.max(...daily.map(d=>+d.rate))+5);
+  const X = i => PL + i*(W-PL-PR)/(daily.length-1||1);
+  const Y = v => PT + (yMax-v)/(yMax-yMin)*(H-PT-PB);
+  const svg = el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%'});
+  const step = Math.max(10, Math.ceil((yMax-yMin)/7/10)*10);
+  for(let g=Math.ceil(yMin/step)*step; g<=yMax; g+=step){
+    el('line',{x1:PL,x2:W-PR,y1:Y(g),y2:Y(g),stroke:'#eef2f7','stroke-width':1},svg);
+    el('text',{x:PL-6,y:Y(g)+3.5,'text-anchor':'end','font-size':9.5,fill:'#94a3b8'},svg).textContent=g+'%';
+  }
+  if(yMin<=95 && yMax>=95){
+    el('line',{x1:PL,x2:W-PR,y1:Y(95),y2:Y(95),stroke:'#ef4444','stroke-width':1.4,
+      'stroke-dasharray':'6 5'},svg);
+    el('text',{x:W-PR,y:Y(95)-5,'text-anchor':'end','font-size':9.5,fill:'#ef4444',fontWeight:600},svg)
+      .textContent='95% 达标线';
+  }
+  const pts = daily.map((d,i)=>`${X(i)},${Y(+d.rate)}`).join(' ');
+  el('polyline',{points:`${X(0)},${Y(yMin)} ${pts} ${X(daily.length-1)},${Y(yMin)}`,
+    fill:'rgba(245,158,11,.10)',stroke:'none'},svg);
+  el('polyline',{points:pts,fill:'none',stroke:'#f59e0b','stroke-width':2.4,
+    'stroke-linejoin':'round','stroke-linecap':'round'},svg);
+  daily.forEach((d,i)=>{
+    const cx=X(i), cy=Y(+d.rate);
+    const c = (d.status==='达标'||+d.rate>=95) ? '#10b981' : '#ef4444';
+    el('circle',{cx,cy,r:5,fill:c,stroke:'#fff','stroke-width':2},svg);
+    el('text',{x:cx,y:cy-9,'text-anchor':'middle','font-size':9.5,fontWeight:700,fill:c},svg)
+      .textContent = nf(+d.rate,2).replace(/\.?0+$/,'')+'%';
+    el('text',{x:cx,y:H-8,'text-anchor':'middle','font-size':10.5,fill:'#64748b',fontWeight:600},svg)
+      .textContent = d.d;
+  });
+  box.appendChild(svg);
+}
+
+function renderVol(){
+  const daily = curDaily; const box = $('chartVol'); box.innerHTML='';
+  if(!daily.length){ box.innerHTML='<div class="empty-tip">暂无发货量数据</div>'; return; }
+  const W=560, H=250, PL=46, PR=12, PT=16, PB=28;
+  const maxV = Math.max(...daily.map(d=>Math.max(+d.plan||0,+d.act||0)));
+  const yMax = Math.max(1000, Math.ceil(maxV*1.08));
+  const Y = v => PT + (1-v/yMax)*(H-PT-PB);
+  const bw = Math.min(26, ((W-PL-PR)/daily.length-10)/2);
+  const svg = el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%'});
+  const step = Math.max(1000, Math.ceil(yMax/6/1000)*1000);
+  for(let g=0; g<=yMax; g+=step){
+    el('line',{x1:PL,x2:W-PR,y1:Y(g),y2:Y(g),stroke:'#eef2f7','stroke-width':1},svg);
+    el('text',{x:PL-6,y:Y(g)+3.5,'text-anchor':'end','font-size':9.5,fill:'#94a3b8'},svg)
+      .textContent = g>=10000 ? (g/10000).toFixed(g%10000?'1':'0')+'万' : g;
+  }
+  daily.forEach((d,i)=>{
+    const gx = PL + i*(W-PL-PR)/daily.length;
+    const plan=+d.plan||0, act=+d.act||0;
+    const h1 = Y(0)-Y(plan), h2 = Y(0)-Y(act);
+    const r1 = el('rect',{x:gx+bw/2-bw, y:Y(plan), width:bw, height:h1, fill:'#c7d2fe', rx:3},svg);
+    const t1 = el('title',{},r1); t1.textContent = `${d.d} 计划: ${fmt(plan)} 件`;
+    const r2 = el('rect',{x:gx+bw/2, y:Y(act), width:bw, height:h2,
+      fill:(d.status==='达标'||+d.rate>=95)?'#3b82f6':'#ef4444', rx:3},svg);
+    const t2 = el('title',{},r2); t2.textContent = `${d.d} 实际: ${fmt(act)} 件`;
+    const lbl = v => v>999 ? (v/1000).toFixed(1)+'k' : v;
+    if(h1>26) el('text',{x:gx, y:Y(plan)-5,'text-anchor':'middle','font-size':9,fill:'#64748b'},svg).textContent=lbl(plan);
+    if(h2>26) el('text',{x:gx+bw, y:Y(act)-5,'text-anchor':'middle','font-size':9,fill:'#2563eb',fontWeight:600},svg).textContent=lbl(act);
+    el('text',{x:gx+bw/2,y:H-8,'text-anchor':'middle','font-size':10.5,fill:'#64748b',fontWeight:600},svg).textContent=d.d;
+  });
+  box.appendChild(svg);
+}
+
+function renderDiff(){
+  const daily = curDaily; const box = $('chartDiff'); box.innerHTML='';
+  if(!daily.length){ box.innerHTML='<div class="empty-tip">暂无差异数据</div>'; return; }
+  const W=560, H=250, PL=46, PR=12, PT=16, PB=28;
+  const maxA = Math.max(...daily.map(d=>Math.abs(+d.diff||0)), 1);
+  const scale = 0.9*(W-PL-PR)/2/maxA;
+  const midX = PL + (W-PL-PR)/2;
+  const svg = el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%'});
+  el('line',{x1:midX,x2:midX,y1:PT,y2:H-PB,stroke:'#cbd5e1','stroke-width':1.2},svg);
+  el('text',{x:midX,y:PT-4,'text-anchor':'middle','font-size':9.5,fill:'#94a3b8'},svg).textContent='0';
+  daily.forEach((d,i)=>{
+    const y = PT + i*(H-PT-PB)/daily.length + (H-PT-PB)/daily.length*0.22;
+    const bh = (H-PT-PB)/daily.length*0.56;
+    const v = +d.diff||0, w = Math.abs(v)*scale, pos = v>=0;
+    const x = pos ? midX : midX-w;
+    const c = v>0 ? '#10b981' : v<0 ? '#ef4444' : '#cbd5e1';
+    const r = el('rect',{x,y,width:w,height:bh,fill:c,rx:3},svg);
+    const t = el('title',{},r); t.textContent = `${d.d} 差异: ${v>0?'+':''}${fmt(v)} 件`;
+    el('text',{x:pos?midX+w+6:midX-w-6,y:y+bh/2+3.5,'text-anchor':pos?'start':'end',
+      'font-size':9.5,fontWeight:700,fill:c},svg)
+      .textContent = (v>0?'+':'')+fmt(v);
+    el('text',{x:PL-6,y:y+bh/2+3.5,'text-anchor':'end','font-size':10.5,fill:'#64748b',fontWeight:600},svg)
+      .textContent = d.d;
+  });
+  box.appendChild(svg);
+}
+
+function renderTop(){
+  const box = $('chartTop'); box.innerHTML='';
+  const items = curDetail
+    .filter(r=>r[7]==='未达标')
+    .map(r=>({code:r[1], spec:r[2]||'', gap:-(+r[5]||0)}))
+    .sort((a,b)=>b.gap-a.gap).slice(0,5);
+  if(!items.length){ box.innerHTML='<div class="empty-tip">🎉 无未达标产品</div>'; return; }
+  const W=560, H=250, PL=74, PR=90, PT=14, PB=12;
+  const maxG = items[0].gap || 1, barH=22;
+  const gap = (H-PT-PB - items.length*barH)/(items.length+1);
+  const svg = el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%'});
+  const defs = el('defs',{},svg);
+  const lg = el('linearGradient',{id:'gradRed',x1:0,y1:0,x2:1,y2:0},defs);
+  el('stop',{offset:0,'stop-color':'#f87171'},lg);
+  el('stop',{offset:1,'stop-color':'#ef4444'},lg);
+  items.forEach((it,i)=>{
+    const y = PT + gap + i*(barH+gap);
+    const w = (it.gap/maxG)*((W-PL-PR)*0.82);
+    el('rect',{x:PL,y,width:w,height:barH,fill:'#fecaca',rx:4},svg);
+    el('rect',{x:PL,y,width:w,height:barH,fill:'url(#gradRed)',rx:4,opacity:.92},svg);
+    el('text',{x:PL-8,y:y+barH/2+4,'text-anchor':'end','font-size':11,fill:'#1e293b',fontWeight:700},svg)
+      .textContent = it.code;
+    el('text',{x:PL+10,y:y+barH/2+3.5,'font-size':9.5,fill:'#7f1d1d'},svg)
+      .textContent = String(it.spec).slice(0,16);
+    el('text',{x:PL+w+8,y:y+barH/2+4,'font-size':11,fill:'#dc2626',fontWeight:700},svg)
+      .textContent = '-'+fmt(it.gap);
+  });
+  box.appendChild(svg);
+}
+
+function renderTable(){
+  const tb = $('tbody'); tb.innerHTML='';
+  $('rowCount').textContent = curDetail.length;
+  const edA = editMode ? ' contenteditable="true"' : '';
+  const edT = editMode ? ' editable' : '';
+  const thead = document.querySelector('thead tr');
+  if(thead){
+    const op = thead.querySelector('th.op');
+    if(editMode && !op){
+      const th = document.createElement('th'); th.className='op'; th.textContent='操作'; thead.appendChild(th);
+    }else if(!editMode && op){ op.remove(); }
+  }
+  curDetail.forEach((r,idx)=>{
+    const tr = document.createElement('tr');
+    let cn = '';
+    if(r[7]==='未达标') cn = 'row-bad';
+    if(!r[9] && lastSync) cn += (cn?' ':'') + 'row-new';
+    if(cn) tr.className = cn;
+    const diff = +r[5]||0;
+    const cells = [
+      `<td class="num${edT}" data-f="0"${edA}>${r[0]}</td>`,
+      `<td class="${edT?edT.trim():''}" data-f="1"${edA}><b>${r[1]}</b></td>`,
+      `<td class="${edT?edT.trim():''}" data-f="2"${edA} style="color:var(--muted)">${r[2]||''}</td>`,
+      `<td class="num${edT}" data-f="3"${edA} style="text-align:right">${fmt(+r[3])}</td>`,
+      `<td class="num${edT}" data-f="4"${edA} style="text-align:right">${fmt(+r[4])}</td>`,
+      `<td class="num ${diff>0?'pos':diff<0?'neg':'zero'}" style="text-align:right">${diff>0?'+':''}${fmt(diff)}</td>`,
+      `<td class="num" style="text-align:right">${nf(+r[6],1)}%</td>`,
+      `<td><span class="st ${r[7]==='达标'?'st-ok':'st-bad'}">${r[7]}</span></td>`,
+      `<td class="${edT?edT.trim():''}" data-f="8"${edA} style="color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis">${r[8]||'—'}</td>`
+    ];
+    if(editMode) cells.push(`<td><button class="del-btn" data-i="${idx}">删除</button></td>`);
+    tr.innerHTML = cells.join('');
+    tb.appendChild(tr);
+  });
+  bindEditCells();
+}
+
+/* 单元格编辑 → 重算 → 自动保存到云端 */
+function bindEditCells(){
+  if(!editMode) return;
+  const tb = $('tbody');
+  tb.querySelectorAll('td[data-f]').forEach(td=>{
+    td.addEventListener('blur', onCellEdit);
+    td.addEventListener('keydown', e=>{
+      if(e.key==='Enter'){ e.preventDefault(); td.blur(); }
+    });
+  });
+  tb.querySelectorAll('.del-btn').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const i = +b.getAttribute('data-i');
+      if(confirm('确认删除该行？删除后所有人的看板都会同步移除。')) deleteRow(i);
+    });
+  });
+}
+
+function onCellEdit(e){
+  const td = e.currentTarget;
+  const tr = td.parentElement;
+  const rows = Array.prototype.slice.call(tr.parentElement.children);
+  const idx = rows.indexOf(tr);
+  const r = curDetail[idx];
+  if(!r) return;
+  const f = +td.getAttribute('data-f');
+  const raw = td.textContent.trim();
+  if(f===3 || f===4 || f===6){
+    const n = num(raw.replace(/,/g,''));
+    if(isNaN(n)){ toast('请输入数字','bad'); renderTable(); return; }
+    r[f] = n;
+  } else {
+    r[f] = raw;
+  }
+  if(f===3 || f===4 || f===6) recalcRow(r);
+  curDaily = aggregate(curDetail);
+  renderAll();
+  saveRow(r);
+}
+
+function renderFindings(){
+  const daily = curDaily;
+  const totPlan = daily.reduce((s,d)=>s+(+d.plan||0),0);
+  const totAct  = daily.reduce((s,d)=>s+(+d.act||0),0);
+  const gap = totAct-totPlan;
+  const otd = totPlan>0? totAct/totPlan*100:0;
+  const okDays = daily.filter(d=>d.status==='达标'||+d.rate>=95).length;
+  const bads = daily.filter(d=>d.status==='未达标'&&+d.rate<95).sort((a,b)=>+a.rate-+b.rate);
+  const topGap = curDetail.filter(r=>r[7]==='未达标').sort((a,b)=>(+b[5])-(+a[5])).slice(0,3);
+  const lis = [];
+  lis.push({html:`整体交付率 <b>${nf(otd,2)}%</b>，周期合计计划 ${fmt(totPlan)} 件、实际发货 ${fmt(totAct)} 件，累计欠发 <b>${fmt(Math.abs(gap))} 件</b>（占计划 ${totPlan? nf(Math.abs(gap)/totPlan*100,2):'--'}%），达标天数 ${okDays}/${daily.length}。`, warn:false});
+  const peak = daily.reduce((a,b)=> (+b.act)>(+a.act)?b:a, daily[0]);
+  if(peak) lis.push({html:`发货高峰日为 ${peak.d}（${fmt(+peak.act)} 件，交付率 ${nf(+peak.rate,2)}%），为集中补发前期欠量所致。`, warn:false});
+  if(bads.length){
+    const w = bads[0];
+    lis.push({html:`最差日为 <b>${w.d}</b>（交付率仅 ${nf(+w.rate,2)}%），欠发 ${fmt(Math.abs(+w.diff))} 件。`, warn:true});
+  }
+  if(topGap.length){
+    const s = topGap.map(r=>`${r[1]}（欠 ${fmt(Math.abs(+r[5]))}）`).join('、');
+    lis.push({html:`欠货集中度：<b>${s}</b> 为主要未达标项，建议优先推动供应商交期与来料质量。`, warn:true});
+  }
+  if(!bads.length) lis.push({html:`本期所有日期交付率均达 95% 参考线，交付表现稳定。`, warn:false});
+  const ul = $('findingsList'); ul.innerHTML='';
+  lis.forEach(it=>{
+    const li = document.createElement('li');
+    li.className = it.warn ? 'warn' : '';
+    li.innerHTML = it.html; ul.appendChild(li);
+  });
+}
+
+/* ================================================================
+   数据导入
+   ================================================================ */
+const fileInput = $('fileInput');
+$('btnImport').addEventListener('click', ()=>fileInput.click());
+fileInput.addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const ext = f.name.split('.').pop().toLowerCase();
+  if(ext==='csv'||ext==='txt') readCSV(f);
+  else readExcel(f);
+  fileInput.value='';
+});
+
+function readCSV(file){
+  const rd = new FileReader();
+  rd.onload = ()=>{
+    try{ applyParsed(parseCSVText(rd.result)); }
+    catch(err){ toast('CSV 解析失败：'+err.message, 'bad'); }
+  };
+  rd.readAsText(file, 'utf-8');
+}
+/* 通用 CSV 文本解析：兼容引号转义、CRLF；跳过 # 注释行与空行 */
+function parseCSVText(text){
+  const rows=[]; let row=[], field='', q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){field+='"';i++;} else q=false; }
+      else field+=c;
+    } else {
+      if(c==='"') q=true;
+      else if(c===','){ row.push(field); field=''; }
+      else if(c==='\n'||c==='\r'){
+        if(c==='\r'&&text[i+1]==='\n') i++;
+        row.push(field); field=''; rows.push(row); row=[];
+      } else field+=c;
+    }
+  }
+  if(field!==''||row.length){ row.push(field); rows.push(row); }
+  const cleaned = rows.filter(r=>r.some(v=>String(v).trim()!=='') && !String(r[0]).trim().startsWith('#'));
+  const head = cleaned.find(r=>r.some(v=>/日期|编码|计划|交付率/.test(String(v)))) || [];
+  const hs = head.map(v=>String(v).trim());
+  const isDetail = hs.some(h=>h.includes('编码')) || hs.some(h=>h.includes('规格'));
+  const isSum = hs.some(h=>h.includes('计划交货数量')) ||
+                (hs.some(h=>h==='日期') && hs.some(h=>h.includes('计划数量')) && !isDetail);
+  if(isDetail){
+    const detail = parseDetail(cleaned);
+    if(!detail.length) throw new Error('明细表无有效数据行');
+    const daily = aggregate(detail);
+    return {daily, detail};
+  }
+  if(isSum){
+    const daily = parseSummary(cleaned);
+    if(!daily.length) throw new Error('汇总表无有效数据行');
+    const detail = expandDetail(daily);
+    return {daily, detail};
+  }
+  throw new Error('表头无法识别：需包含「日期/编码」(明细) 或「日期/计划交货数量」(汇总)');
+}
+function readExcel(file){
+  if(typeof XLSX === 'undefined'){
+    toast('Excel 解析库未加载（网络受限），请改用 CSV 格式导入', 'bad');
+    return;
+  }
+  const rd = new FileReader();
+  rd.onload = ()=>{
+    try{
+      const wb = XLSX.read(rd.result, {type:'array', cellDates:true});
+      const sheets = wb.SheetNames.map(n=>{
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[n], {header:1, defval:null, raw:true});
+        return {name:n, rows};
+      });
+      applyParsed(extractFromSheets(sheets));
+    }catch(err){ toast('Excel 解析失败：'+err.message, 'bad'); }
+  };
+  rd.readAsArrayBuffer(file);
+}
+
+/* 从 sheets 中识别「汇总」与「明细」，缺省时自动聚合 */
+function extractFromSheets(sheets){
+  let sumRows=null, detRows=null;
+  sheets.forEach(s=>{
+    const head = (s.rows.find(r=>r&&r.some(v=>v!=null&&v!==''))||[]).map(v=>v==null?'':String(v).trim());
+    const hasDetail = head.some(h=>h.includes('编码')) || head.some(h=>h.includes('规格'));
+    const hasSum    = head.some(h=>h.includes('计划交货数量')) || (head.some(h=>h==='日期')&&head.some(h=>h.includes('计划数量'))&&!hasDetail);
+    const score = hasDetail?2:(hasSum?1:0);
+    if(score>=2 && detRows==null) detRows = s.rows;
+    else if(score===1 && sumRows==null) sumRows = s.rows;
+    else if(score===0){
+      const nm = s.name;
+      if(/明细/.test(nm) && detRows==null) detRows = s.rows;
+      else if(/汇总|交付率/.test(nm) && sumRows==null) sumRows = s.rows;
+    }
+  });
+  const daily = sumRows ? parseSummary(sumRows) : [];
+  let detail = detRows ? parseDetail(detRows) : [];
+  if(!daily.length && detail.length) daily.push(...aggregate(detail));
+  if(!detail.length && daily.length) detail = expandDetail(daily);
+  if(!daily.length && !detail.length) throw new Error('未找到有效数据表（需含「日期/计划交货数量」或「日期/编码」表头）');
+  if(daily.length && !daily.some(d=>d.status)) daily.forEach(d=>d.status=statusOf(+d.rate));
+  return {daily, detail};
+}
+
+function parseSummary(rows){
+  const out=[]; let headIdx=-1;
+  rows.forEach((r,idx)=>{
+    if(headIdx>=0) return;
+    const hs = (r||[]).map(v=>v==null?'':String(v).trim());
+    if(hs.some(h=>h==='日期') && (hs.some(h=>h.includes('计划交货数量'))||hs.some(h=>h==='计划数量'))) headIdx=idx;
+  });
+  if(headIdx<0) return out;
+  const hs = rows[headIdx].map(v=>v==null?'':String(v).trim());
+  const idx = k => hs.findIndex(h=>h.includes(k));
+  const iDate=idx('日期'), iPlan=hs.findIndex(h=>h.includes('计划交货数量')||h==='计划数量'),
+        iAct=hs.findIndex(h=>h.includes('实际发货')||h.includes('实际数量')),
+        iRate=idx('交付率'), iDiff=idx('差异'), iSt=idx('状态');
+  for(let r=headIdx+1; r<rows.length; r++){
+    const row=rows[r]; if(!row||!row.length) continue;
+    const d = fmtDate(row[iDate]);
+    const ds = d.replace(/[-/]/g,'');
+    if(!d || /^\D/.test(ds) || '合计总计汇总'.includes(String(row[iDate]).trim().slice(0,2))) continue;
+    const plan = num(row[iPlan]), act = num(row[iAct]);
+    if(isNaN(plan) && isNaN(act)) continue;
+    const rate = toPct(row[iRate], plan, act);
+    const diff = !isNaN(num(row[iDiff])) ? num(row[iDiff]) : (isNaN(plan)?0:act-plan);
+    const st = row[iSt]!=null && /达|未/.test(String(row[iSt])) ? (String(row[iSt]).includes('未')?'未达标':'达标') : statusOf(rate);
+    out.push({d, plan:isNaN(plan)?0:plan, act:isNaN(act)?0:act, rate, diff, status:st});
+  }
+  out.sort((a,b)=>a.d.localeCompare(b.d));
+  return out;
+}
+
+function parseDetail(rows){
+  const out=[]; let headIdx=-1;
+  rows.forEach((r,idx)=>{
+    if(headIdx>=0) return;
+    const hs=(r||[]).map(v=>v==null?'':String(v).trim());
+    if(hs.some(h=>h==='日期') && (hs.some(h=>h.includes('编码'))||hs.some(h=>h.includes('规格')))) headIdx=idx;
+  });
+  if(headIdx<0) return out;
+  const hs = rows[headIdx].map(v=>v==null?'':String(v).trim());
+  const idx=k=>hs.findIndex(h=>h.includes(k));
+  const iDate=idx('日期'), iCode=idx('编码'), iSpec=idx('规格'),
+        iPlan=idx('计划'), iAct=idx('实际'), iRate=idx('交付率'), iDiff=idx('差异'), iSt=idx('状态'), iNote=idx('备注');
+  for(let r=headIdx+1; r<rows.length; r++){
+    const row=rows[r]; if(!row||!row.length) continue;
+    const d = fmtDate(row[iDate]);
+    const code = row[iCode]!=null?String(row[iCode]).trim():'';
+    if(!d || !code) continue;
+    const plan = num(row[iPlan]), act = num(row[iAct]);
+    if(isNaN(plan)&&isNaN(act)) continue;
+    const p=isNaN(plan)?0:plan, a=isNaN(act)?0:act;
+    const rate = toPct(row[iRate], p, a);
+    const diff = !isNaN(num(row[iDiff])) ? num(row[iDiff]) : a-p;
+    const st = row[iSt]!=null&&/达|未/.test(String(row[iSt])) ? (String(row[iSt]).includes('未')?'未达标':'达标') : statusOf(rate);
+    out.push([d, code, row[iSpec]!=null?String(row[iSpec]).trim():'', p, a, diff, rate, st,
+      row[iNote]!=null?String(row[iNote]).trim():'']);
+  }
+  out.sort((a,b)=> (a[0]+a[1]).localeCompare(b[0]+b[1]));
+  return out;
+}
+
+/* 由明细聚合出每日汇总 */
+function aggregate(detail){
+  const map={};
+  detail.forEach(r=>{
+    if(!map[r[0]]) map[r[0]]={d:r[0],plan:0,act:0};
+    map[r[0]].plan += +r[3]||0; map[r[0]].act += +r[4]||0;
+  });
+  return Object.values(map).sort((a,b)=>a.d.localeCompare(b.d)).map(x=>{
+    const rate = x.plan>0? x.act/x.plan*100:100;
+    return {d:x.d, plan:x.plan, act:x.act, rate:Math.round(rate*100)/100, diff:x.act-x.plan, status:statusOf(rate)};
+  });
+}
+/* 只有汇总表时，生成占位明细行 */
+function expandDetail(daily){
+  return daily.map(d=>[d.d, '—', '（仅汇总数据）', d.plan, d.act, d.diff, d.rate, d.status, '']);
+}
+
+function applyParsed(data){
+  if(!data.daily.length) throw new Error('汇总数据为空');
+  const rows = (data.detail||[]).map(r=>r.slice());
+  if(ONLINE){
+    if(!rows.length) throw new Error('明细数据为空，无法写入云端');
+    const ok = confirm(`将用导入的 ${rows.length} 行数据【覆盖云端全部数据】，其他人的看板会同步更新。\n确认继续？`);
+    if(!ok) return;
+    replaceCloud(rows);
+  }else{
+    curDaily = data.daily.map(x=>Object.assign({},x));
+    curDetail = rows;
+    dataSource = '导入数据';
+    renderAll();
+    toast(`导入成功（本地）：${curDaily.length} 天 / ${curDetail.length} 行明细`, 'ok');
+  }
+}
+
+/* 模板下载 */
+function downloadCSV(name, text){
+  const blob = new Blob(['\ufeff'+text], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  a.click(); URL.revokeObjectURL(a.href);
+}
+$('btnTpl').addEventListener('click', ()=>{
+  const sumTpl =
+`日期,计划交货数量,实际发货数量,交付率,差异(实际-计划),状态
+08-16,12000,11800,98.33,-200,达标
+08-17,8000,8000,100,0,达标
+# 说明：交付率可填小数(0.98)或百分数(98%)，留空自动计算；差异留空自动计算；状态可留空自动判定(≥95%达标)`;
+  const detTpl =
+`日期,编码,规格/型号,计划数量,实际数量,差异,交付率,状态,备注
+08-16,H33001,示例产品A,1000,980,-20,98,达标,
+08-16,H33002,示例产品B,500,0,-500,0,未达标,供应商延期
+# 说明：两个 sheet 可放在同一 Excel 的不同工作表，或分别作为汇总/明细 CSV 导入；
+# 只导入明细 CSV 时自动按日期聚合生成每日汇总，只导入汇总 CSV 时明细区显示占位行`;
+  downloadCSV('OTD汇总模板.csv', sumTpl);
+  setTimeout(()=>downloadCSV('OTD明细模板.csv', detTpl), 200);
+  toast('已下载 2 个模板（汇总 + 明细）', 'ok');
+});
+/* 编辑模式开关 */
+$('editChk').addEventListener('change', e=>{
+  editMode = e.target.checked;
+  e.target.parentElement.classList.toggle('on', editMode);
+  $('btnAdd').disabled = !editMode || !ONLINE;
+  renderTable();
+  if(editMode){
+    if(ONLINE) toast('已进入编辑模式：点表格改数字/备注，失焦即存云端（保存需已登录 WorkBuddy 账号）','ok');
+    else toast('未连接云端，改动只在本地显示（其他人看不到）','bad');
+  }
+});
+
+/* 新增一行（编辑模式下） */
+$('btnAdd').addEventListener('click', ()=>{
+  const last = curDetail[curDetail.length-1];
+  const r = [last?last[0]:'10-19', '新编码', '', 0, 0, 0, 0, '未达标', '', ''];
+  curDetail.push(r);
+  syncDraft();
+  renderAll();
+  setTimeout(()=>{
+    const tr = $('tbody').lastElementChild;
+    if(tr){
+      tr.scrollIntoView({block:'center', behavior:'smooth'});
+      const td = tr.querySelector('td[data-f="1"]');
+      if(td){ td.focus(); document.execCommand && document.execCommand('selectAll', false, null); }
+    }
+  }, 60);
+  toast('已在末尾新增一行，填好后自动保存；新增行显示为蓝色底','ok');
+});
+
+/* 手动刷新 */
+$('btnRefresh').addEventListener('click', ()=>{
+  if(!ONLINE){ toast('未连接云端','bad'); return; }
+  cloudLoad().then(ok=>{ if(ok) toast('已拉取云端最新数据','ok'); });
+});
+
+/* 导出当前数据为 CSV */
+$('btnExport').addEventListener('click', ()=>{
+  const q = v => '"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const head = '日期,编码,规格/型号,计划数量,实际数量,差异,交付率,状态,备注';
+  const lines = curDetail.map(r=>[q(r[0]),q(r[1]),q(r[2]),r[3],r[4],r[5],r[6],r[7],q(r[8])].join(','));
+  downloadCSV('OTD明细_'+new Date().toISOString().slice(0,10)+'.csv', [head].concat(lines).join('\n'));
+  toast('已导出当前看板数据','ok');
+});
+
+/* ---------------- init ---------------- */
+(function init(){
+  if(ONLINE){
+    setSync('busy','连接云端…');
+    cloudLoad().then(ok=>{
+      if(!ok){
+        curDaily = DEFAULT_DAILY.map(x=>Object.assign({},x));
+        curDetail = DEFAULT_DETAIL.map(r=>r.slice());
+        renderAll();
+        setSync('off','本地数据');
+      }
+    });
+    setInterval(()=>{
+      const chk = $('autoChk');
+      if(!chk || !chk.checked) return;
+      if(saving>0) return;
+      const ae = document.activeElement;
+      if(ae && ae.isContentEditable) return;   /* 正在编辑时不打断 */
+      cloudLoad(true);
+    }, 60000);
+  }else{
+    renderAll();
+    setSync('off','本地预览 · 未连接云端');
+  }
+})();
+</script>
+<style>
+  /* 内嵌只读版提示条 */
+  #embedRO{position:fixed;right:14px;bottom:14px;z-index:9999;max-width:300px;
+    background:#fff8e6;border:1px solid #f0d9a0;color:#7a5a10;border-radius:10px;
+    padding:8px 12px;font-size:12px;line-height:1.6;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+  #embedRO b{display:block;font-size:12px;margin-bottom:2px}
+  #embedRO .ro-x{position:absolute;top:4px;right:8px;cursor:pointer;color:#a98b4a;font-size:14px}
+</style>
+<script>
+/* 内嵌版只读：把写操作拦下来并给出明确说明，避免出现"保存失败"这种误导 */
+(function () {
+  var MSG = '这是总看板内的只读副本，数据实时来自云端。要编辑请点顶栏「官方在线版」。';
+  function notify() {
+    var n = document.getElementById('embedRO');
+    if (!n) return;
+    n.style.outline = '2px solid #f0c36d';
+    setTimeout(function () { n.style.outline = ''; }, 900);
+  }
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('button,.btn,[data-act]') : null;
+    if (!el) return;
+    var t = (el.innerText || el.textContent || '').replace(/\s+/g, '');
+    if (/编辑模式|新增一行|导入并覆盖云端|写入云端|删除|保存/.test(t)) {
+      e.preventDefault(); e.stopPropagation(); notify();
+    }
+  }, true);
+  document.addEventListener('dblclick', function (e) {
+    if (e.target.isContentEditable) { e.preventDefault(); notify(); }
+  }, true);
+  window.addEventListener('load', function () {
+    var d = document.createElement('div');
+    d.id = 'embedRO';
+    d.innerHTML = '<span class="ro-x" id="roX">&times;</span><b>只读内嵌版</b>' + MSG;
+    document.body.appendChild(d);
+    var x = document.getElementById('roX');
+    if (x) x.onclick = function () { d.remove(); };
+  });
+})();
+</script>
+</body>
+</html>
