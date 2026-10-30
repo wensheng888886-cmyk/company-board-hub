@@ -1391,8 +1391,8 @@ function calcDelayDays(est, act) {
    原先走境外公共 MQTT（hivemq / emqx / mosquitto），国内网络经常连不上，
    同事打开就退化成本机数据、互相看不到改动。现改为「HTTP 推送 + 6 秒轮询拉取」，效果一致。 */
 var SYNC_API_LIST = [
-  'https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/purchaseSync',
-  'https://as1532656116-d6g77h3laf139a81d.service.tcloudbase.com/purchaseSync'
+  'https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/boardSync?app=purchase',
+  'https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/boardSync?app=purchase'
 ];
 
 var CloudSync = {
@@ -1455,7 +1455,11 @@ var CloudSync = {
       var b = localStorage.getItem('jt_broker');
       var t = localStorage.getItem('jt_topic');
       var n = localStorage.getItem('jt_nickname');
-      // 兼容旧版本：以前存的是 wss:// 的 MQTT 地址，现已废弃，强制回落到腾讯云
+      // 旧版本残留：以前存的是 wss:// 的 MQTT 地址或旧云函数地址，现已废弃，强制回落到统一接口
+      if (b && /purchaseSync|wss?:|^mqtt/.test(b)) {
+        b = SYNC_API_LIST[0];
+        try { localStorage.setItem('jt_broker', b); } catch (e) {}
+      }
       if (b && /^https?:\/\//.test(b)) this.broker = b;
       else if (b) { try { localStorage.removeItem('jt_broker'); } catch (e) {} }
       if (t) this.topic = t;
@@ -1497,7 +1501,7 @@ var CloudSync = {
     var self = this;
     if (this._busy) return;
     this._busy = true;
-    var url = this.broker + '?topic=' + encodeURIComponent(this.topic) + '&_=' + Date.now();
+    var url = this.broker + '&topic=' + encodeURIComponent(this.topic) + '&_=' + Date.now();
     fetch(url, { cache: 'no-store' })
       .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function(res) {
