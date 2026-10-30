@@ -330,7 +330,7 @@ var DOC_ID = 'main';
 var DEFAULT_ENV = 'as1532656116-d6g77h3laf139a81d';
 /* 部门清单（看板网址 / 分组 / 密码）存在腾讯云云函数 hubConfig 里。
    本环境只开通了 PostgreSQL，没有文档型数据库，所以不再走 cloudbase SDK。 */
-var HUB_API = 'https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/hubConfig';
+var HUB_API = 'https://as1532656116-d6g77h3laf139a81d-1470518011.ap-shanghai.app.tcloudbase.com/boardSync?app=hub';
 var HUB_TOKEN = 'fulin-board-hub-2026';
 var COLORS = ['blue','green','amber','purple','teal','gray','coral','rose','cyan','olive','slate'];
 var COLOR_HEX = {blue:'#185FA5',green:'#3B6D11',amber:'#BA7517',purple:'#534AB7',teal:'#0F6E56',gray:'#5F5E5A',coral:'#993C1D',rose:'#A32D5E',cyan:'#0B6E99',olive:'#634D0C',slate:'#3D4D5C'};
@@ -460,7 +460,7 @@ try{
 /* ==================== 云端 ==================== */
 async function initCloud(silent){
   try{
-    var r = await fetch(HUB_API + '?t=' + Date.now(), { cache: 'no-store' });
+    var r = await fetch(HUB_API + '&t=' + Date.now(), { cache: 'no-store' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     var j = await r.json();
     if (!j || j.ok !== true) throw new Error((j && j.error) || '返回异常');
@@ -474,7 +474,7 @@ async function initCloud(silent){
 }
 async function pullFromCloud(){
   try{
-    var r = await fetch(HUB_API + '?t=' + Date.now(), { cache: 'no-store' });
+    var r = await fetch(HUB_API + '&t=' + Date.now(), { cache: 'no-store' });
     var j = await r.json();
     var doc = j && j.config;
     if (doc && doc.groups){
@@ -501,7 +501,7 @@ async function syncConfigOnce(){
   if (!state.cloud.ready || layerOpen()) return false;
   if (slide && slide.on) return false;               // 幻灯片播放中不被打断
   try{
-    var r = await fetch(HUB_API + '?t=' + Date.now(), { cache: 'no-store' });
+    var r = await fetch(HUB_API + '&t=' + Date.now(), { cache: 'no-store' });
     var j = await r.json();
     var doc = j && j.config;
     if (!doc || !doc.groups) return false;
